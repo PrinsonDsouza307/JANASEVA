@@ -1,0 +1,429 @@
+/* JANASEVA Android App Download Modal & Component Styles */
+
+/* Hero Banner Button Specifics */
+.hero-android-btn {
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 14.5px;
+  line-height: inherit;
+}
+
+/* Modal Body Lock */
+body.android-modal-open {
+  overflow: hidden !important;
+  touch-action: none;
+}
+
+/* Modal Overlay & Backdrop */
+.android-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.25s ease, visibility 0.25s ease;
+}
+
+.android-modal-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.android-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(11, 37, 69, 0.68);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+}
+
+/* Modal Dialog Window */
+.android-modal-dialog {
+  position: relative;
+  z-index: 1;
+  background: var(--color-card-bg, #ffffff);
+  border: 1px solid var(--color-card-border, #d4e2f0);
+  border-radius: var(--radius-lg, 16px);
+  box-shadow: 0 24px 50px rgba(11, 37, 69, 0.32);
+  width: 100%;
+  max-width: 660px;
+  max-height: calc(100vh - 40px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  color: var(--color-text-main, #1e293b);
+  transform: translateY(20px) scale(0.97);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.android-modal-overlay.active .android-modal-dialog {
+  transform: translateY(0) scale(1);
+}
+
+/* Tricolour Top Accent Stripe */
+.android-modal-dialog::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 4px;
+  background: linear-gradient(90deg, #ff9933 0 33.33%, #e8eff6 33.33% 66.66%, #138808 66.66%);
+  z-index: 3;
+}
+
+/* Modal Header */
+.android-modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 24px 28px 18px;
+  border-bottom: 1px solid var(--color-card-border-light, #e8eff6);
+  background: #ffffff;
+  position: relative;
+  z-index: 2;
+}
+
+.android-download-intro {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  min-width: 0;
+}
+
+.android-download-icon {
+  width: 56px;
+  height: 56px;
+  flex: 0 0 56px;
+  border-radius: 14px;
+  background: var(--color-royal-blue-light, #e8f0fe);
+  color: var(--color-royal-blue, #0f56b3);
+  display: grid;
+  place-items: center;
+}
+
+.android-download-icon svg {
+  width: 28px;
+  height: 28px;
+}
+
+.android-download-eyebrow {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-royal-blue, #0f56b3);
+  margin: 0 0 4px;
+}
+
+.android-modal-title {
+  font-family: var(--font-heading, inherit);
+  font-size: clamp(20px, 2.5vw, 24px);
+  font-weight: 800;
+  line-height: 1.25;
+  letter-spacing: -0.025em;
+  color: var(--color-primary-navy, #0b2545);
+  margin: 0 0 6px;
+}
+
+.android-download-description {
+  color: var(--color-text-muted, #64748b);
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.5;
+  max-width: 440px;
+}
+
+.android-modal-close-btn {
+  width: 36px;
+  height: 36px;
+  flex: 0 0 36px;
+  border-radius: 50%;
+  border: 1px solid var(--color-card-border, #cbd5e1);
+  background: #f8fafc;
+  color: #64748b;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 16px;
+  transition: all 0.2s ease;
+  padding: 0;
+}
+
+.android-modal-close-btn:hover {
+  background: #fee2e2;
+  color: #dc2626;
+  border-color: #fca5a5;
+  transform: rotate(90deg);
+}
+
+.android-modal-close-btn:focus-visible {
+  outline: 3px solid var(--color-royal-blue, #0f56b3);
+  outline-offset: 2px;
+}
+
+/* Modal Body (Scrollable) */
+.android-modal-body {
+  padding: 20px 28px;
+  overflow-y: auto;
+  flex: 1 1 auto;
+  -webkit-overflow-scrolling: touch;
+  color: var(--color-text-main, #1e293b);
+}
+
+.android-modal-body p {
+  font-size: 14px;
+  line-height: 1.65;
+  margin: 10px 0;
+}
+
+/* Release Metadata Grid */
+.android-release-meta {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  border: 1px solid var(--color-card-border-light, #e8eff6);
+  border-radius: 12px;
+  background: var(--color-bg-page, #f4f8fc);
+  margin: 0 0 18px;
+  padding: 14px 0;
+}
+
+.android-release-meta > div {
+  padding: 0 18px;
+  min-width: 0;
+}
+
+.android-release-meta > div + div {
+  border-left: 1px solid var(--color-card-border, #d4e2f0);
+}
+
+.android-release-meta dt {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--color-text-muted, #64748b);
+  margin-bottom: 4px;
+}
+
+.android-release-meta dd {
+  font-size: 14.5px;
+  font-weight: 700;
+  color: var(--color-primary-navy, #0b2545);
+  margin: 0;
+}
+
+.android-release-meta small {
+  display: block;
+  font-size: 11.5px;
+  font-weight: 400;
+  color: var(--color-text-muted, #64748b);
+  margin-top: 2px;
+}
+
+/* Status Warning Strip */
+.android-download-status {
+  padding: 12px 14px;
+  background: #fff8ed;
+  border: 1px solid #f3dfbd;
+  border-radius: 8px;
+  color: #785015;
+  font-size: 13px;
+  line-height: 1.55;
+  margin: 0 0 16px;
+}
+
+/* Accordion Details */
+.android-modal-body details {
+  border-top: 1px solid var(--color-card-border-light, #e8eff6);
+}
+
+.android-modal-body summary {
+  cursor: pointer;
+  min-height: 44px;
+  padding: 12px 2px;
+  color: var(--color-primary-navy, #0b2545);
+  font-weight: 600;
+  font-size: 13.5px;
+}
+
+.android-modal-body summary::marker {
+  color: var(--color-royal-blue, #0f56b3);
+}
+
+.android-modal-body details[open] summary {
+  color: var(--color-royal-blue, #0f56b3);
+}
+
+.android-modal-body ol {
+  padding: 0 0 0 22px;
+  margin: 0 0 14px;
+  font-size: 13.5px;
+  line-height: 1.75;
+}
+
+.android-modal-body li {
+  padding-left: 4px;
+  margin: 6px 0;
+}
+
+.android-modal-body code {
+  display: block;
+  background: var(--color-bg-page, #f4f8fc);
+  padding: 10px 12px;
+  border-radius: 8px;
+  overflow-wrap: anywhere;
+  white-space: normal;
+  font-size: 12px;
+  margin-top: 6px;
+  border: 1px solid var(--color-card-border-light, #e8eff6);
+}
+
+.android-modal-body details a {
+  color: var(--color-royal-blue, #0f56b3);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.android-modal-body a:focus-visible,
+.android-modal-body summary:focus-visible {
+  outline: 3px solid var(--color-royal-blue, #0f56b3);
+  outline-offset: 3px;
+}
+
+/* Modal Footer */
+.android-modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 14px;
+  padding: 16px 28px 20px;
+  border-top: 1px solid var(--color-card-border-light, #e8eff6);
+  background: #f8fafc;
+  position: relative;
+  z-index: 2;
+}
+
+.android-download-action {
+  flex: 0 0 auto;
+}
+
+.android-download-button {
+  display: inline-flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 12px 24px;
+  border-radius: var(--radius-sm, 8px);
+  background: var(--color-royal-blue, #0f56b3);
+  color: #ffffff !important;
+  text-decoration: none !important;
+  font-size: 14px;
+  font-weight: 700;
+  box-shadow: 0 4px 10px rgba(15, 86, 179, 0.2);
+  transition: background 0.2s, box-shadow 0.2s, transform 0.15s;
+}
+
+.android-download-button svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.android-download-button:hover {
+  background: var(--color-royal-blue-hover, #0c438c);
+  box-shadow: 0 6px 16px rgba(15, 86, 179, 0.3);
+  transform: translateY(-1px);
+}
+
+.android-download-button:focus-visible {
+  outline: 3px solid var(--color-royal-blue, #0f56b3);
+  outline-offset: 3px;
+}
+
+.android-download-caption {
+  margin: 0;
+  font-size: 12px;
+  color: var(--color-text-muted, #64748b);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Responsive Rules */
+@media (max-width: 680px) {
+  .android-modal-overlay {
+    padding: 12px;
+  }
+  .android-modal-dialog {
+    max-height: calc(100vh - 24px);
+    border-radius: 14px;
+  }
+  .android-modal-header {
+    padding: 20px 20px 14px;
+  }
+  .android-modal-body {
+    padding: 16px 20px;
+  }
+  .android-modal-footer {
+    padding: 14px 20px 18px;
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
+  }
+  .android-download-action {
+    width: 100%;
+  }
+  .android-download-button {
+    width: 100%;
+  }
+  .android-download-caption {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .android-download-intro {
+    gap: 12px;
+  }
+  .android-download-icon {
+    width: 44px;
+    height: 44px;
+    flex-basis: 44px;
+    border-radius: 10px;
+  }
+  .android-download-icon svg {
+    width: 22px;
+    height: 22px;
+  }
+  .android-release-meta {
+    grid-template-columns: 1fr;
+    padding: 0;
+  }
+  .android-release-meta > div {
+    padding: 10px 14px;
+  }
+  .android-release-meta > div + div {
+    border-left: 0;
+    border-top: 1px solid var(--color-card-border-light, #e8eff6);
+  }
+  .android-release-meta small {
+    display: inline;
+    margin-left: 6px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .android-modal-overlay,
+  .android-modal-dialog,
+  .android-download-button {
+    transition: none !important;
+  }
+}

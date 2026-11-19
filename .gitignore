@@ -1,0 +1,43 @@
+# ==============================================================================
+# JANASEVA WEBSITE – Version Control Exclusions
+# ==============================================================================
+
+# Secrets & Environment Files
+.env
+.env.*
+!.env.example
+functions/.env
+functions/.env.*
+!functions/.env.example
+
+# Dependencies
+node_modules/
+functions/node_modules/
+
+# Logs & Debugging
+*.log
+firebase-debug.log
+firebase-debug.*.log
+.firebase/
+.netlify/
+
+# OS Cache
+.DS_Store
+Thumbs.db
+
+Android/source/.gradle/
+Android/source/**/build/
+Android/source/local.properties
+*.jks
+*.keystore
+public/
+
+# Working copies and platform build output
+website/public/
+backend/firebase/functions/node_modules/
+android/source/.gradle/
+android/source/app/build/
+**/.env
+**/.env.local
+.ua/
+.agents/

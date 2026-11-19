@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <!-- Favicon & Brand Identity -->
+  <link rel="icon" type="image/x-icon" href="assets/branding/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/branding/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/branding/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/branding/apple-touch-icon.png">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0b2545">
+  <title>JANASEVA – Digital Grievance Management System | Login</title>
+  
+  <!-- Favicon & Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+Kannada:wght@400;600;700&family=Noto+Sans+Devanagari:wght@400;600;700&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body class="page-auth-portal">
+
+  <!-- Toast Notification System -->
+  <div id="toast-container" class="toast-container" aria-live="polite"></div>
+
+  <!-- ========================================================================
+       TOP UTILITY BAR (National Identity & Language Switcher)
+       ======================================================================== -->
+  <header class="auth-top-bar" role="banner">
+    <div class="auth-top-container">
+      <div class="auth-top-govt-badge">
+        <img src="assets/ashoka-emblem.png" alt="National Emblem of India" class="auth-micro-emblem">
+        <span>Government of India <span class="auth-govt-sub">&bull; Digital Grievance Initiative</span></span>
+      </div>
+
+      <div class="auth-top-right-actions">
+        <!-- Language Switcher -->
+        <div class="lang-selector-wrapper">
+          <i class="fa-solid fa-globe lang-icon"></i>
+          <select class="janaseva-lang-select" aria-label="Select Language">
+            <option value="en">English</option>
+            <option value="kn">ಕನ್ನಡ (Kannada)</option>
+            <option value="hi">हिन्दी (Hindi)</option>
+          </select>
+        </div>
+
+        <a href="https://ipchat.in/" class="auth-top-home-link nav-link-external" target="_blank" rel="noopener noreferrer" title="IP Chat – External Messaging Service">
+          <i class="fa-solid fa-comments" aria-hidden="true"></i>
+          <span>IP Chat</span>
+          <i class="fa-solid fa-arrow-up-right-from-square nav-ext-icon" aria-hidden="true"></i>
+        </a>
+
+        <a href="index.html" class="auth-top-home-link" title="Return to Portal">
+          <i class="fa-solid fa-house"></i>
+          <span>Home</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- ========================================================================
+       MAIN CENTERED AUTHENTICATION SECTION (MIDDLE & PROFESSIONAL)
+       ======================================================================== -->
+  <main class="auth-page-centered-main" role="main">
+
+    <!-- Centered Brand Identity Header (MIDDLE) -->
+    <div class="auth-brand-center">
+      <img src="assets/branding/janaseva-icon.png" alt="JANASEVA Official Brand Logo" class="auth-center-emblem">
+      <h1 class="auth-center-title">JANASEVA</h1>
+      <div class="auth-center-subtitle">Gram Panchayat Grievance Portal</div>
+      <div class="auth-center-tagline">Report &bull; Submit &bull; Track &bull; Resolve</div>
+      
+      <!-- Symmetrical National Tricolour Divider -->
+      <div class="auth-tricolour-divider" aria-hidden="true">
+        <span class="auth-tricolour-line saffron"></span>
+        <span class="auth-tricolour-dot"></span>
+        <span class="auth-tricolour-line green"></span>
+      </div>
+    </div>
+
+    <!-- Centered Single Authentication Card (MIDDLE) -->
+    <div class="auth-single-container">
+      <section class="portal-card auth-single-card" id="auth-main-card">
+        <div class="portal-card-body auth-card-inner">
+          
+          <!-- Top Navigation Tabs (inside the single card) -->
+          <div class="auth-tabs-header" role="tablist" aria-label="Authentication Options">
+            <button type="button" class="auth-tab-btn active" id="tab-login-btn" role="tab" aria-selected="true" aria-controls="login-pane" onclick="switchAuthTab('login')">
+              <i class="fa-solid fa-arrow-right-to-bracket"></i>
+              <span>Login</span>
+            </button>
+            <button type="button" class="auth-tab-btn" id="tab-register-btn" role="tab" aria-selected="false" aria-controls="register-pane" onclick="switchAuthTab('register')">
+              <i class="fa-solid fa-user-plus"></i>
+              <span>Register</span>
+            </button>
+          </div>
+
+          <!-- ============================================================
+               TAB PANE 1: LOGIN FORM
+               ============================================================ -->
+          <div id="login-pane" class="auth-tab-pane active" role="tabpanel" aria-labelledby="tab-login-btn">
+            
+            <!-- Title and Graphic Header -->
+            <div class="auth-body-layout">
+              <div>
+                <h2 class="auth-intro-title">Welcome Back!</h2>
+                <p class="auth-intro-subtitle">Log in to your JANASEVA account.</p>
+              </div>
+              <img src="assets/login-illustration.png" alt="Login Graphic" class="auth-illustration">
+            </div>
+
+            <!-- Login Error Alert -->
+            <div class="login-error-alert" id="login-error-alert" role="alert">
+              <i class="fa-solid fa-circle-exclamation error-icon"></i>
+              <span class="login-error-text" id="login-error-msg">Invalid credentials. Please verify your email and password.</span>
+            </div>
+
+            <form id="login-form" autocomplete="on" novalidate>
+              <!-- Email Input -->
+              <div class="form-group">
+                <label for="login-email" class="form-label">
+                  <i class="fa-regular fa-envelope"></i>
+                  <span>Email Address</span>
+                  <span class="req-star">*</span>
+                </label>
+                <div class="input-with-icon">
+                  <input type="email" id="login-email" class="form-input" placeholder="Enter your email address" required autocomplete="username">
+                </div>
+              </div>
+
+              <!-- Password Input -->
+              <div class="form-group">
+                <label for="login-password" class="form-label">
+                  <i class="fa-solid fa-lock"></i>
+                  <span>Password</span>
+                  <span class="req-star">*</span>
+                </label>
+                <div class="input-with-icon password-input-wrap">
+                  <input type="password" id="login-password" class="form-input" placeholder="Enter your password" required autocomplete="current-password">
+                  <button type="button" class="pwd-toggle-btn" id="login-pwd-toggle" aria-label="Toggle password visibility" onclick="togglePasswordVisibility('login-password', 'login-pwd-toggle')">
+                    <i class="fa-regular fa-eye-slash"></i>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Options: Remember Me & Forgot Password -->
+              <div class="auth-options-row">
+                <label class="remember-me-checkbox">
+                  <input type="checkbox" id="login-remember" checked>
+                  <span class="custom-checkbox"></span>
+                  <span class="checkbox-label">Remember Me</span>
+                </label>
+                <a href="#forgot-password" class="forgot-pwd-link" id="forgot-password-trigger">Forgot Password?</a>
+              </div>
+
+              <!-- Submit Button -->
+              <button type="submit" class="btn-submit-full btn-auth-submit" id="login-submit-btn">
+                <i class="fa-solid fa-arrow-right-to-bracket"></i>
+                <span>Sign In to Portal</span>
+              </button>
+            </form>
+
+            <!-- Local Testing Quick Login Helpers -->
+            <div id="local-demo-accounts-box" style="margin-top: 16px; padding: 12px 14px; background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 8px;">
+              <div style="font-size: 11.5px; font-weight: 700; color: #475569; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between;">
+                <span style="display: inline-flex; align-items: center; gap: 5px;">
+                  <i class="fa-solid fa-bolt" style="color: #f59e0b;"></i>
+                  <span>Quick Test Login (1-Click Fill)</span>
+                </span>
+                <span style="font-size: 10px; color: #64748b; font-weight: normal;">Local Preview</span>
+              </div>
+              <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px;">
+                <button type="button" class="btn-demo-fill" onclick="quickFillDemo('citizen@janaseva.local', 'Citizen@123')" style="padding: 7px 6px; font-size: 11px; border: 1px solid #cbd5e1; background: #ffffff; border-radius: 6px; cursor: pointer; text-align: center; color: #1e293b; font-weight: 600;">
+                  👤 Citizen
+                </button>
+                <button type="button" class="btn-demo-fill" onclick="quickFillDemo('receiver@janaseva.local', 'Receiver@123')" style="padding: 7px 6px; font-size: 11px; border: 1px solid #cbd5e1; background: #ffffff; border-radius: 6px; cursor: pointer; text-align: center; color: #1e293b; font-weight: 600;">
+                  🏢 Receiver
+                </button>
+                <button type="button" class="btn-demo-fill" onclick="quickFillDemo('admin@janaseva.local', 'Admin@123')" style="padding: 7px 6px; font-size: 11px; border: 1px solid #cbd5e1; background: #ffffff; border-radius: 6px; cursor: pointer; text-align: center; color: #1e293b; font-weight: 600;">
+                  🛡️ Admin
+                </button>
+              </div>
+            </div>
+
+            <div class="auth-switch-prompt">
+              <span>New to JANASEVA?</span>
+              <a href="javascript:void(0)" class="auth-switch-link" onclick="switchAuthTab('register')">Create an Account</a>
+            </div>
+
+            <div class="auth-trust-footnote">
+              <i class="fa-solid fa-shield-halved"></i>
+              <span>Official Government Digital Services &bull; Protected by Role-Based Authorization</span>
+            </div>
+          </div>
+
+          <!-- ============================================================
+               TAB PANE 2: CITIZEN REGISTRATION FORM
+               ============================================================ -->
+          <div id="register-pane" class="auth-tab-pane" role="tabpanel" aria-labelledby="tab-register-btn" style="display: none;">
+            
+            <div class="auth-body-layout">
+              <div>
+                <h2 class="auth-intro-title">New Citizen Registration</h2>
+                <p class="auth-intro-subtitle">Create your personal JANASEVA account to submit and track grievances.</p>
+              </div>
+              <img src="assets/register-illustration.png" alt="Registration Graphic" class="auth-illustration">
+            </div>
+
+            <!-- Registration Error Alert -->
+            <div class="login-error-alert" id="register-error-alert" role="alert">
+              <i class="fa-solid fa-circle-exclamation error-icon"></i>
+              <span class="login-error-text" id="register-error-msg">Registration failed. Please check the information entered.</span>
+            </div>
+
+            <form id="register-form" autocomplete="on" novalidate>
+              <div class="form-row-2col">
+                <!-- Full Name -->
+                <div class="form-group">
+                  <label for="reg-fullname" class="form-label">
+                    <i class="fa-regular fa-user"></i>
+                    <span>Full Name</span>
+                    <span class="req-star">*</span>
+                  </label>
+                  <input type="text" id="reg-fullname" class="form-input" placeholder="Enter your full name" required autocomplete="name">
+                </div>
+
+                <!-- Email Address -->
+                <div class="form-group">
+                  <label for="reg-email" class="form-label">
+                    <i class="fa-regular fa-envelope"></i>
+                    <span>Email Address</span>
+                    <span class="req-star">*</span>
+                  </label>
+                  <input type="email" id="reg-email" class="form-input" placeholder="Enter your email" required autocomplete="email">
+                </div>
+              </div>
+
+              <div class="form-row-2col">
+                <!-- Mobile Number -->
+                <div class="form-group">
+                  <label for="reg-mobile" class="form-label">
+                    <i class="fa-solid fa-phone"></i>
+                    <span>Mobile Number</span>
+                    <span class="req-star">*</span>
+                  </label>
+                  <input type="tel" id="reg-mobile" class="form-input" placeholder="Enter your 10-digit mobile" maxlength="10" required autocomplete="tel">
+                </div>
+
+                <!-- Password -->
+                <div class="form-group">
+                  <label for="reg-password" class="form-label">
+                    <i class="fa-solid fa-lock"></i>
+                    <span>Password</span>
+                    <span class="req-star">*</span>
+                  </label>
+                  <div class="input-with-icon password-input-wrap">
+                    <input type="password" id="reg-password" class="form-input" placeholder="Create a password (min 6 chars)" minlength="6" required autocomplete="new-password">
+                    <button type="button" class="pwd-toggle-btn" id="reg-pwd-toggle" aria-label="Toggle password visibility" onclick="togglePasswordVisibility('reg-password', 'reg-pwd-toggle')">
+                      <i class="fa-regular fa-eye-slash"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Confirm Password -->
+              <div class="form-group">
+                <label for="reg-confirm-password" class="form-label">
+                  <i class="fa-solid fa-lock"></i>
+                  <span>Confirm Password</span>
+                  <span class="req-star">*</span>
+                </label>
+                <div class="input-with-icon password-input-wrap">
+                  <input type="password" id="reg-confirm-password" class="form-input" placeholder="Re-enter your password" minlength="6" required autocomplete="new-password">
+                  <button type="button" class="pwd-toggle-btn" id="reg-conf-pwd-toggle" aria-label="Toggle confirm password visibility" onclick="togglePasswordVisibility('reg-confirm-password', 'reg-conf-pwd-toggle')">
+                    <i class="fa-regular fa-eye-slash"></i>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Submit Register Button -->
+              <button type="submit" class="btn-submit-full btn-auth-submit" id="register-submit-btn">
+                <i class="fa-solid fa-user-plus"></i>
+                <span>Register Citizen Account</span>
+              </button>
+            </form>
+
+            <div class="auth-switch-prompt">
+              <span>Already have an account?</span>
+              <a href="javascript:void(0)" class="auth-switch-link" onclick="switchAuthTab('login')">Sign In to Portal</a>
+            </div>
+
+            <div class="auth-trust-footnote">
+              <i class="fa-solid fa-shield-halved"></i>
+              <span>Official Government Digital Services &bull; Protected by Role-Based Authorization</span>
+            </div>
+          </div>
+
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- ========================================================================
+       CENTERED DIGNIFIED FOOTER
+       ======================================================================== -->
+  <footer class="auth-footer-centered" role="contentinfo">
+    <div class="auth-footer-trust-row">
+      <span class="auth-footer-trust-item"><i class="fa-solid fa-shield-halved text-success"></i> 256-Bit SSL Encrypted</span>
+      <span>&bull;</span>
+      <span class="auth-footer-trust-item"><i class="fa-solid fa-database text-primary"></i> Cloud Firestore Protected</span>
+      <span>&bull;</span>
+      <span class="auth-footer-trust-item"><i class="fa-solid fa-landmark text-primary"></i> Official Grievance Redressal</span>
+    </div>
+    <div class="auth-footer-disclaimer">
+      <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 4px;">
+        <img src="assets/branding/janaseva-icon.png" alt="JANASEVA Logo" class="footer-emblem-img" width="26" height="26" style="width: 26px; height: 26px; object-fit: contain;">
+        <strong>JANASEVA &ndash; Gram Panchayat Grievance Portal</strong>
+      </div>
+      This portal is an academic student project created for civic grievance demonstration. Not an official Government of India website.
+    </div>
+    <div class="auth-footer-links">
+      <a href="https://ipchat.in/" target="_blank" rel="noopener noreferrer">
+        <i class="fa-solid fa-comments" aria-hidden="true"></i>
+        <span>IP Chat – External Messaging Service</span>
+        <i class="fa-solid fa-arrow-up-right-from-square nav-ext-icon" aria-hidden="true"></i>
+      </a>
+    </div>
+  </footer>
+
+  <!-- ========================================================================
+       FORGOT PASSWORD MODAL
+       ======================================================================== -->
+  <div class="modal-overlay" id="forgot-password-modal">
+    <div class="modal-window" style="max-width: 480px;">
+      <div class="modal-header">
+        <div class="modal-title" style="display: flex; align-items: center; gap: 8px;">
+          <i class="fa-solid fa-key" style="color: #0f56b3;"></i> Reset Password
+        </div>
+        <button type="button" class="modal-close-btn" onclick="closeForgotPasswordModal()" aria-label="Close modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size: 13.5px; color: #64748b; margin-bottom: 16px;">
+          Enter your registered email address and we will dispatch a password reset verification link to your inbox.
+        </p>
+        <div class="form-group">
+          <label class="form-label" for="reset-email">Registered Email Address</label>
+          <input type="email" id="reset-email" class="form-input" placeholder="e.g. ">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-cta-primary" id="send-reset-btn">
+          Send Reset Link
+        </button>
+        <button type="button" class="btn-cta-secondary" onclick="closeForgotPasswordModal()">
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Firebase & App Scripts -->
+  <!-- JANASEVA MongoDB Backend & Scripts -->
+  <script src="js/firebase-config.js"></script>
+  <script src="js/mongodb-adapter.js"></script>
+  <script src="js/translations.js"></script>
+  <script src="js/universal-settings.js"></script>
+  <script src="js/status-config.js"></script>
+  <script src="js/auth.js"></script>
+<script>
+    // Tab Switching Logic between Login & Register in the SAME card
+    function switchAuthTab(tab) {
+      const loginBtn = document.getElementById('tab-login-btn');
+      const regBtn = document.getElementById('tab-register-btn');
+      const loginPane = document.getElementById('login-pane');
+      const regPane = document.getElementById('register-pane');
+
+      if (!loginBtn || !regBtn || !loginPane || !regPane) return;
+
+      if (tab === 'register') {
+        loginBtn.classList.remove('active');
+        loginBtn.setAttribute('aria-selected', 'false');
+        regBtn.classList.add('active');
+        regBtn.setAttribute('aria-selected', 'true');
+
+        loginPane.style.display = 'none';
+        loginPane.classList.remove('active');
+        regPane.style.display = 'block';
+        regPane.classList.add('active');
+
+        clearLoginError();
+        const firstInput = document.getElementById('reg-fullname');
+        if (firstInput && window.innerWidth > 768) firstInput.focus();
+      } else {
+        regBtn.classList.remove('active');
+        regBtn.setAttribute('aria-selected', 'false');
+        loginBtn.classList.add('active');
+        loginBtn.setAttribute('aria-selected', 'true');
+
+        regPane.style.display = 'none';
+        regPane.classList.remove('active');
+        loginPane.style.display = 'block';
+        loginPane.classList.add('active');
+
+        clearRegisterError();
+        const firstInput = document.getElementById('login-email');
+        if (firstInput && window.innerWidth > 768) firstInput.focus();
+      }
+
+      // Re-apply translations if active language is kn or hi
+      if (window.janasevaTranslator && window.janasevaTranslator.currentLang !== 'en') {
+        window.janasevaTranslator.applyTranslations();
+      }
+    }
+
+    // Execute on Login Page Load
+    document.addEventListener('DOMContentLoaded', () => {
+      // Check if logged out notification requested
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('logged_out')) {
+        if (window.showToast) window.showToast("You have been signed out successfully.", "info");
+      }
+
+      // Support direct hash navigation (#register or ?tab=register)
+      if (window.location.hash === '#register' || params.get('tab') === 'register') {
+        switchAuthTab('register');
+      }
+
+      // Check if user is already logged in and route them smoothly
+      if (window.authService) {
+        window.authService.handleLoginEntry();
+      }
+    });
+
+    // Quick Fill Demo Credentials Helper
+    function quickFillDemo(email, password) {
+      const emailInput = document.getElementById('login-email');
+      const pwdInput = document.getElementById('login-password');
+      if (emailInput) emailInput.value = email;
+      if (pwdInput) pwdInput.value = password;
+      clearLoginError();
+      const submitBtn = document.getElementById('login-submit-btn');
+      if (submitBtn) submitBtn.focus();
+    }
+
+    // Show / Hide Password Helper
+    function togglePasswordVisibility(inputId, btnId) {
+      const input = document.getElementById(inputId);
+      const btn = typeof btnId === 'string' ? document.getElementById(btnId) : btnId;
+      if (!input) return;
+      if (input.type === 'password') {
+        input.type = 'text';
+        if (btn) btn.innerHTML = '<i class="fa-regular fa-eye"></i>';
+      } else {
+        input.type = 'password';
+        if (btn) btn.innerHTML = '<i class="fa-regular fa-eye-slash"></i>';
+      }
+    }
+
+    function showLoginError(msg) {
+      const alert = document.getElementById('login-error-alert');
+      const text = document.getElementById('login-error-msg');
+      if (alert && text) {
+        const localized = (typeof window.janasevaT === 'function') ? window.janasevaT(msg) : msg;
+        text._origEn = msg;
+        text._lastTranslated = localized;
+        text.innerText = localized;
+        alert.style.display = 'flex';
+      }
+    }
+
+    function clearLoginError() {
+      const alert = document.getElementById('login-error-alert');
+      if (alert) alert.style.display = 'none';
+    }
+
+    function showRegisterError(msg) {
+      const alert = document.getElementById('register-error-alert');
+      const text = document.getElementById('register-error-msg');
+      if (alert && text) {
+        const localized = (typeof window.janasevaT === 'function') ? window.janasevaT(msg) : msg;
+        text._origEn = msg;
+        text._lastTranslated = localized;
+        text.innerText = localized;
+        alert.style.display = 'flex';
+      }
+    }
+
+    function clearRegisterError() {
+      const alert = document.getElementById('register-error-alert');
+      if (alert) alert.style.display = 'none';
+    }
+
+    // Login Form Handler
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      clearLoginError();
+
+      const email = document.getElementById('login-email').value.trim();
+      const password = document.getElementById('login-password').value;
+      const btn = document.getElementById('login-submit-btn');
+
+      if (!email || !password) {
+        showLoginError("Please enter both email address and password.");
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> ${window.janasevaT ? window.janasevaT('Authenticating...') : 'Authenticating...'}`;
+
+      try {
+        const user = await window.authService.login(email, password);
+        if (window.showToast) window.showToast(`Welcome back, ${user.name}!`, "success");
+        
+        btn.innerHTML = `<i class="fa-solid fa-circle-check"></i> ${window.janasevaT ? window.janasevaT('Verified. Redirecting...') : 'Verified. Redirecting...'}`;
+
+        setTimeout(() => {
+          const urlParams = new URLSearchParams(window.location.search);
+          const redirect = urlParams.get('redirect');
+          window.authService.routeUserAfterLogin(user, redirect);
+        }, 600);
+      } catch (err) {
+        const msg = window.authService ? window.authService.getFriendlyErrorMessage(err) : err.message;
+        showLoginError(msg);
+        if (window.showToast) window.showToast(msg, "error");
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-arrow-right-to-bracket"></i> <span>Sign In to Portal</span>';
+        if (window.janasevaTranslator) window.janasevaTranslator.applyTranslations(btn);
+      }
+    });
+
+    // Registration Form Handler
+    document.getElementById('register-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      clearRegisterError();
+
+      const name = document.getElementById('reg-fullname').value.trim();
+      const email = document.getElementById('reg-email').value.trim();
+      const mobile = document.getElementById('reg-mobile').value.trim();
+      const password = document.getElementById('reg-password').value;
+      const confirmPassword = document.getElementById('reg-confirm-password').value;
+      const btn = document.getElementById('register-submit-btn');
+
+      btn.disabled = true;
+      btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> ${window.janasevaT ? window.janasevaT('Creating Account...') : 'Creating Account...'}`;
+
+      try {
+        const newUser = await window.authService.register(name, email, mobile, password, confirmPassword);
+        if (window.showToast) window.showToast("Registration successful! Welcome to JANASEVA.", "success");
+        btn.innerHTML = `<i class="fa-solid fa-circle-check"></i> ${window.janasevaT ? window.janasevaT('Account Created. Redirecting...') : 'Account Created. Redirecting...'}`;
+        setTimeout(() => {
+          window.authService.routeUserAfterLogin(newUser, 'index.html');
+        }, 800);
+      } catch (err) {
+        const msg = window.authService ? window.authService.getFriendlyErrorMessage(err) : err.message;
+        showRegisterError(msg);
+        if (window.showToast) window.showToast(msg, "error");
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-user-plus"></i> <span>Register Citizen Account</span>';
+        if (window.janasevaTranslator) window.janasevaTranslator.applyTranslations(btn);
+      }
+    });
+
+    // Forgot Password Handling
+    const forgotTrigger = document.getElementById('forgot-password-trigger');
+    const forgotModal = document.getElementById('forgot-password-modal');
+    const sendResetBtn = document.getElementById('send-reset-btn');
+
+    if (forgotTrigger && forgotModal) {
+      forgotTrigger.addEventListener('click', (e) => {
+        e.preventDefault();
+        forgotModal.classList.add('active');
+        if (window.janasevaTranslator) window.janasevaTranslator.applyTranslations(forgotModal);
+      });
+    }
+
+    function closeForgotPasswordModal() {
+      if (forgotModal) forgotModal.classList.remove('active');
+    }
+
+    if (sendResetBtn) {
+      sendResetBtn.addEventListener('click', async () => {
+        const email = document.getElementById('reset-email').value.trim();
+        if (!email) {
+          if (window.showToast) window.showToast("Please enter your registered email address.", "warning");
+          return;
+        }
+        sendResetBtn.disabled = true;
+        sendResetBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> ${window.janasevaT ? window.janasevaT('Sending...') : 'Sending...'}`;
+        try {
+          await window.authService.sendPasswordReset(email);
+          if (window.showToast) window.showToast(`Password reset link sent to ${email}.`, "success");
+          closeForgotPasswordModal();
+        } catch (err) {
+          if (window.showToast) window.showToast(err.message, "error");
+        } finally {
+          sendResetBtn.disabled = false;
+          sendResetBtn.innerHTML = window.janasevaT ? window.janasevaT('Send Reset Link') : 'Send Reset Link';
+        }
+      });
+    }
+  </script>
+  <script src="js/offline-db.js"></script>
+  <script src="js/ai-prioritization.js"></script>
+  <script src="js/document-verifier.js"></script>
+  <script src="js/knowledge-parsers.js"></script>
+  <script src="js/knowledge-security.js"></script>
+  <script src="js/knowledge-rag.js"></script>
+  <script src="js/knowledge-storage.js"></script>
+  <script src="js/ai-chat-services.js"></script>
+  <script src="js/ai-voice-assistant.js"></script>
+</body>
+</html>

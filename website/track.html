@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <!-- Favicon & Brand Identity -->
+  <link rel="icon" type="image/x-icon" href="assets/branding/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/branding/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/branding/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/branding/apple-touch-icon.png">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0b2545">
+  <title>Track Complaint Status – JANASEVA Portal</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+  <!-- Auth Guard Overlay (Prevents flash of protected content during session verification) -->
+  <div id="auth-guard-overlay" class="auth-guard-overlay">
+    <div class="auth-guard-box">
+      <img src="assets/branding/janaseva-icon.png" alt="JANASEVA" class="auth-guard-logo">
+      <div class="auth-guard-spinner"></div>
+      <div class="auth-guard-title">JANASEVA</div>
+      <div class="auth-guard-sub" id="auth-guard-sub">Verifying security session...</div>
+    </div>
+  </div>
+
+
+  <!-- Header -->
+  <header class="portal-header">
+    <div class="header-container">
+      <a href="index.html" class="brand-section">
+        <img src="assets/branding/janaseva-icon.png" alt="JANASEVA Official Logo" class="emblem-img brand-logo-img">
+        <div class="brand-text-block">
+          <span class="brand-main-title">JANASEVA</span>
+          <div class="brand-divider"></div>
+          <div class="brand-sub-titles">
+            <span class="brand-subtitle">Gram Panchayat Grievance Portal</span>
+            <span class="brand-tagline">Report • Submit • Track • Resolve</span>
+          </div>
+        </div>
+      </a>
+
+      <!-- Header Action Controls: Notification Bell (Always visible in Android toolbar & Desktop header) + Mobile Menu Toggle -->
+      <div class="header-action-controls" id="header-action-controls">
+        <button class="nav-notif-bell-btn" id="nav-notif-bell-btn" type="button" aria-label="View Notifications">
+          <i class="fa-regular fa-bell"></i>
+          <span class="nav-notif-badge" id="nav-notif-badge" style="display: none;">0</span>
+        </button>
+        <button class="nav-toggle-btn" id="mobile-nav-toggle" aria-label="Toggle Navigation">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+      </div>
+
+      <nav class="main-nav" id="main-navigation">
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="complaint.html" class="nav-link">Submit Complaint</a>
+        <a href="track.html" class="nav-link active">Track Status</a>
+        <a href="directory.html" class="nav-link">Panchayat Directory</a>
+        <a href="knowledge-centre.html" class="nav-link">Knowledge Centre</a>
+        <a href="https://ipchat.in/" class="nav-link nav-link-external" target="_blank" rel="noopener noreferrer"><i class="fa-solid fa-comments" aria-hidden="true"></i> <span>IP Chat</span> <i class="fa-solid fa-arrow-up-right-from-square nav-ext-icon" aria-hidden="true"></i></a>
+        <a href="about.html" class="nav-link">About</a>
+        <div class="lang-selector-wrapper">
+          <i class="fa-solid fa-globe lang-icon"></i>
+          <select class="janaseva-lang-select" aria-label="Select Language">
+            <option value="en">English</option>
+            <option value="kn">ಕನ್ನಡ (Kannada)</option>
+            <option value="hi">हिन्दी (Hindi)</option>
+          </select>
+        </div>
+        <div id="nav-auth-container" style="display: inline-flex; align-items: center; gap: 8px;">
+          <a href="login.html" class="nav-btn-primary">
+            <i class="fa-solid fa-arrow-right-to-bracket"></i>
+            <span>Sign In</span>
+          </a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Hero Banner -->
+  <section class="hero-banner">
+    <div class="hero-bg-overlay"></div>
+    <div class="hero-content-wrap">
+      <div class="hero-text-side">
+        <div class="hero-title-with-icon">
+          <div class="hero-page-icon">
+            <i class="fa-solid fa-magnifying-glass"></i>
+          </div>
+          <h1 class="hero-main-heading">Track Complaint Status</h1>
+        </div>
+        <p class="hero-subheading">Check the real-time progress of your submitted complaint using your Complaint ID or Email.</p>
+      </div>
+    </div>
+
+    <div class="tricolour-wave-separator">
+      <svg viewBox="0 0 1440 24" fill="none" preserveAspectRatio="none">
+        <path d="M0,0 C360,18 1080,6 1440,16 L1440,24 L0,24 Z" fill="#ffffff" />
+        <path d="M0,4 C400,20 1100,10 1440,18" stroke="#ff9933" stroke-width="2.5" fill="none" />
+        <path d="M0,8 C420,22 1120,12 1440,20" stroke="#138808" stroke-width="2.5" fill="none" />
+      </svg>
+    </div>
+  </section>
+
+  <!-- Main Content -->
+  <main class="page-main-content">
+    <div class="two-col-layout">
+      
+      <!-- Left Column: Search Box & Track Result -->
+      <div>
+        
+        <!-- Search Card -->
+        <section class="portal-card" style="margin-bottom: 16px;">
+          <div class="portal-card-header">
+            <div class="card-title-group">
+              <i class="fa-solid fa-magnifying-glass card-header-icon"></i>
+              <div>
+                <h2 class="card-heading">Check Your Complaint Status</h2>
+                <p class="card-subheading">Enter your Complaint ID or the email address used while submitting the complaint.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="portal-card-body">
+            <form id="track-status-form">
+              <div class="search-options-row">
+                <label class="search-radio-label">
+                  <input type="radio" name="search_type" id="search-by-id" value="id" checked>
+                  <span>By Complaint ID</span>
+                </label>
+                <label class="search-radio-label">
+                  <input type="radio" name="search_type" id="search-by-email" value="email">
+                  <span>By Email</span>
+                </label>
+              </div>
+
+              <div class="track-input-group">
+                <div class="track-input-wrapper">
+                  <i class="fa-solid fa-ticket track-input-icon"></i>
+                  <input type="text" id="track-search-input" class="track-input-field" placeholder="Enter Complaint ID (e.g. JAN-2026-XXXX)" required>
+                </div>
+                <button type="submit" class="btn-track-submit">
+                  <i class="fa-solid fa-magnifying-glass"></i>
+                  <span>Track Status</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </section>
+
+        <!-- Initial Prompt Guide (Visible before a search is performed) -->
+        <div id="track-initial-prompt" class="portal-card" style="padding: 24px 16px; text-align: center; margin-bottom: 16px;">
+          <div style="width: 58px; height: 58px; border-radius: 50%; background: #eff6ff; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 14px;">
+            <i class="fa-solid fa-magnifying-glass" style="font-size: 24px; color: #0f56b3;"></i>
+          </div>
+          <h3 style="font-size: 17px; color: #0b2545; font-weight: 700; margin-bottom: 8px;">Track Your Grievance</h3>
+          <p style="font-size: 14px; color: #64748b; max-width: 460px; margin: 0 auto; line-height: 1.5;">
+            Enter your Complaint ID or registered email address above and click <strong>Track Status</strong> to view the live status, resolution timeline, and official Panchayat responses.
+          </p>
+        </div>
+
+        <!-- Result Card: Complaint Details (Hidden until search is performed) -->
+        <section class="portal-card" id="track-result-container" style="display: none;">
+          <div class="portal-card-header" style="background-color: #f0fdf4;">
+            <div class="card-title-group">
+              <i class="fa-solid fa-circle-check" style="color: #16a34a; font-size: 22px;"></i>
+              <div>
+                <h2 class="card-heading" style="color: #166534;">Complaint Details</h2>
+              </div>
+            </div>
+          </div>
+
+          <div class="portal-card-body">
+            <div class="track-result-grid">
+              
+              <!-- Left Side: Metadata Table -->
+              <div>
+                <table class="detail-table">
+                  <tr>
+                    <td class="detail-label-cell">
+                      <i class="fa-solid fa-id-card-clip" style="color: #0f56b3; width: 18px;"></i> Complaint ID
+                    </td>
+                    <td class="detail-value-cell">: <strong id="res-complaint-id" style="color: #0b2545;">-</strong></td>
+                  </tr>
+                  <tr>
+                    <td class="detail-label-cell">
+                      <i class="fa-solid fa-user" style="color: #0f56b3; width: 18px;"></i> Name
+                    </td>
+                    <td class="detail-value-cell">: <span id="res-citizen-name">-</span></td>
+                  </tr>
+                  <tr>
+                    <td class="detail-label-cell">
+                      <i class="fa-solid fa-landmark" style="color: #0f56b3; width: 18px;"></i> Gram Panchayat
+                    </td>
+                    <td class="detail-value-cell">: <span id="res-gp-name">-</span></td>
+                  </tr>
+                  <tr>
+                    <td class="detail-label-cell">
+                      <i class="fa-solid fa-square-check" style="color: #0f56b3; width: 18px;"></i> Category
+                    </td>
+                    <td class="detail-value-cell">: <span id="res-category">-</span></td>
+                  </tr>
+                  <tr>
+                    <td class="detail-label-cell">
+                      <i class="fa-regular fa-calendar-days" style="color: #0f56b3; width: 18px;"></i> Submitted On
+                    </td>
+                    <td class="detail-value-cell">: <span id="res-created-at">-</span></td>
+                  </tr>
+                  <tr id="res-ai-row" style="display: none;">
+                    <td class="detail-label-cell">
+                      <i class="fa-solid fa-brain" style="color: #2563eb; width: 18px;"></i> AI Intelligence
+                    </td>
+                    <td class="detail-value-cell">: 
+                      <span id="res-ai-priority-badge" class="ai-priority-pill pill-high" style="font-size: 11px; padding: 2px 8px; border-radius: 4px; font-weight: 800;">HIGH</span>
+                      <span id="res-ai-dept-text" style="font-size: 12px; color: #475569; margin-left: 6px;">(PWD)</span>
+                      <a href="receiver-dashboard.html?tab=intelligence" id="res-ai-intel-link" style="display: none; margin-left: 8px; font-size: 11.5px; color: #2563eb; font-weight: 700; text-decoration: underline;" title="View in Panchayat Intelligence & Hotspots">
+                        <i class="fa-solid fa-arrow-up-right-from-square"></i> Hotspots
+                      </a>
+                    </td>
+                  </tr>
+                </table>
+
+                <div style="margin-top: 14px;" id="res-photo-wrap">
+                  <div style="cursor: pointer;" onclick="window.openImageLightbox('assets/complaint-road.png', 'Evidence Photograph')" title="Click to view full image">
+                    <img src="assets/complaint-road.png" alt="Issue Photograph" style="width: 100%; height: 115px; object-fit: cover; border-radius: 8px; border: 1.5px solid #cbd5e1; display: block;">
+                    <div style="margin-top: 6px; display: flex; align-items: center; justify-content: space-between;">
+                      <span style="font-size: 11px; color: #0f56b3; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;">
+                        <i class="fa-solid fa-expand"></i> Click to view full image
+                      </span>
+                      <span style="font-size: 10.5px; color: #64748b; background: #f1f5f9; padding: 2px 6px; border-radius: 4px; font-weight: 600;">
+                        <i class="fa-regular fa-image"></i> Evidence
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Right Side: Timeline & Current Status -->
+              <div class="timeline-track-section">
+                
+                <div class="status-header-line" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 12px;">
+                  <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 14px; font-weight: 700; color: #0b2545;">Current Status</span>
+                    <!-- Admin Quick Edit Option -->
+                    <button type="button" id="track-admin-edit-btn" onclick="openAdminEditFromTracking()" style="display: none; align-items: center; gap: 6px; padding: 5px 14px; font-size: 12px; font-weight: 700; background: #0b2545; color: #fff; border: none; border-radius: 6px; cursor: pointer; transition: all 0.2s; box-shadow: 0 2px 4px rgba(11, 37, 69, 0.2);" title="Edit Complaint Status & Official Response in Admin Control Centre">
+                      <i class="fa-solid fa-pen-to-square"></i> Edit in Admin
+                    </button>
+                    <!-- Admin Quick Delete Option -->
+                    <button type="button" id="track-admin-delete-btn" onclick="deleteComplaintFromTracking()" style="display: none; align-items: center; gap: 6px; padding: 5px 14px; font-size: 12px; font-weight: 700; background: #fee2e2; border: 1px solid #fca5a5; color: #991b1b; border-radius: 6px; cursor: pointer; transition: all 0.2s; box-shadow: 0 2px 4px rgba(220, 38, 38, 0.1);" title="Permanently Delete Complaint (Admin Only)">
+                      <i class="fa-solid fa-trash-can"></i> Delete Complaint
+                    </button>
+                  </div>
+                  <div id="res-status-badge">
+                    <div class="status-badge-pill badge-inprogress">
+                      <i class="fa-solid fa-gear"></i> In Progress
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 6-Stage Visual Progress Timeline -->
+                <div class="timeline-bar-container" id="timeline-stepper-container">
+                  <div class="timeline-connecting-line">
+                    <div class="timeline-connecting-progress" id="timeline-progress-bar" style="width: 60%;"></div>
+                  </div>
+
+                  <!-- Stage 1: Submitted -->
+                  <div class="timeline-step completed" id="timeline-step-1">
+                    <div class="timeline-node"><i class="fa-solid fa-check"></i></div>
+                    <div class="timeline-step-label">Submitted</div>
+                  </div>
+
+                  <!-- Stage 2: Assigned -->
+                  <div class="timeline-step completed" id="timeline-step-2">
+                    <div class="timeline-node"><i class="fa-solid fa-check"></i></div>
+                    <div class="timeline-step-label">Assigned</div>
+                  </div>
+
+                  <!-- Stage 3: Under Review -->
+                  <div class="timeline-step completed" id="timeline-step-3">
+                    <div class="timeline-node"><i class="fa-solid fa-check"></i></div>
+                    <div class="timeline-step-label">Under Review</div>
+                  </div>
+
+                  <!-- Stage 4: In Progress -->
+                  <div class="timeline-step active" id="timeline-step-4">
+                    <div class="timeline-node" style="border-color: #d97706; color: #d97706; box-shadow: 0 0 0 4px #fde68a;"><i class="fa-solid fa-gear" style="font-size: 11px;"></i></div>
+                    <div class="timeline-step-label">In Progress</div>
+                  </div>
+
+                  <!-- Stage 5: Action Taken -->
+                  <div class="timeline-step" id="timeline-step-5">
+                    <div class="timeline-node"></div>
+                    <div class="timeline-step-label">Action Taken</div>
+                  </div>
+
+                  <!-- Stage 6: Resolved -->
+                  <div class="timeline-step" id="timeline-step-6">
+                    <div class="timeline-node"></div>
+                    <div class="timeline-step-label">Resolved</div>
+                  </div>
+                </div>
+
+                <!-- Rejection or Reopened Banner if applicable -->
+                <div id="res-rejection-banner" style="display: none; background: #fef2f2; border: 1.5px solid #fca5a5; border-radius: 8px; padding: 12px 16px; margin-top: 12px;">
+                  <div style="font-size: 13px; font-weight: 800; color: #991b1b; display: flex; align-items: center; gap: 6px;">
+                    <i class="fa-solid fa-triangle-exclamation"></i> Grievance Rejected by Administration
+                  </div>
+                  <div style="font-size: 12.5px; color: #7f1d1d; margin-top: 4px;" id="res-rejection-reason"></div>
+                </div>
+
+                <div id="res-reopen-banner" style="display: none; background: #fff7ed; border: 1.5px solid #fdba74; border-radius: 8px; padding: 12px 16px; margin-top: 12px;">
+                  <div style="font-size: 13px; font-weight: 800; color: #c2410c; display: flex; align-items: center; gap: 6px;">
+                    <i class="fa-solid fa-rotate-left"></i> Grievance Reopened for Further Verification
+                  </div>
+                  <div style="font-size: 12.5px; color: #9a3412; margin-top: 4px;" id="res-reopen-reason"></div>
+                </div>
+
+                <!-- Info Message Box / Latest Official Note -->
+                <div class="info-callout-box info" style="margin-top: 12px;" id="res-latest-note-box">
+                  <i class="fa-solid fa-circle-info" style="font-size: 18px; flex-shrink: 0;"></i>
+                  <span id="res-official-note">The road inspection was completed by the Panchayat Engineer. Material has been ordered and repair work is scheduled to begin this week.</span>
+                </div>
+
+              </div>
+
+            </div>
+
+            <!-- OFFICIAL ADMIN RESPONSE & CITIZEN COMMUNICATION THREAD -->
+            <div class="comm-thread-card" style="margin-top: 16px;">
+              <div class="comm-thread-header">
+                <div class="comm-thread-header-title">
+                  <i class="fa-solid fa-comments" style="color: #0f56b3;"></i>
+                  <span>OFFICIAL ADMIN RESPONSE & COMMUNICATION HISTORY</span>
+                </div>
+                <span style="font-size: 11px; font-weight: 700; color: #166534; background: #dcfce7; padding: 2px 8px; border-radius: 4px;">
+                  <i class="fa-solid fa-shield-check"></i> Verified Official Channel
+                </span>
+              </div>
+
+              <!-- Message History Box (Public only) -->
+              <div class="comm-thread-box" id="track-comm-messages" style="max-height: 240px;">
+                <!-- Populated dynamically -->
+              </div>
+
+              <!-- Citizen Reply Box (For active complaints) -->
+              <div class="comm-composer-box" id="track-citizen-reply-box">
+                <div style="font-size: 13px; font-weight: 700; color: #0b2545; margin-bottom: 6px; display: flex; align-items: center; gap: 6px;">
+                  <i class="fa-solid fa-reply" style="color: #0f56b3;"></i> Send a Reply / Follow-up to Gram Panchayat
+                </div>
+                <div style="display: flex; gap: 8px; align-items: flex-end;">
+                  <textarea id="track-citizen-reply-text" class="form-textarea" placeholder="Type your follow-up inquiry or update for the officials..." rows="2" style="flex: 1; min-height: 50px; font-size: 13px;"></textarea>
+                  <button type="button" class="btn-cta-primary" id="track-citizen-send-btn" onclick="sendCitizenReply()" style="padding: 10px 18px; font-size: 13px; white-space: nowrap;">
+                    <i class="fa-solid fa-paper-plane"></i> Send Reply
+                  </button>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- Citizen Complaint History Section -->
+        <section class="portal-card" id="track-history-section" style="display: none; margin-bottom: 20px;">
+          <div class="portal-card-header" style="justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+            <div class="card-title-group">
+              <i class="fa-solid fa-clock-rotate-left card-header-icon" style="color: #0f56b3;"></i>
+              <div>
+                <h2 class="card-heading">Citizen Complaint History</h2>
+                <p class="card-subheading">All previously submitted complaints, submission dates, current statuses, and official Panchayat responses.</p>
+              </div>
+            </div>
+            <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+              <span id="track-history-badge" class="admin-tab-badge" style="background: #0f56b3; color: #fff; font-weight: 700;">0 Complaints</span>
+              <button type="button" class="btn-refresh" onclick="refreshTrackComplaintHistory()" title="Reload complaints from database">
+                <i class="fa-solid fa-arrows-rotate"></i> <span>Refresh</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="portal-card-body" style="padding: 16px;">
+            <!-- Filter & Search Toolbar -->
+            <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; align-items: center; justify-content: space-between; background: #f8fafc; padding: 10px 14px; border-radius: 8px; border: 1px solid #e2e8f0;">
+              <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+                <div style="position: relative; min-width: 200px;">
+                  <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 12px;"></i>
+                  <input type="text" id="track-history-filter-input" placeholder="Search by ID, keyword..." style="padding: 6px 10px 6px 28px; font-size: 12px; border: 1px solid #cbd5e1; border-radius: 6px; width: 100%;" oninput="filterTrackHistory()">
+                </div>
+                <select id="track-history-status-filter" class="form-select" style="padding: 6px 10px; font-size: 12px; border-radius: 6px; width: auto; border: 1px solid #cbd5e1;" onchange="filterTrackHistory()">
+                  <option value="all">All Statuses</option>
+                  <option value="Submitted">Submitted</option>
+                  <option value="Under Review">Under Review</option>
+                  <option value="In Progress">In Progress</option>
+                  <option value="Resolved">Resolved</option>
+                  <option value="Rejected">Rejected</option>
+                  <option value="Reopened">Reopened</option>
+                </select>
+              </div>
+              <div style="font-size: 12px; color: #64748b;">
+                <span id="track-history-filtered-count">Showing 0 complaints</span>
+              </div>
+            </div>
+
+            <!-- Desktop Table View -->
+            <div class="directory-table-responsive" id="track-history-table-wrap">
+              <table class="directory-table" style="font-size: 13px;">
+                <thead>
+                  <tr>
+                    <th style="width: 140px;">Complaint ID</th>
+                    <th>Complaint Details</th>
+                    <th style="width: 140px;">Submitted On</th>
+                    <th style="width: 130px;">Current Status</th>
+                    <th>Panchayat Response &amp; Resolution</th>
+                    <th style="text-align: right; width: 190px;">Management Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="track-history-table-body">
+                  <!-- Dynamically populated -->
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Mobile Card View -->
+            <div id="track-history-mobile-wrap" style="display: none; flex-direction: column; gap: 12px;">
+              <!-- Dynamically populated -->
+            </div>
+
+            <!-- Empty State -->
+            <div id="track-history-empty" style="display: none; padding: 28px 16px; text-align: center; color: #64748b;">
+              <i class="fa-regular fa-folder-open" style="font-size: 32px; color: #94a3b8; margin-bottom: 8px;"></i>
+              <div style="font-weight: 700; color: #0b2545; font-size: 15px;">No Complaints Found</div>
+              <div style="font-size: 13px; margin-top: 4px;">There are no complaints matching your query or filter criteria.</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Not Found Card (Hidden by default) -->
+        <div id="track-not-found-card" class="portal-card" style="display: none; padding: 20px 16px; text-align: center;">
+          <i class="fa-solid fa-circle-exclamation" style="font-size: 38px; color: #ef4444; margin-bottom: 12px; display: block;"></i>
+          <h3 style="font-size: 18px; color: #0b2545; font-weight: 700;">No Complaint Found</h3>
+          <p style="font-size: 14px; color: #64748b; margin-top: 6px;">
+            No Complaint Found. Please verify your Complaint ID and registered email address.
+          </p>
+        </div>
+
+      </div>
+
+      <!-- Right Column: Status Indicators Legend & Help -->
+      <aside>
+        
+        <div class="status-indicators-card" id="status-indicators-container">
+          <h2 style="font-size: 18px; font-weight: 800; color: #0b2545; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+            <i class="fa-regular fa-flag" style="color: #0f56b3;"></i> Status Indicators
+          </h2>
+
+          <div class="indicator-item sub">
+            <i class="fa-solid fa-circle-check indicator-icon" style="color: #16a34a;"></i>
+            <div>
+              <div class="indicator-title">Submitted</div>
+              <div class="indicator-desc">Your complaint has been successfully received.</div>
+            </div>
+          </div>
+
+          <div class="indicator-item">
+            <i class="fa-solid fa-user-check indicator-icon" style="color: #7c3aed;"></i>
+            <div>
+              <div class="indicator-title">Assigned</div>
+              <div class="indicator-desc">Allocated to designated Panchayat grievance officer.</div>
+            </div>
+          </div>
+
+          <div class="indicator-item rev">
+            <i class="fa-solid fa-magnifying-glass indicator-icon" style="color: #0284c7;"></i>
+            <div>
+              <div class="indicator-title">Under Review</div>
+              <div class="indicator-desc">Inspection, cost planning, or department coordination.</div>
+            </div>
+          </div>
+
+          <div class="indicator-item inp">
+            <i class="fa-solid fa-gear indicator-icon" style="color: #d97706;"></i>
+            <div>
+              <div class="indicator-title">In Progress</div>
+              <div class="indicator-desc">Remediation work actively underway on site.</div>
+            </div>
+          </div>
+
+          <div class="indicator-item">
+            <i class="fa-solid fa-truck-fast indicator-icon" style="color: #0891b2;"></i>
+            <div>
+              <div class="indicator-title">Action Taken</div>
+              <div class="indicator-desc">Field work completed; awaiting final sign-off.</div>
+            </div>
+          </div>
+
+          <div class="indicator-item res">
+            <i class="fa-regular fa-circle-check indicator-icon" style="color: #15803d;"></i>
+            <div>
+              <div class="indicator-title">Resolved</div>
+              <div class="indicator-desc">Grievance successfully addressed and verified.</div>
+            </div>
+          </div>
+
+          <div class="indicator-item">
+            <i class="fa-solid fa-circle-xmark indicator-icon" style="color: #dc2626;"></i>
+            <div>
+              <div class="indicator-title">Rejected</div>
+              <div class="indicator-desc">Out of Panchayat scope or duplicate submission.</div>
+            </div>
+          </div>
+
+          <div class="indicator-item">
+            <i class="fa-solid fa-rotate-left indicator-icon" style="color: #ea580c;"></i>
+            <div>
+              <div class="indicator-title">Reopened</div>
+              <div class="indicator-desc">Reopened for further investigation or citizen appeal.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mission-side-card">
+          <div class="mission-icon-wrap">
+            <i class="fa-solid fa-hand-holding-heart"></i>
+          </div>
+          <div class="mission-text-wrap">
+            <h3 class="mission-heading">Stay Updated</h3>
+            <p class="mission-body">Track your complaint anytime and get real-time updates from your Gram Panchayat.</p>
+          </div>
+        </div>
+
+      </aside>
+
+    </div>
+  </main>
+
+  <!-- Modal: Admin Quick Edit Complaint & Status -->
+  <div class="modal-overlay" id="track-admin-edit-modal">
+    <div class="modal-window" style="max-width: 680px;">
+      <div class="modal-header">
+        <div class="modal-title" style="display: flex; align-items: center; gap: 10px;">
+          <i class="fa-solid fa-pen-to-square" style="color: #0f56b3;"></i>
+          <span>Edit Complaint &amp; Lifecycle Status (Admin)</span>
+        </div>
+        <button type="button" class="modal-close-btn" onclick="closeAdminEditModal()">&times;</button>
+      </div>
+
+      <div class="modal-body" style="max-height: 75vh; overflow-y: auto; padding: 20px 24px;">
+        <form id="track-admin-edit-form" onsubmit="event.preventDefault(); saveAdminEditFromTracking();">
+          <!-- Complaint Summary Pill -->
+          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 16px; margin-bottom: 18px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+            <div>
+              <span style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase;">Grievance ID</span>
+              <div style="font-size: 15px; font-weight: 800; color: #0b2545;" id="track-edit-id-display">JAN-2026-0000</div>
+              <div style="font-size: 12px; color: #475569;" id="track-edit-citizen-display">Citizen Name</div>
+            </div>
+            <div>
+              <span style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase;">Current Active Status</span>
+              <div id="track-edit-current-status-display" style="margin-top: 3px;"></div>
+            </div>
+          </div>
+
+          <!-- Status & Priority Controls -->
+          <div class="modal-grid-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 16px;">
+            <div>
+              <label for="track-edit-status-select" style="display: block; font-size: 12.5px; font-weight: 700; color: #1e293b; margin-bottom: 5px;">
+                <i class="fa-solid fa-arrows-split-up-and-left" style="color: #0f56b3;"></i> Change Grievance Status *
+              </label>
+              <select id="track-edit-status-select" class="form-select" onchange="handleTrackEditStatusChange()" style="width: 100%; padding: 8px 12px; border: 1.5px solid #cbd5e1; border-radius: 6px; font-size: 13px; font-weight: 600; background: #fff;">
+                <!-- Populated dynamically with role-permitted transitions -->
+              </select>
+            </div>
+            <div>
+              <label for="track-edit-priority-select" style="display: block; font-size: 12.5px; font-weight: 700; color: #1e293b; margin-bottom: 5px;">
+                <i class="fa-solid fa-bolt" style="color: #d97706;"></i> Grievance Priority Level
+              </label>
+              <select id="track-edit-priority-select" class="form-select" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; background: #fff;">
+                <option value="NORMAL">NORMAL (Standard Processing Time)</option>
+                <option value="URGENT">URGENT (Critical Hazard / Emergency)</option>
+                <option value="HIGH">HIGH (Immediate Attention Required)</option>
+                <option value="LOW">LOW (Minor / Maintenance)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Conditional Rejection Reason Input -->
+          <div class="form-group" id="track-edit-rejection-wrap" style="display: none; margin-bottom: 14px;">
+            <label for="track-edit-rejection-reason" style="display: block; font-size: 12.5px; font-weight: 700; color: #b91c1c; margin-bottom: 4px;">
+              <i class="fa-solid fa-triangle-exclamation"></i> Mandatory Reason for Rejection *
+            </label>
+            <input type="text" id="track-edit-rejection-reason" class="form-input" placeholder="State official reason for rejecting this grievance..." style="width: 100%; padding: 8px 12px; border: 1px solid #f87171; border-radius: 6px; font-size: 13px;">
+          </div>
+
+          <!-- Conditional Reopening Justification Input -->
+          <div class="form-group" id="track-edit-reopen-wrap" style="display: none; margin-bottom: 14px;">
+            <label for="track-edit-reopen-reason" style="display: block; font-size: 12.5px; font-weight: 700; color: #c2410c; margin-bottom: 4px;">
+              <i class="fa-solid fa-rotate-left"></i> Reopening Justification *
+            </label>
+            <input type="text" id="track-edit-reopen-reason" class="form-input" placeholder="Detail reason for reopening this grievance..." style="width: 100%; padding: 8px 12px; border: 1px solid #fdba74; border-radius: 6px; font-size: 13px;">
+          </div>
+
+          <!-- Official Response & Citizen Communication -->
+          <div style="margin-bottom: 16px;">
+            <label for="track-edit-response-text" style="display: block; font-size: 12.5px; font-weight: 700; color: #1e293b; margin-bottom: 4px;">
+              <i class="fa-solid fa-bullhorn" style="color: #0f56b3;"></i> Official Public Response (Visible to Citizen)
+            </label>
+            <textarea id="track-edit-response-text" rows="3" placeholder="Enter updated official response, resolution details, or progress update..." style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 12.5px; line-height: 1.4;"></textarea>
+          </div>
+
+          <!-- Action Buttons -->
+          <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #e2e8f0; padding-top: 16px; flex-wrap: wrap; gap: 10px;">
+            <div style="display: flex; gap: 8px; align-items: center;">
+              <a id="track-open-admin-link" href="receiver-dashboard.html" class="btn-cta-secondary" style="display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; font-size: 12px; font-weight: 700; text-decoration: none; border-radius: 6px; background: #f1f5f9; color: #0b2545; border: 1px solid #cbd5e1;">
+                <i class="fa-solid fa-arrow-up-right-from-square"></i> Open in Full Admin Control Centre
+              </a>
+              <button type="button" id="track-modal-delete-btn" onclick="deleteComplaintFromTracking()" style="display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; font-size: 12px; font-weight: 700; background: #fee2e2; border: 1px solid #fca5a5; color: #991b1b; border-radius: 6px; cursor: pointer;" title="Delete this complaint permanently">
+                <i class="fa-solid fa-trash-can"></i> Delete
+              </button>
+            </div>
+            <div style="display: flex; gap: 10px;">
+              <button type="button" class="btn-cta-secondary" onclick="closeAdminEditModal()" style="padding: 7px 14px; font-size: 12.5px; font-weight: 600; cursor: pointer;">Cancel</button>
+              <button type="submit" id="track-edit-save-btn" class="btn-cta-primary" style="padding: 7px 18px; font-size: 12.5px; font-weight: 700; background: #0b2545; color: #fff; border: none; border-radius: 6px; cursor: pointer;">
+                <i class="fa-solid fa-floppy-disk"></i> Update Status
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Citizen Complaint Details & Panchayat Responses -->
+  <div class="modal-overlay" id="track-details-modal" style="display: none;">
+    <div class="modal-window" style="max-width: 720px; border-top: 4px solid #0f56b3;">
+      <div class="modal-header" style="background: #fff; border-bottom: 1px solid #e2e8f0; padding: 16px 20px; display: flex; justify-content: space-between; align-items: center;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div style="width: 36px; height: 36px; border-radius: 8px; background: #eff6ff; display: flex; align-items: center; justify-content: center; color: #0f56b3;">
+            <i class="fa-solid fa-file-lines" style="font-size: 18px;"></i>
+          </div>
+          <div>
+            <h3 style="margin: 0; font-size: 16px; color: #0b2545; font-weight: 700;" id="tdm-title">Complaint Details</h3>
+            <span style="font-size: 12px; color: #64748b;" id="tdm-id-subtitle">Complaint ID: <strong id="tdm-id" style="color: #0f56b3;">-</strong></span>
+          </div>
+        </div>
+        <button type="button" class="btn-close-modal" onclick="closeTrackDetailsModal()" aria-label="Close" style="background: transparent; border: none; font-size: 18px; color: #64748b; cursor: pointer;">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <div class="modal-body" style="padding: 20px; max-height: calc(85vh - 120px); overflow-y: auto;">
+        
+        <!-- Status & Meta Banner -->
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; padding: 12px 14px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 16px;">
+          <div>
+            <span style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase;">Current Status:</span>
+            <div id="tdm-status-badge" style="margin-top: 2px;"></div>
+          </div>
+          <div style="text-align: right;">
+            <span style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase;">Submission Date:</span>
+            <div id="tdm-submission-date" style="font-size: 13px; font-weight: 600; color: #0b2545;"><span id="tdm-date">-</span></div>
+          </div>
+        </div>
+
+        <!-- Metadata Table -->
+        <table class="detail-table" style="margin-bottom: 16px;">
+          <tr>
+            <td class="detail-label-cell" style="width: 140px;">Gram Panchayat</td>
+            <td class="detail-value-cell">: <strong id="tdm-gp-name" style="color: #0b2545;"><span id="tdm-panchayat">-</span></strong></td>
+          </tr>
+          <tr>
+            <td class="detail-label-cell">Category</td>
+            <td class="detail-value-cell">: <span id="tdm-category" style="font-weight: 600;">-</span></td>
+          </tr>
+          <tr>
+            <td class="detail-label-cell">Location / Landmark</td>
+            <td class="detail-value-cell">: <span id="tdm-location">-</span></td>
+          </tr>
+          <tr>
+            <td class="detail-label-cell">Applicant</td>
+            <td class="detail-value-cell">: <span id="tdm-applicant">-</span></td>
+          </tr>
+        </table>
+
+        <!-- Description Box -->
+        <div style="margin-bottom: 16px;">
+          <h4 style="font-size: 13px; color: #0b2545; font-weight: 700; margin-bottom: 6px; display: flex; align-items: center; gap: 6px;">
+            <i class="fa-solid fa-align-left" style="color: #0f56b3;"></i> Description of the Issue:
+          </h4>
+          <div id="tdm-description" style="padding: 12px; background: #f8fafc; border-radius: 6px; border: 1px solid #e2e8f0; font-size: 13px; color: #334155; line-height: 1.5; white-space: pre-wrap;"></div>
+        </div>
+
+        <!-- Photo / Evidence Preview (if available) -->
+        <div id="tdm-photo-wrap" style="display: none; margin-bottom: 16px;">
+          <h4 style="font-size: 13px; color: #0b2545; font-weight: 700; margin-bottom: 6px; display: flex; align-items: center; gap: 6px;">
+            <i class="fa-solid fa-camera" style="color: #0f56b3;"></i> Photographic Evidence:
+          </h4>
+          <div style="max-height: 240px; border-radius: 8px; overflow: hidden; border: 1px solid #e2e8f0; display: inline-block;">
+            <img id="tdm-photo" src="" alt="Evidence Photo" style="max-height: 240px; width: auto; object-fit: contain; display: block;">
+          </div>
+        </div>
+
+        <!-- Official Panchayat Response & Resolution Section -->
+        <div style="margin-bottom: 16px;">
+          <h4 style="font-size: 13px; color: #0b2545; font-weight: 700; margin-bottom: 6px; display: flex; align-items: center; gap: 6px;">
+            <i class="fa-solid fa-landmark" style="color: #15803d;"></i> Official Panchayat Responses &amp; Resolution Updates:
+          </h4>
+          <div id="tdm-responses-container" style="display: flex; flex-direction: column; gap: 8px;">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+
+        <!-- Work Progress (if applicable) -->
+        <div id="tdm-work-progress-wrap" style="display: none; margin-bottom: 16px; padding: 12px; background: #eff6ff; border-radius: 8px; border: 1px solid #bfdbfe;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <strong style="font-size: 13px; color: #1e40af;"><i class="fa-solid fa-bars-progress"></i> Verified Field Work Progress</strong>
+            <span id="tdm-work-percent-badge" class="admin-tab-badge" style="background: #2563eb; color: #fff;">0%</span>
+          </div>
+          <div style="height: 8px; background: #dbeafe; border-radius: 4px; overflow: hidden; margin-bottom: 8px;">
+            <div id="tdm-work-progress-bar" style="height: 100%; background: #2563eb; width: 0%; transition: width 0.3s;"></div>
+          </div>
+          <div id="tdm-work-details" style="font-size: 12px; color: #1e3a8a;"></div>
+        </div>
+
+      </div>
+      <div class="modal-footer" style="padding: 14px 20px; background: #f8fafc; border-top: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+        <button type="button" id="tdm-delete-btn" class="btn-table-action" style="background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; font-weight: 700; padding: 7px 14px; border-radius: 6px; cursor: pointer;">
+          <i class="fa-solid fa-trash-can"></i> Delete Complaint
+        </button>
+        <div style="display: flex; gap: 8px;">
+          <button type="button" class="btn-cta-secondary" onclick="closeTrackDetailsModal()" style="padding: 7px 14px; font-size: 12.5px;">Close</button>
+          <button type="button" id="tdm-track-btn" class="btn-cta-primary" style="padding: 7px 16px; font-size: 12.5px;">
+            <i class="fa-solid fa-location-crosshairs"></i> Track Live Status
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Citizen Complaint Deletion Confirmation -->
+  <div class="modal-overlay" id="track-delete-modal" style="display: none;">
+    <div class="modal-window" style="max-width: 520px; border-top: 5px solid #dc2626;">
+      <div class="modal-header" style="background: #fff; border-bottom: 1px solid #e2e8f0; padding: 16px 20px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div style="width: 38px; height: 38px; border-radius: 50%; background: #fef2f2; display: flex; align-items: center; justify-content: center; color: #dc2626; font-size: 18px;">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+          </div>
+          <div>
+            <h3 style="margin: 0; font-size: 16px; color: #0b2545; font-weight: 700;">Confirm Complaint Deletion</h3>
+            <span style="font-size: 12px; color: #64748b;">Proper verification required before deletion</span>
+          </div>
+        </div>
+      </div>
+      <div class="modal-body" style="padding: 20px;">
+        <p style="font-size: 13.5px; color: #334155; margin-bottom: 14px; line-height: 1.5;">
+          Are you sure you want to delete this grievance from your complaint history?
+        </p>
+        
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 14px; margin-bottom: 14px; font-size: 13px;">
+          <div style="margin-bottom: 6px;">
+            <span style="color: #64748b;">Complaint ID:</span> <strong id="tdel-id" style="color: #0b2545;">-</strong>
+          </div>
+          <div style="margin-bottom: 6px;">
+            <span style="color: #64748b;">Subject / Category:</span> <span id="tdel-subject" style="font-weight: 600;">-</span>
+          </div>
+          <div style="margin-bottom: 6px;">
+            <span style="color: #64748b;">Submitted Date:</span> <span id="tdel-date">-</span>
+          </div>
+          <div>
+            <span style="color: #64748b;">Status:</span> <span id="tdel-status">-</span>
+          </div>
+        </div>
+
+        <div style="padding: 10px 12px; background: #fff5f5; border-left: 3px solid #dc2626; border-radius: 4px; font-size: 12.5px; color: #991b1b; margin-bottom: 14px; line-height: 1.4;">
+          <i class="fa-solid fa-circle-info"></i> <strong>Important:</strong> Deleting this complaint will remove it from your active complaint history and live tracking list.
+        </div>
+
+        <div>
+          <label for="tdel-reason" style="display: block; font-size: 12.5px; font-weight: 700; color: #334155; margin-bottom: 4px;">Reason for Deletion (Optional):</label>
+          <input type="text" id="tdel-reason" class="form-input" placeholder="e.g. Issue resolved on site, duplicate submission, no longer required..." style="width: 100%; padding: 8px 12px; font-size: 12.5px; border-radius: 6px; border: 1px solid #cbd5e1;">
+        </div>
+      </div>
+      <div class="modal-footer" style="padding: 14px 20px; background: #f8fafc; border-top: 1px solid #e2e8f0; display: flex; justify-content: flex-end; gap: 10px;">
+        <button type="button" class="btn-cta-secondary" onclick="closeTrackDeleteModal()" style="padding: 8px 16px; font-size: 12.5px; cursor: pointer;">Cancel</button>
+        <button type="button" id="tdel-confirm-btn" onclick="executeTrackDeleteComplaint()" class="btn-cta-primary" style="background: #dc2626; border-color: #dc2626; padding: 8px 18px; font-size: 12.5px; cursor: pointer;">
+          <i class="fa-solid fa-trash-can"></i> Yes, Delete Complaint
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="portal-footer">
+    <div class="footer-wave-line"></div>
+    <div class="footer-content">
+      <div class="footer-disclaimer">
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px;">
+          <img src="assets/branding/janaseva-icon.png" alt="JANASEVA Logo" class="footer-emblem-img" width="26" height="26" style="width: 26px; height: 26px; object-fit: contain;">
+          <strong>JANASEVA – Gram Panchayat Grievance Portal</strong>
+        </div>
+        This portal is an academic student project created for civic grievance demonstration. Not an official Government of India website.
+      </div>
+      <div class="footer-links-group">
+        <a href="index.html">Home</a>
+        <a href="complaint.html">Submit Complaint</a>
+        <a href="track.html">Track Status</a>
+        <a href="directory.html">Directory</a>
+        <a href="knowledge-centre.html">Knowledge Centre</a>
+        <a href="about.html">About</a>
+        <a href="https://ipchat.in/" target="_blank" rel="noopener noreferrer">IP Chat – External Messaging Service</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- JANASEVA MongoDB Backend & Scripts -->
+  <script src="js/firebase-config.js"></script>
+  <script src="js/mongodb-adapter.js"></script>
+  <script src="js/translations.js"></script>
+  <script src="js/universal-settings.js"></script>
+  <script src="js/status-config.js"></script>
+  <script src="js/auth.js"></script>
+<script src="js/universal-notifications.js"></script>
+  <script src="js/email.js"></script>
+  <script src="js/complaint-storage-manager.js"></script>
+  <script src="js/tracking.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      if (window.authService) {
+        window.authService.protectPage('any');
+      }
+    });
+  </script>
+  <script src="js/offline-db.js"></script>
+  <script src="js/ai-prioritization.js"></script>
+  <script src="js/document-verifier.js"></script>
+  <script src="js/knowledge-parsers.js"></script>
+  <script src="js/knowledge-security.js"></script>
+  <script src="js/knowledge-rag.js"></script>
+  <script src="js/knowledge-storage.js"></script>
+  <script src="js/ai-chat-services.js"></script>
+  <script src="js/ai-voice-assistant.js"></script>
+</body>
+</html>

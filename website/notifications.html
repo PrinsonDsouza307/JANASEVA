@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JANASEVA – Notifications and Updates</title>
+
+  <!-- PWA & Favicon Icons -->
+  <link rel="icon" type="image/x-icon" href="assets/branding/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/branding/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/branding/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/branding/apple-touch-icon.png">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0b2545">
+
+  <!-- Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <!-- Core Stylesheets -->
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+
+  <!-- Top Security & Navigation Bar (Canonical Standard Header) -->
+  <header class="portal-header">
+    <div class="header-container">
+      <a href="index.html" class="brand-section" aria-label="JANASEVA Home">
+        <img src="assets/branding/janaseva-icon.png" alt="JANASEVA Official Logo" class="emblem-img brand-logo-img">
+        <div class="brand-text-block">
+          <span class="brand-main-title">JANASEVA</span>
+          <div class="brand-divider"></div>
+          <div class="brand-sub-titles">
+            <span class="brand-subtitle">Gram Panchayat Grievance Portal</span>
+            <span class="brand-tagline">Report • Submit • Track • Resolve</span>
+          </div>
+        </div>
+      </a>
+
+      <!-- Header Action Controls: Notification Bell (Always visible in Android toolbar & Desktop header) + Mobile Menu Toggle -->
+      <div class="header-action-controls" id="header-action-controls">
+        <button class="nav-notif-bell-btn" id="nav-notif-bell-btn" type="button" aria-label="View Notifications">
+          <i class="fa-regular fa-bell"></i>
+          <span class="nav-notif-badge" id="nav-notif-badge" style="display: none;">0</span>
+        </button>
+        <button class="nav-toggle-btn" id="mobile-nav-toggle" aria-label="Toggle Navigation">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+      </div>
+
+      <!-- Main Navigation Menu -->
+      <nav class="main-nav" id="main-navigation">
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="complaint.html" class="nav-link">Submit Complaint</a>
+        <a href="track.html" class="nav-link">Track Status</a>
+        <a href="directory.html" class="nav-link">Panchayat Directory</a>
+        <a href="knowledge-centre.html" class="nav-link">Knowledge Centre</a>
+        <a href="https://ipchat.in/" class="nav-link nav-link-external" target="_blank" rel="noopener noreferrer">
+          <i class="fa-solid fa-comments" aria-hidden="true"></i> <span>IP Chat</span> <i class="fa-solid fa-arrow-up-right-from-square nav-ext-icon" aria-hidden="true"></i>
+        </a>
+        <a href="notifications.html" class="nav-link active">Get Updates</a>
+        <a href="about.html" class="nav-link">About</a>
+
+        <!-- Language Selector -->
+        <div class="lang-selector-wrapper">
+          <i class="fa-solid fa-globe lang-icon"></i>
+          <select class="janaseva-lang-select" aria-label="Select Language">
+            <option value="en">English</option>
+            <option value="kn">ಕನ್ನಡ (Kannada)</option>
+            <option value="hi">हिन्दी (Hindi)</option>
+          </select>
+        </div>
+
+        <!-- Auth Button / User Chip Container -->
+        <div id="nav-auth-container" style="display: inline-flex; align-items: center; gap: 8px;">
+          <a href="login.html" class="nav-btn-primary" id="nav-login-btn">
+            <i class="fa-solid fa-arrow-right-to-bracket"></i>
+            <span>Sign In</span>
+          </a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Hero Banner with Official Indian Tricolour Separator -->
+  <section class="hero-banner">
+    <div class="hero-bg-overlay"></div>
+    <div class="hero-content-wrap">
+      <div class="hero-text-side">
+        <div class="hero-title-with-icon">
+          <div class="hero-page-icon">
+            <i class="fa-solid fa-bell"></i>
+          </div>
+          <h1 class="hero-main-heading">Notifications &amp; Civic Updates</h1>
+        </div>
+        <p class="hero-subheading">
+          Stay informed with real-time grievance lifecycle dispatches, Gram Sabha announcements, and village administration advisories.
+        </p>
+      </div>
+    </div>
+
+    <div class="tricolour-wave-separator">
+      <svg viewBox="0 0 1440 24" fill="none" preserveAspectRatio="none">
+        <path d="M0,0 C360,18 1080,6 1440,16 L1440,24 L0,24 Z" fill="#ffffff" />
+        <path d="M0,4 C400,20 1100,10 1440,18" stroke="#ff9933" stroke-width="2.5" />
+        <path d="M0,9 C400,25 1100,15 1440,23" stroke="#ffffff" stroke-width="2" />
+        <path d="M0,14 C400,30 1100,20 1440,28" stroke="#138808" stroke-width="2.5" />
+      </svg>
+    </div>
+  </section>
+
+  <!-- Main Content Layout (Two Column) -->
+  <main class="page-main-content">
+    <div class="two-col-layout">
+      
+      <!-- Primary Column: Grievance Lifecycle Updates & Public Announcements -->
+      <div>
+        
+        <!-- Live Grievance Updates by Email Card -->
+        <section class="portal-card" style="margin-bottom: 24px;">
+          <div class="portal-card-header">
+            <div class="card-title-group">
+              <i class="fa-solid fa-envelope-circle-check card-header-icon" style="color: var(--color-royal-blue);"></i>
+              <div>
+                <h2 class="card-heading">Receive Grievance Status Updates</h2>
+                <p class="card-subheading">Automated dispatches sent directly to your registered citizen email at every resolution milestone.</p>
+              </div>
+            </div>
+            <div class="notif-live-badge">
+              <span class="notif-live-dot"></span> Active Dispatch
+            </div>
+          </div>
+          <div class="portal-card-body" style="padding: 22px;">
+            <p style="font-size: 14px; color: #334155; line-height: 1.6; margin-bottom: 18px;">
+              Whenever you register a civic grievance on JANASEVA, our automated notification engine sends instant email updates at each official Gram Panchayat lifecycle transition:
+            </p>
+
+            <!-- 4-Stage Lifecycle Stepper Grid -->
+            <div class="notif-stage-grid">
+              
+              <div class="notif-stage-card stage-green">
+                <div class="notif-stage-title">
+                  <i class="fa-solid fa-file-circle-check"></i> 1. Submission &amp; Slip
+                </div>
+                <div class="notif-stage-desc">
+                  Instant electronic acknowledgement with permanent Complaint ID and QR tracking slip.
+                </div>
+              </div>
+
+              <div class="notif-stage-card stage-blue">
+                <div class="notif-stage-title">
+                  <i class="fa-solid fa-user-check"></i> 2. Panchayat Review
+                </div>
+                <div class="notif-stage-desc">
+                  Notification as soon as the village Executive Officer assigns your grievance to a field officer.
+                </div>
+              </div>
+
+              <div class="notif-stage-card stage-orange">
+                <div class="notif-stage-title">
+                  <i class="fa-solid fa-wrench"></i> 3. Field Remediation
+                </div>
+                <div class="notif-stage-desc">
+                  Real-time progress alerts, site inspection logs, and physical repair progress notes.
+                </div>
+              </div>
+
+              <div class="notif-stage-card stage-purple">
+                <div class="notif-stage-title">
+                  <i class="fa-solid fa-circle-check"></i> 4. Resolution &amp; Report
+                </div>
+                <div class="notif-stage-desc">
+                  Final sign-off with official Panchayat resolution report and citizen feedback prompt.
+                </div>
+              </div>
+
+            </div>
+
+            <!-- Interactive Quick Email Grievance Lookup Box -->
+            <div class="notif-search-card">
+              <h3 class="notif-search-title">
+                <i class="fa-solid fa-magnifying-glass" style="color: var(--color-royal-blue);"></i> Check Your Grievance Updates
+              </h3>
+              <p class="notif-search-desc">
+                Enter your registered citizen email address to view all active dispatches and official Panchayat communications:
+              </p>
+              <form id="notifications-lookup-form" onsubmit="handleNotificationLookup(event)" class="notif-search-form">
+                <div class="notif-input-wrapper">
+                  <i class="fa-regular fa-envelope"></i>
+                  <input type="email" id="notif-email-input" class="notif-email-input" placeholder="e.g. citizen@example.com" required autocomplete="email">
+                </div>
+                <button type="submit" class="btn-cta-primary">
+                  <i class="fa-solid fa-location-crosshairs"></i> Get Live Updates
+                </button>
+              </form>
+            </div>
+          </div>
+        </section>
+
+        <!-- Public Civic Announcements Board -->
+        <section class="portal-card">
+          <div class="portal-card-header">
+            <div class="card-title-group">
+              <i class="fa-solid fa-bullhorn card-header-icon" style="color: #0f56b3;"></i>
+              <div>
+                <h2 class="card-heading">Gram Panchayat Civic Announcements</h2>
+                <p class="card-subheading">Public notices, maintenance advisories, and village administration schedules.</p>
+              </div>
+            </div>
+          </div>
+          <div class="portal-card-body" style="padding: 22px;">
+            
+            <!-- Category Filter Tabs -->
+            <div class="notif-filters">
+              <button type="button" class="notif-filter-btn active" data-category="all" onclick="filterAnnouncements('all', this)">
+                <i class="fa-solid fa-layer-group"></i> All Notices
+              </button>
+              <button type="button" class="notif-filter-btn" data-category="water" onclick="filterAnnouncements('water', this)">
+                <i class="fa-solid fa-faucet-drip"></i> Water &amp; Sanitation
+              </button>
+              <button type="button" class="notif-filter-btn" data-category="sabha" onclick="filterAnnouncements('sabha', this)">
+                <i class="fa-solid fa-users"></i> Gram Sabha
+              </button>
+              <button type="button" class="notif-filter-btn" data-category="works" onclick="filterAnnouncements('works', this)">
+                <i class="fa-solid fa-road"></i> Public Works
+              </button>
+              <button type="button" class="notif-filter-btn" data-category="health" onclick="filterAnnouncements('health', this)">
+                <i class="fa-solid fa-heart-pulse"></i> Health &amp; Welfare
+              </button>
+            </div>
+
+            <!-- Announcements Feed -->
+            <div id="announcements-container" style="display: flex; flex-direction: column; gap: 14px;">
+              
+              <!-- Notice 1: Water Supply -->
+              <article class="notif-announcement-item border-blue" data-category="water">
+                <div class="notif-item-header">
+                  <div class="notif-item-title">
+                    <i class="fa-solid fa-droplet" style="color: #0f56b3; margin-right: 6px;"></i> Drinking Water Supply Maintenance &amp; Pipeline Flushing
+                  </div>
+                  <span class="notif-pill pill-blue"><i class="fa-solid fa-circle-info"></i> Public Advisory</span>
+                </div>
+                <div class="notif-item-body">
+                  Scheduled overhead water tank inspection and chlorinated pipeline flushing will take place across Wards 1 through 4 this weekend. Water supply will operate on low pressure between 10:00 AM and 2:00 PM. Clean reserve storage is advised.
+                </div>
+                <div class="notif-item-footer">
+                  <div class="notif-meta-group">
+                    <span class="notif-meta-item"><i class="fa-regular fa-calendar"></i> Nov 14, 2026</span>
+                    <span class="notif-meta-item"><i class="fa-solid fa-location-dot"></i> Wards 1 – 4</span>
+                  </div>
+                  <span style="font-weight: 600; color: #0b2545;">Water redressed helpline: 1800-425-001</span>
+                </div>
+              </article>
+
+              <!-- Notice 2: Gram Sabha -->
+              <article class="notif-announcement-item border-green" data-category="sabha">
+                <div class="notif-item-header">
+                  <div class="notif-item-title">
+                    <i class="fa-solid fa-users" style="color: #16a34a; margin-right: 6px;"></i> Ordinary Gram Sabha Meeting – Q4 Grievance Redressal Review
+                  </div>
+                  <span class="notif-pill pill-green"><i class="fa-solid fa-calendar-check"></i> Scheduled Event</span>
+                </div>
+                <div class="notif-item-body">
+                  All registered village citizens are cordially invited to attend the quarterly Gram Sabha session. The agenda includes reviewing closed public grievances, sanctioning rural street light repairs, and inspecting local drainage works.
+                </div>
+                <div class="notif-item-footer">
+                  <div class="notif-meta-group">
+                    <span class="notif-meta-item"><i class="fa-regular fa-calendar"></i> Nov 20, 2026 • 10:30 AM</span>
+                    <span class="notif-meta-item"><i class="fa-solid fa-landmark"></i> Village Panchayat Auditorium</span>
+                  </div>
+                  <span style="font-weight: 600; color: #166534;">Open to all registered adult citizens</span>
+                </div>
+              </article>
+
+              <!-- Notice 3: Public Works -->
+              <article class="notif-announcement-item border-orange" data-category="works">
+                <div class="notif-item-header">
+                  <div class="notif-item-title">
+                    <i class="fa-solid fa-road" style="color: #d97706; margin-right: 6px;"></i> Village Main Road Resurfacing &amp; Culvert Repair Notice
+                  </div>
+                  <span class="notif-pill pill-orange"><i class="fa-solid fa-triangle-exclamation"></i> Civic Works</span>
+                </div>
+                <div class="notif-item-body">
+                  Asphalt resurfacing and concrete storm-water culvert reconstruction will commence on the Main Market Road connecting Ward 2 to the Primary Health Sub-Centre. Light vehicle diversions will be active during daylight construction hours.
+                </div>
+                <div class="notif-item-footer">
+                  <div class="notif-meta-group">
+                    <span class="notif-meta-item"><i class="fa-regular fa-calendar"></i> Nov 16 – Nov 22, 2026</span>
+                    <span class="notif-meta-item"><i class="fa-solid fa-location-dot"></i> Market Road to Sub-Centre</span>
+                  </div>
+                  <span style="font-weight: 600; color: #9a3412;">Panchayat Engineering Division</span>
+                </div>
+              </article>
+
+              <!-- Notice 4: Health Camp -->
+              <article class="notif-announcement-item border-purple" data-category="health">
+                <div class="notif-item-header">
+                  <div class="notif-item-title">
+                    <i class="fa-solid fa-stethoscope" style="color: #7c3aed; margin-right: 6px;"></i> Rural Child Immunization &amp; Senior Citizen Health Camp
+                  </div>
+                  <span class="notif-pill pill-purple"><i class="fa-solid fa-heart-pulse"></i> Health Advisory</span>
+                </div>
+                <div class="notif-item-body">
+                  A free specialized rural health screening camp and seasonal flu vaccination drive will be conducted in coordination with the District Primary Health Unit. Free blood pressure, blood glucose, and vision examinations will be provided.
+                </div>
+                <div class="notif-item-footer">
+                  <div class="notif-meta-group">
+                    <span class="notif-meta-item"><i class="fa-regular fa-calendar"></i> Nov 25, 2026 • 9:00 AM – 4:00 PM</span>
+                    <span class="notif-meta-item"><i class="fa-solid fa-hospital"></i> Primary Health Sub-Centre</span>
+                  </div>
+                  <span style="font-weight: 600; color: #5b21b6;">Free checkup &amp; medicine distribution</span>
+                </div>
+              </article>
+
+            </div>
+          </div>
+        </section>
+
+      </div>
+
+      <!-- Secondary Column: Quick Services & Verified Channels -->
+      <aside>
+        
+        <!-- Quick Services Navigation Card -->
+        <div class="portal-card" style="margin-bottom: 20px;">
+          <div class="portal-card-header">
+            <h3 class="card-heading" style="font-size: 16px;">
+              <i class="fa-solid fa-bolt" style="color: #0f56b3;"></i> Quick Services
+            </h3>
+          </div>
+          <div class="portal-card-body" style="padding: 16px 18px; display: flex; flex-direction: column; gap: 10px;">
+            <a href="complaint.html" class="btn-cta-primary" style="justify-content: center; text-decoration: none; padding: 11px 16px; font-size: 13.5px; border-radius: 8px;">
+              <i class="fa-solid fa-pen-to-square"></i> Submit New Grievance
+            </a>
+            <a href="track.html" class="btn-cta-secondary" style="justify-content: center; text-decoration: none; padding: 10px 16px; font-size: 13.5px; border-radius: 8px;">
+              <i class="fa-solid fa-location-crosshairs"></i> Track Live Status
+            </a>
+            <a href="directory.html" class="btn-cta-secondary" style="justify-content: center; text-decoration: none; padding: 10px 16px; font-size: 13.5px; border-radius: 8px;">
+              <i class="fa-solid fa-landmark"></i> Panchayat Directory
+            </a>
+            <a href="knowledge-centre.html" class="btn-cta-secondary" style="justify-content: center; text-decoration: none; padding: 10px 16px; font-size: 13.5px; border-radius: 8px;">
+              <i class="fa-solid fa-book-open"></i> Knowledge Centre
+            </a>
+          </div>
+        </div>
+
+        <!-- Verified Notification Channels Card -->
+        <div class="portal-card" style="margin-bottom: 20px;">
+          <div class="portal-card-header">
+            <h3 class="card-heading" style="font-size: 16px;">
+              <i class="fa-solid fa-shield-halved" style="color: #16a34a;"></i> Verified Channels
+            </h3>
+          </div>
+          <div class="portal-card-body" style="padding: 16px 18px;">
+            
+            <div class="notif-channel-item">
+              <div class="notif-channel-icon" style="background: #eff6ff; color: #0f56b3;">
+                <i class="fa-regular fa-envelope"></i>
+              </div>
+              <div>
+                <strong style="color: #0b2545; font-size: 13.5px; display: block; margin-bottom: 2px;">Email Notifications</strong>
+                <div style="font-size: 12.5px; color: #64748b; line-height: 1.4;">Automated transactional dispatches sent via Panchayat Unitpost gateway.</div>
+              </div>
+            </div>
+
+            <div class="notif-channel-item">
+              <div class="notif-channel-icon" style="background: #f0fdf4; color: #16a34a;">
+                <i class="fa-solid fa-mobile-screen"></i>
+              </div>
+              <div>
+                <strong style="color: #0b2545; font-size: 13.5px; display: block; margin-bottom: 2px;">SMS &amp; WhatsApp</strong>
+                <div style="font-size: 12.5px; color: #64748b; line-height: 1.4;">Instant SMS notifications dispatched to registered citizen phone numbers.</div>
+              </div>
+            </div>
+
+            <div class="notif-channel-item">
+              <div class="notif-channel-icon" style="background: #f5f3ff; color: #7c3aed;">
+                <i class="fa-solid fa-desktop"></i>
+              </div>
+              <div>
+                <strong style="color: #0b2545; font-size: 13.5px; display: block; margin-bottom: 2px;">Live 24/7 Redressal</strong>
+                <div style="font-size: 12.5px; color: #64748b; line-height: 1.4;">Public status tracking available online without mandatory login.</div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Office Working Hours & Help Card -->
+        <div class="portal-card">
+          <div class="portal-card-header">
+            <h3 class="card-heading" style="font-size: 16px;">
+              <i class="fa-solid fa-clock" style="color: #d97706;"></i> Office Working Hours
+            </h3>
+          </div>
+          <div class="portal-card-body" style="padding: 16px 18px; font-size: 13px; color: #475569; line-height: 1.55;">
+            <div style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px dashed #e2e8f0;">
+              <span>Monday – Friday:</span>
+              <strong style="color: #0b2545;">9:30 AM – 5:30 PM</strong>
+            </div>
+            <div style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px dashed #e2e8f0;">
+              <span>Saturday:</span>
+              <strong style="color: #0b2545;">9:30 AM – 1:30 PM</strong>
+            </div>
+            <div style="display: flex; justify-content: space-between; padding: 6px 0;">
+              <span>Sunday &amp; Public Holidays:</span>
+              <span style="color: #dc2626; font-weight: 600;">Closed</span>
+            </div>
+            <div style="margin-top: 14px; padding: 10px 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 12px;">
+              <i class="fa-solid fa-phone" style="color: var(--color-royal-blue); margin-right: 6px;"></i>
+              Grievance Helpline: <strong>0824-2220147</strong>
+            </div>
+          </div>
+        </div>
+
+      </aside>
+
+    </div>
+  </main>
+
+  <!-- Canonical Standard Footer with Defensively Sized 26px Emblem -->
+  <footer class="portal-footer">
+    <div class="footer-wave-line"></div>
+    <div class="footer-content">
+      <div class="footer-disclaimer">
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px;">
+          <img src="assets/branding/janaseva-icon.png" alt="JANASEVA Logo" class="footer-emblem-img" width="26" height="26" style="width: 26px; height: 26px; object-fit: contain;">
+          <strong>JANASEVA – Gram Panchayat Grievance Portal</strong>
+        </div>
+        This portal is an academic student project created for civic grievance demonstration. Not an official Government of India website.
+      </div>
+      <div class="footer-links-group">
+        <a href="index.html">Home</a>
+        <a href="complaint.html">Submit Complaint</a>
+        <a href="track.html">Track Status</a>
+        <a href="directory.html">Directory</a>
+        <a href="knowledge-centre.html">Knowledge Centre</a>
+        <a href="notifications.html">Notifications &amp; Updates</a>
+        <a href="about.html">About</a>
+        <a href="https://ipchat.in/" target="_blank" rel="noopener noreferrer">IP Chat – External Messaging Service</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Firebase & Core Scripts -->
+  <!-- JANASEVA MongoDB Backend & Scripts -->
+  <script src="js/firebase-config.js"></script>
+  <script src="js/mongodb-adapter.js"></script>
+  <script src="js/translations.js"></script>
+  <script src="js/universal-settings.js"></script>
+  <script src="js/status-config.js"></script>
+  <script src="js/auth.js"></script>
+<script src="js/universal-notifications.js"></script>
+  <script src="js/cms-notifications.js"></script>
+
+  <!-- Page Interactivity -->
+  <script>
+    function handleNotificationLookup(e) {
+      e.preventDefault();
+      const email = document.getElementById('notif-email-input')?.value.trim();
+      if (!email) return;
+      window.location.href = `track.html?email=${encodeURIComponent(email)}`;
+    }
+
+    function filterAnnouncements(category, btn) {
+      document.querySelectorAll('.notif-filter-btn').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+
+      const items = document.querySelectorAll('.notif-announcement-item');
+      items.forEach(item => {
+        if (category === 'all' || item.getAttribute('data-category') === category) {
+          item.style.display = 'block';
+        } else {
+          item.style.display = 'none';
+        }
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      // Mobile navigation toggle
+      const navToggle = document.getElementById('mobile-nav-toggle');
+      const mainNav = document.getElementById('main-navigation');
+      if (navToggle && mainNav) {
+        navToggle.addEventListener('click', () => {
+          mainNav.classList.toggle('nav-open');
+        });
+      }
+
+      // Check if user is logged in, auto-fill email
+      if (window.authService && window.authService.currentUser) {
+        const u = window.authService.currentUser;
+        const input = document.getElementById('notif-email-input');
+        if (input && u.email) {
+          input.value = u.email;
+        }
+      }
+    });
+  </script>
+</body>
+</html>

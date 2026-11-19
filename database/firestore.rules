@@ -1,0 +1,2508 @@
+rules_version = '2';
+
+// ===============================================================
+// Assumed Data Model & Architecture
+// ===============================================================
+//
+// Application: JANASEVA – Gram Panchayat Grievance Portal & Admin Control Centre
+//
+// 1. Collection: users
+//    Document ID: {userId} (matches Firebase Auth UID)
+//    Fields:
+//      - uid: string (required, 1-128 chars, immutable, matches document ID & auth.uid)
+//      - name: string (required, 1-100 chars, citizen or official full name)
+//      - email: string (required, 5-100 chars, valid email format, immutable by owner)
+//      - mobile: string (required, 10-20 chars, valid phone format)
+//      - role: string (required, 'citizen' | 'receiver' | 'admin', immutable by owner)
+//      - panchayatId: string (optional, 1-50 chars, assigned Gram Panchayat for receiver, immutable by owner)
+//      - panchayatName: string (optional, 0-100 chars, display name of Gram Panchayat)
+//      - preferredLang: string (optional, 'en' | 'kn' | 'hi', preferred UI language)
+//      - uiPreferences: map (optional, max 12 keys, user interface preferences)
+//      - createdAt: timestamp / string (required, immutable creation timestamp)
+//      - updatedAt: timestamp / string (optional, last profile/settings update timestamp)
+//      - updatedBy: string (optional, 0-100 chars, modifier identifier/email)
+//
+// 1b. Subcollection: users/{userId}/chatSessions
+//     Document ID: {sessionId} (1-80 chars)
+//     Access: Strictly Owner-Only (isAuthenticated() && isOwner(userId) for read, create, update, delete)
+//     Fields:
+//       - sessionId: string (required, 1-80 chars, immutable, matches document ID)
+//       - userId: string (required, 1-128 chars, immutable, matches parent userId & auth.uid)
+//       - title: string (required, 1-150 chars)
+//       - language: string (required, 'en-IN' | 'kn-IN' | 'hi-IN' | 'en' | 'kn' | 'hi')
+//       - messages: list (required, max 100 items)
+//       - conversationStatus: string (required, 'active' | 'archived' | 'completed')
+//       - messageCount: int / number (optional, 0..100)
+//       - createdAt: timestamp / string (required, immutable)
+//       - updatedAt: timestamp / string (required)
+//
+// 2. Collection: panchayats
+//    Document ID: {panchayatId} (e.g. 'gp-001')
+//    Fields:
+//      - panchayatId: string (required, 1-50 chars, immutable, matches document ID)
+//      - name: string (required, 1-100 chars, official Gram Panchayat name)
+//      - district: string (required, 1-100 chars)
+//      - block: string (required, 1-100 chars)
+//      - receiverEmail: string (required, 5-100 chars, valid official receiver email)
+//      - contactNumber: string (required, 10-20 chars, official contact phone number)
+//      - president: string (optional, 1-100 chars)
+//      - secretary: string (optional, 1-100 chars)
+//      - officeAddress: string (optional, 1-250 chars)
+//      - announcementText: string (optional, 0-1000 chars)
+//      - attachedFileName: string (optional, 0-200 chars)
+//      - attachedFileData: string (optional)
+//      - createdAt: timestamp / string (required, immutable)
+//
+// 3. Collection: officers
+//    Document ID: {officerId} (e.g. 'off-001')
+//    Fields:
+//      - name: string (required, 1-100 chars)
+//      - designation: string (required, 1-100 chars)
+//      - panchayatId: string (required, 1-50 chars)
+//      - email: string (optional, 5-100 chars, valid email)
+//      - phone: string (optional, 10-20 chars, valid phone)
+//
+// 4. Collection: complaints
+//    Document ID: {complaintId} (e.g. 'JAN-2026-0147')
+//    Fields:
+//      - complaintId: string (required, 1-50 chars, immutable, matches document ID)
+//      - userId: string (required, 1-128 chars, immutable, matches creator auth.uid)
+//      - citizenName: string (required, 1-100 chars)
+//      - citizenEmail: string (required, 5-100 chars, valid email)
+//      - panchayatId: string (required, 1-50 chars, target Panchayat ID)
+//      - panchayatName: string (optional, 1-100 chars, denormalized for fast display)
+//      - category: string (required, 1-50 chars, e.g. Road, Water, Garbage)
+//      - description: string (required, 5-2000 chars)
+//      - photoURL: string (optional, 0-1000 chars, valid URL/path or empty)
+//      - status: string (required, 'Submitted' | 'Assigned' | 'In Progress' | 'Under Review' | 'Action Taken' | 'Resolved' | 'Rejected' | 'Reopened' | uppercase variants)
+//      - createdAt: timestamp / string (required, immutable)
+//      - updatedAt: timestamp / string (required, update timestamp)
+//      - officialResponse: string (optional, 0-2000 chars, official remarks by receiver/admin)
+//      - assignedReceiverId: string (optional, 1-128 chars, assigned Panchayat receiver UID)
+//      - assignedReceiverEmail: string (optional, 5-100 chars, valid email)
+//      - assignedReceiverName: string (optional, 1-100 chars)
+//      - latestResponse: string (optional, 0-2000 chars, latest public/official response)
+//      - latestResponseAt: timestamp / string (optional, response timestamp)
+//      - latestResponseBy: string (optional, 1-100 chars, author name/email)
+//      - rejectionReason: string (optional, 0-1000 chars, reason for rejection)
+//      - reopenReason: string (optional, 0-1000 chars, citizen's rationale for reopening)
+//      - expectedResolutionDate: timestamp / string (optional, estimated target date)
+//      - internalNotes: string (optional, 0-4000 chars, official-only internal communication)
+//      - officialResponses: list (optional, max 100 items, array of response maps/objects)
+//      - statusHistory: list (optional, max 100 items, denormalized array of transitions)
+//      - subject: string (optional, 1-200 chars)
+//      - citizenPhone: string (optional, 0-30 chars)
+//      - citizenMobileNumber: string (optional, 0-30 chars)
+//      - citizenUid: string (optional, 0-128 chars)
+//      - submissionDate: string (optional, 0-50 chars)
+//      - submissionTimestamp: string (optional, 0-50 chars)
+//      - lastUpdatedDate: string (optional, 0-50 chars)
+//      - resolutionDate: string (optional, 0-50 chars)
+//      - assignedDepartment: string (optional, 0-100 chars)
+//      - assignedReceiverUid: string (optional, 0-100 chars)
+//      - supportingDocuments: list (optional, array of documents)
+//      - citizenFeedback: map (optional, citizen rating and feedback)
+//      - aiPriority: string (optional, 'LOW' | 'NORMAL' | 'HIGH' | 'URGENT' | lowercase)
+//      - aiCategory: string (optional, 0-100 chars)
+//      - aiDepartment: string (optional, 0-100 chars)
+//      - aiRationale: string (optional, 0-500 chars)
+//      - isEmergency: bool (optional)
+//      - emergencyDetails: map (optional)
+//      - documentAnalysis: map (optional)
+//      - offlineRequestId: string (optional, 0-100 chars)
+//      - syncStatus: string (optional, 0-50 chars)
+//      - synchronizedAt: string (optional, 0-50 chars)
+//      - workProgress: map (optional, remediation tracking stage & scope)
+//      - deletedByCitizen: bool (optional, soft-delete flag set by citizen owner)
+//      - deletedAt: string (optional, 0-100 chars)
+//      - deletionReason: string (optional, 0-1000 chars)
+//      - village: string (optional, 0-100 chars, target village name)
+//      - location: string (optional, 0-200 chars, landmark or street location)
+//      - clientSubmissionId: string (optional, 0-100 chars, idempotency submission token)
+//      - sourceChannel: string (optional, 0-50 chars, submission channel e.g. AI_CHAT_ASSISTANT)
+//
+// 5. Subcollection & Root Collection: messages (complaints/{id}/messages & complaintMessages)
+//    Document ID: {messageId} (auto-generated ID)
+//    Fields:
+//      - complaintId: string (required, 1-50 chars, references complaint)
+//      - messageId: string (optional, 1-100 chars)
+//      - senderId: string (required, 1-128 chars, matches auth.uid)
+//      - senderName: string (required, 1-100 chars)
+//      - senderEmail: string (optional, 5-100 chars, valid email)
+//      - senderRole: string (required, 'citizen' | 'receiver' | 'admin' | uppercase variants)
+//      - message: string (required, 1-4000 chars, message body)
+//      - visibility: string (required, 'public' | 'internal' | uppercase variants)
+//      - createdAt: timestamp / string (required, creation timestamp)
+//      - panchayatId: string (optional, 1-50 chars)
+//      - officialDesignation: string (optional, 1-100 chars)
+//      - attachments: list (optional, max 10 items)
+//
+// 6. Collection: statusHistory & complaints/{id}/statusHistory
+//    Document ID: {historyId} (auto-generated ID)
+//    Fields:
+//      - complaintId: string (required, 1-50 chars, links to complaint document)
+//      - oldStatus: string (optional, 0-50 chars, previous status)
+//      - newStatus: string (required, expanded workflow status)
+//      - updatedBy: string (required, 1-100 chars, modifier identifier/UID)
+//      - officialNote: string (optional, 0-2000 chars)
+//      - historyId: string (optional, 1-100 chars)
+//      - timestamp: timestamp / string (required, timestamp of transition)
+//
+// 7. Collection: emailLogs
+//    Document ID: {logId} (auto-generated ID)
+//    Access: Strictly Receiver read; Authenticated create with schema validation; Strictly Receiver update & delete
+//    Fields:
+//      - complaintId: string (required, 1-50 chars)
+//      - recipient: string (required, 3-100 chars, valid email or 'ERROR')
+//      - emailType: string (required, 1-50 chars)
+//      - deliveryStatus: string (required, 1-50 chars)
+//      - logId: string (optional, 1-100 chars)
+//      - errorMessage: string (optional, 0-1000 chars)
+//      - formattedTime: string (optional, 0-100 chars)
+//      - timestamp: timestamp / string (required)
+//
+// 8. Collection: adminAuditLogs
+//    Document ID: {logId} (auto-generated ID)
+//    Fields:
+//      - action: string (required, 1-100 chars, e.g. STATUS_UPDATE, ASSIGN_RECEIVER, STATUS_CONFIG_UPDATE)
+//      - adminId: string (required, 1-128 chars, matches admin UID or 'admin')
+//      - timestamp: timestamp / string (required)
+//      - adminEmail: string (optional, 1-100 chars)
+//      - statusId: string (optional, 1-100 chars)
+//      - previousConfig: map / string (optional)
+//      - newConfig: map / string (optional)
+//      - reason: string (optional, 0-1000 chars)
+//      - formattedTime: string (optional, 0-100 chars)
+//      - actorId: string (optional, 1-128 chars)
+//      - actorEmail: string (optional, 5-100 chars)
+//      - actorRole: string (optional, 1-50 chars)
+//      - actor: string (optional, 1-100 chars)
+//      - targetType: string (optional, 1-50 chars)
+//      - targetId: string (optional, 1-100 chars)
+//      - complaintId: string (optional, 1-100 chars)
+//      - details: map / string (optional, <= 5000 chars if string)
+//      - metadata: map (optional)
+//      - logId: string (optional, 1-100 chars)
+//      - panchayatId: string (optional, 1-50 chars)
+//
+// 9. Collection: notifications
+//    Document ID: {notifId} (auto-generated ID)
+//    Fields:
+//      - title: string (required, 1-200 chars)
+//      - body: string (required, 1-1000 chars)
+//      - read: bool (required, read flag)
+//      - createdAt: timestamp / string (required)
+//      - userId: string (optional, 1-128 chars, recipient UID)
+//      - email: string (optional, 5-100 chars, recipient email)
+//      - complaintId: string (optional, 1-50 chars)
+//      - type: string (optional, 1-50 chars)
+//      - readAt: timestamp / string (optional)
+//      - notifId: string (optional, 1-100 chars)
+//      - panchayatId: string (optional, 1-50 chars)
+//
+// 10. Collection: receiverSettings
+//     Document ID: {settingId} (e.g. 'settings' or 'global')
+//     Access: Strictly Receiver-Only (Admins explicitly forbidden)
+//     Fields:
+//       - receiverEmail: string (required, 5-100 chars, valid email)
+//       - previousReceiverEmail: string (optional, empty '' or 5-100 chars valid email)
+//       - emailjsPublicKey: string (optional, <= 100 chars)
+//       - emailjsServiceId: string (optional, <= 100 chars)
+//       - emailjsTemplateId: string (optional, <= 100 chars)
+//       - emailProvider: string (optional, 'emailjs' | 'smtp' | 'both' | 'simulation')
+//       - notificationPreferences: map (optional, max 20 keys)
+//       - updatedAt: timestamp / string (required)
+//       - updatedBy: string (optional, <= 100 chars)
+//       - lastSectionUpdated: string (optional, <= 60 chars)
+//
+// 11. Collection: receiverSettingsAudit
+//     Document ID: {auditId} (auto-generated ID)
+//     Access: Strictly Receiver-Only (Append-only immutable audit trail)
+//     Fields:
+//       - changedBy: string (required)
+//       - timestamp: timestamp / string (required)
+//
+// 12. Collection: backups
+//     Document ID: {backupId} (e.g. 'SNAP-2026-001')
+//     Access: Strictly Administrator-Only (Full disaster recovery & snapshot storage)
+//     Fields:
+//       - snapshotId: string (required)
+//       - timestamp: timestamp / string (required)
+//       - recordCount: number (optional)
+//       - totalSize: string (optional)
+//       - triggeredBy: string (optional)
+//       - status: string (optional)
+//
+// 13. Collection: offlineSyncRecords
+//     Document ID: {recordId}
+//     Access: Authenticated creator/owner or Administrator
+//     Fields:
+//       - userId: string
+//       - offlineRequestId: string (optional)
+//       - payload: map (optional)
+//
+// 14. Collection: panchayatAnalytics
+//     Document ID: {docId}
+//     Access: Authenticated read, Administrator write
+//     Fields:
+//       - aggregated metrics, recurring problem patterns, hotspot detection data
+//
+// 15. Collection: complaintStatusConfig
+//     Document ID: {configId} (e.g. 'current')
+//     Access: Read by all authenticated users; Create & Update strictly Administrator only; Delete forbidden
+//     Fields:
+//       - statuses: list / map (required, active grievance statuses, colors, icons, and order)
+//       - updatedAt: timestamp / string (required)
+//       - updatedBy: string (required, 1-100 chars, modifier email or UID)
+//       - configId: string (optional, 1-50 chars)
+//       - version: string (optional, 1-50 chars)
+//       - createdAt: timestamp / string (optional)
+//       - description: string (optional, 0-1000 chars)
+//
+// 16. Collection: complaintTransitionRules
+//     Document ID: {ruleId}
+//     Access: Read by all authenticated users; Create & Update strictly Administrator only; Delete forbidden
+//     Fields:
+//       - allowedRoles: list (optional, max 10 items)
+//       - mandatoryRemarks: bool (optional)
+//       - mandatoryEvidence: bool (optional)
+//       - requiresReceiver: bool (optional)
+//       - requiresPanchayat: bool (optional)
+//       - notificationTrigger: bool (optional)
+//       - ruleId: string (optional, 1-100 chars)
+//       - fromStatus: string (optional, 1-50 chars)
+//       - toStatus: string (optional, 1-50 chars)
+//       - updatedBy: string (optional, 1-100 chars)
+//       - updatedAt: timestamp / string (optional)
+//       - rules: map / list (optional)
+//
+// 17. Collection: citizens
+//     Document ID: {citizenId}
+//     Access: Owner, Receiver, or Administrator read; Owner or Administrator create/update; Administrator delete
+//
+// 18. Collection: emergencyResetAuditLogs
+//     Document ID: {logId}
+//     Access: Strictly Administrator-Only (Append-only immutable audit trail)
+//     Fields:
+//       - operationId: string (required, 1-100 chars, e.g. 'RESET-20261110-XXXX')
+//       - adminId: string (required, 1-128 chars, matches auth.uid)
+//       - adminEmail: string (required, valid email, matches auth.token.email)
+//       - resetType: string (required, 'operational' | 'complete')
+//       - backupId: string (required, 1-100 chars)
+//       - recordsDeleted: int / number (required, >= 0)
+//       - filesDeleted: int / number (required, >= 0)
+//       - status: string (required, 'SUCCESS' | 'PARTIAL_FAILURE' | 'FAILED')
+//       - startedAt: timestamp / string (required)
+//       - completedAt: timestamp / string (required)
+//       - verificationReport: map / string (optional)
+//
+// 19. Collection: emergencyResetBackups
+//     Document ID: {backupId}
+//     Access: Strictly Administrator-Only (Disaster recovery pre-reset snapshots)
+//     Fields:
+//       - backupId: string (required, 1-100 chars)
+//       - adminId: string (required, 1-128 chars, matches auth.uid)
+//       - adminEmail: string (required, valid email)
+//       - scope: list / map / string (required)
+//       - snapshotData: map / string (required)
+//       - checksum: string (required, 1-128 chars)
+//       - totalRecords: int / number (required, >= 0)
+//       - createdAt: timestamp / string (required)
+//       - verified: bool (required)
+//
+// 20. Collection: systemSettings
+//     Document ID: {settingId} (e.g. 'maintenance', 'resetLock', 'adminBanner', 'banner', 'assistantConfig')
+//     Access:
+//       - 'adminBanner' / 'banner' / 'maintenance': Public get allowed (for portal banner & maintenance banner); authenticated read/list; create, update, delete strictly restricted to authenticated Administrators (isAdmin())
+//       - 'assistantConfig': Authenticated read (including isAdmin()); create, update strictly Administrator only (or Cloud Functions Admin SDK), strictly forbidding secret/credential keys; delete forbidden
+//       - Other system settings (e.g. 'resetLock'): Authenticated read; create, update strictly Administrator only; delete forbidden
+//     Fields:
+//       - System settings, maintenance mode flags, emergency locks, portal banner configuration, non-secret assistant runtime config
+//
+// 21. Collection: adminBanners
+//     Document ID: {bannerId} (e.g. 'banner_1731234567890')
+//     Access: Read allowed for all authenticated users (and public get so visitors can see the portal banner); create, update, delete strictly restricted to authenticated Administrators (isAdmin())
+//     Fields:
+//       - bannerId: string (required, 1-100 chars, matches document ID, immutable on update)
+//       - filename: string (required, 1-255 chars)
+//       - fileSize: number / int (required, 0 <= fileSize <= 10485760 bytes, max 10MB)
+//       - mimeType: string (required, 'image/jpeg' | 'image/png' | 'image/webp')
+//       - imageUrl: string (required, 1-2000 chars, valid URL or blob/storage path)
+//       - uploadedBy: string (required, 1-128 chars, admin identifier)
+//       - uploadedAt: string or timestamp (required, immutable on update)
+//       - updatedAt: string or timestamp (required)
+//       - active: bool (required)
+//       - originalFilename: string (optional, 0-255 chars)
+//       - formattedSize: string (optional, 0-50 chars)
+//       - storagePath: string (optional, 0-500 chars)
+//       - uploadedByEmail: string (optional, 0-100 chars)
+//       - uploadedByName: string (optional, 0-100 chars)
+//       - width: number / int (optional)
+//       - height: number / int (optional)
+//       - aspectRatio: string (optional, 0-20 chars)
+//
+// 22. Collection: complaint_updates (and subcollection complaints/{complaintId}/updates)
+//     Document ID: {updateId} (e.g. 'upd-1731234567890-1234')
+//     Access:
+//       - Read: Admin can read all updates. Receivers can read updates for grievances in their assigned Panchayat or assigned to them. Citizens can read updates corresponding to their own complaints (where complaint's citizenEmail matches citizen or authorUid matches).
+//       - Create: Admin and authenticated Receivers can write updates. Citizens can record initial submission updates or withdrawal requests.
+//       - Update: Immutable / restricted to Admin with immutable core checks.
+//       - Delete: Restricted to Admin.
+//     Fields:
+//       - updateId: string (required, 1-100 chars, matches document ID, immutable on update)
+//       - complaintId: string (required, 1-50 chars, links to parent complaint, immutable on update)
+//       - citizenName: string (optional, 1-100 chars)
+//       - citizenEmail: string (optional, 5-100 chars, valid email)
+//       - category: string (optional, 1-50 chars)
+//       - panchayatId: string (optional, 1-50 chars)
+//       - panchayatName: string (optional, 1-100 chars)
+//       - oldStatus: string (optional, 0-50 chars, previous status)
+//       - newStatus: string (required, 1-50 chars, updated status)
+//       - updateType: string (required, 1-50 chars, e.g. STATUS_CHANGE, INITIAL_SUBMISSION, MOVED_TO_RECYCLE_BIN, COMPLAINT_RESTORED)
+//       - remarks: string (optional, 0-4000 chars)
+//       - resolutionDetails: string (optional, 0-4000 chars)
+//       - authorName: string (required, 1-100 chars)
+//       - authorEmail: string (optional, 5-100 chars, valid email)
+//       - authorRole: string (required, 1-50 chars, 'admin' | 'receiver' | 'citizen' | uppercase variants)
+//       - authorUid: string (optional, 0-128 chars, immutable on update)
+//       - timestamp: timestamp / string (required, immutable on update)
+//       - formattedDate: string (optional, 0-100 chars)
+//
+// 23. Collection: recycle_bin
+//     Document ID: {recycleId} (e.g. 'bin-1731234567890-1234')
+//     Access: Strictly Administrator-Only (isAdmin()). Citizens and Receivers have NO read or write access.
+//     Fields:
+//       - recycleId: string (required, 1-100 chars, matches document ID, immutable on update)
+//       - complaintId: string (required, 1-50 chars, immutable on update)
+//       - complaintData: map (required, quarantined complaint payload)
+//       - deletedBy: string (required, 3-100 chars, admin identifier/email)
+//       - deletedByName: string (optional, 1-100 chars)
+//       - deletedByRole: string (required, 'admin' | 'ADMIN')
+//       - deletedAt: timestamp / string (required, immutable on update)
+//       - formattedDeletedAt: string (optional, 0-100 chars)
+//       - reason: string (optional, 0-1000 chars)
+//       - status: string (required, 'IN_BIN' | 'RESTORED' | 'PURGED')
+//
+// 24. Collection: activity_logs
+//     Document ID: {logId} (e.g. 'act-1731234567890-1234')
+//     Access:
+//       - Read: Strictly Administrator-Only (isAdmin())
+//       - Create: Authenticated users (admin or receiver) logging authorized operations
+//       - Update: Strictly forbidden (immutable audit records)
+//       - Delete: Strictly Administrator-Only (emergency reset / pruning)
+//     Fields:
+//       - logId: string (required, 1-100 chars, matches document ID)
+//       - action: string (required, 1-100 chars, e.g. STATUS_UPDATED, MOVED_TO_RECYCLE_BIN, COMPLAINT_RESTORED, PERMANENTLY_DELETED, REPORTS_EXPORTED)
+//       - recordId: string (required, 1-100 chars)
+//       - details: string (optional, 0-5000 chars)
+//       - actorEmail: string (optional, 5-100 chars, valid email)
+//       - actorName: string (optional, 1-100 chars)
+//       - actorRole: string (optional, 1-50 chars, 'admin' | 'receiver' | 'citizen')
+//       - actorUid: string (optional, 0-128 chars)
+//       - timestamp: timestamp / string (required)
+//       - formattedDate: string (optional, 0-100 chars)
+//
+// 25. Collection: complaint_attachments
+//     Document ID: {attachmentId} (e.g. 'att-1731234567890')
+//     Access:
+//       - Read: Admin, assigned Panchayat Receiver, or the Citizen owner
+//       - Create: Authenticated Citizen or Official attaching evidence
+//       - Update: Admin only
+//       - Delete: Admin only
+//     Fields:
+//       - attachmentId: string (required, 1-100 chars, matches document ID, immutable on update)
+//       - complaintId: string (required, 1-50 chars, immutable on update)
+//       - photoURL: bool / string (optional, boolean flag or storage URL up to 2000 chars)
+//       - hasPhoto: bool (optional)
+//       - hasDocument: bool (optional)
+//       - createdAt: timestamp / string (required, immutable on update)
+//       - fileName: string (optional, 0-255 chars)
+//       - fileUrl: string (optional, 0-2000 chars)
+//       - fileSize: number / int (optional, >= 0)
+//       - fileType: string (optional, 0-100 chars)
+//       - uploadedBy: string (optional, 0-100 chars)
+//       - uploaderUid: string (optional, 0-128 chars)
+//       - uploaderEmail: string (optional, 0-100 chars, valid email)
+//       - panchayatId: string (optional, 0-50 chars)
+//
+// 26. Collection: complaint_assignments
+//     Document ID: {assignmentId} (e.g. 'asg-1731234567890')
+//     Access:
+//       - Read: Admin and designated Receiver
+//       - Write (Create, Update, Delete): Admin only
+//     Fields:
+//       - assignmentId: string (required, 1-100 chars, matches document ID, immutable on update)
+//       - complaintId: string (required, 1-50 chars, immutable on update)
+//       - panchayatId: string (required, 1-50 chars)
+//       - receiverId: string (optional, 1-128 chars)
+//       - receiverEmail: string (optional, 5-100 chars, valid email)
+//       - receiverName: string (optional, 1-100 chars)
+//       - assignedAt: timestamp / string (required, immutable on update)
+//       - assignedBy: string (optional, 1-100 chars)
+//       - assignedByEmail: string (optional, 5-100 chars, valid email)
+//       - status: string (optional, 1-50 chars)
+//       - notes: string (optional, 0-2000 chars)
+//
+// 27. Collection: assistantFeedback
+//     Document ID: {feedbackId} (1-80 chars)
+//     Access:
+//       - Read: Creator citizen (userId == auth.uid) or Administrator
+//       - Create: Authenticated user under own UID with status 'open'
+//       - Update / Delete: Strictly Administrator only
+//     Fields:
+//       - feedbackId: string (required, 1-80 chars, immutable, matches document ID)
+//       - userId: string (required, 1-128 chars, immutable, matches auth.uid on create)
+//       - userRole: string (optional, 0-30 chars)
+//       - sessionId: string (optional, 0-80 chars)
+//       - messageId: string (optional, 0-80 chars)
+//       - rating: string (required, immutable, 'helpful' | 'not_helpful' | 'incorrect')
+//       - reason: string (optional, 0-1000 chars)
+//       - messageSnippet: string (optional, 0-500 chars)
+//       - language: string (optional, 'en-IN' | 'kn-IN' | 'hi-IN' | 'en' | 'kn' | 'hi')
+//       - status: string (required, 'open' on create; 'open' | 'reviewed' | 'resolved' | 'dismissed' on update)
+//       - createdAt: timestamp / string (required, immutable)
+//       - adminNote: string (optional, 0-1000 chars, admin review only)
+//       - reviewedBy: string (optional, 0-128 chars, admin review only)
+//       - reviewedAt: timestamp / string (optional, admin review only)
+//
+// 28. Collection: assistantAnalytics
+//     Document ID: {docId} (e.g. 'summary')
+//     Access: Administrator read only; all client writes forbidden (Admin SDK only)
+//
+// 29. Collection: assistantRateLimits
+//     Document ID: {limitId}
+//     Access: Strictly server-only Admin SDK access (client read and write forbidden)
+//
+// 30. Collection: submissionNonces
+//     Document ID: {nonceId}
+//     Access: Strictly server-only Admin SDK access (client read and write forbidden)
+//
+// 31. Collection: knowledge_documents
+//     Document ID: {docId} (e.g. 'KDOC-2026-A1B2C3')
+//     Access:
+//       - Read: Public / any user ONLY when status == 'INDEXED' && enabled == true && quarantined == false && deleted == false; Administrator (isAdmin()) can read all documents (disabled, failed, quarantined, superseded, deleted)
+//       - Create, Update, Delete: Strictly forbidden from clients (server-only via Admin SDK Cloud Functions)
+//     Fields:
+//       - docId: string (required, immutable)
+//       - title, originalFilename, safeFilename, format, mimeType, fileHash: string
+//       - sizeBytes, wordCount, charCount, chunkCount, tableCount, version: number / int
+//       - primaryLanguage, category, sourceReliability, sourceChannel: string
+//       - detectedLanguages, keywords, piiTypes: list
+//       - contributorId, contributorDisplayName, summary, previousDocId, supersededByDocId: string (no contributorEmail PII)
+//       - ocrUsed, piiDetected, promptInjectionFlag, isMultilingual, enabled, quarantined, deleted: bool
+//       - status: string ('INDEXED' | 'QUARANTINED' | 'FAILED' | 'SUPERSEDED')
+//       - privateStorageRef, privateTextRef, failureStage, failureReason, failureCode, quarantineReason, quarantineCode: string
+//       - uploadedAt, updatedAt: timestamp / string
+//
+// 32. Collection: knowledge_chunks
+//     Document ID: {chunkId} (e.g. '{docId}_C0')
+//     Access:
+//       - Read: Public / any user ONLY when active == true; Administrator (isAdmin()) can read all chunks
+//       - Create, Update, Delete: Strictly forbidden from clients (server-only via Admin SDK)
+//     Fields:
+//       - chunkId, docId, sectionTitle, language, text: string
+//       - chunkIndex, charCount, tokenCount: int / number
+//       - hasTable, active: bool
+//       - createdAt: timestamp / string
+//
+// 33. Collection: knowledge_embeddings
+//     Document ID: {embeddingId} (e.g. 'EMB_{chunkId}')
+//     Access:
+//       - Read: Public / any user ONLY when active == true; Administrator (isAdmin()) can read all embeddings
+//       - Create, Update, Delete: Strictly forbidden from clients (server-only via Admin SDK)
+//     Fields:
+//       - embeddingId, docId, chunkId, model: string
+//       - dimensions: int / number
+//       - vector, externalVector: list
+//       - active: bool
+//       - createdAt: timestamp / string
+//
+// 34. Collection: knowledge_uploaders
+//     Document ID: {uploaderId}
+//     Access: Strictly Administrator-Only read (isAdmin()); all client writes forbidden (protects private uploader emails/metadata)
+//     Fields:
+//       - uploaderId, displayName, email, role: string
+//       - uploadCount, indexedCount: int / number
+//       - lastUploadAt: timestamp / string
+//
+// 35. Collection: knowledge_processing_jobs
+//     Document ID: {jobId} (1-100 chars)
+//     Access:
+//       - Read: Strictly Administrator-Only (isAdmin())
+//       - Create: Queued async staging allowed ONLY with status == 'QUEUED', sourceReliability == 'community', valid tempStoragePath under AI_KNOWLEDGE_CENTRE/temporary_uploads/, bounded filename <= 200 chars, and schema validation
+//       - Update, Delete: Strictly forbidden from clients (processed via Cloud Function triggers / Admin SDK)
+//     Fields:
+//       - jobId: string (required, 1-100 chars, matches document ID)
+//       - filename: string (required, 1-200 chars)
+//       - tempStoragePath: string (required, 39-400 chars, scoped to AI_KNOWLEDGE_CENTRE/temporary_uploads/)
+//       - status: string (required, 'QUEUED' on client create)
+//       - startedAt: timestamp / string (required)
+//       - sourceReliability: string (required, 'community' on client create)
+//       - mimeType, fileHash, contributorId, contributorName, contributorRole, categoryHint, replaceDocId, sourceChannel: string (optional)
+//       - sizeBytes: int / number (optional, 0..52428800)
+//       - updatedAt: timestamp / string (optional)
+//
+// 36. Collection: knowledge_api_receivers
+//     Document ID: {receiverId} (e.g. 'default')
+//     Access: Strictly Administrator-Only read (isAdmin()); all client writes forbidden (managed via updateKnowledgeApiSettings callable)
+//
+// 37. Collection: knowledge_api_secrets
+//     Document ID: {secretId} (e.g. 'default')
+//     Access: Strictly server-only Admin SDK access (client read and write forbidden)
+//
+// 38. Collection: knowledge_api_logs
+//     Document ID: {logId}
+//     Access: Strictly Administrator-Only read (isAdmin()); all client writes forbidden (server-only via Admin SDK)
+//
+// 39. Collection: knowledge_audit_logs
+//     Document ID: {auditId}
+//     Access: Strictly Administrator-Only read (isAdmin()); all client writes forbidden (immutable append-only via Admin SDK)
+//
+// 40. Collection: knowledge_storage_usage
+//     Document ID: {docId} (e.g. 'summary')
+//     Access: Strictly Administrator-Only read (isAdmin()); all client writes forbidden (server-only via Admin SDK)
+//
+// 41. Collection: knowledge_backups
+//     Document ID: {backupId}
+//     Access: Strictly Administrator-Only read (isAdmin()); all client writes forbidden (server-only via Admin SDK)
+//
+// 42. Collection: knowledge_idempotency
+//     Document ID: {key}
+//     Access: Strictly server-only Admin SDK access (client read and write forbidden)
+//
+// 43. Collection: knowledge_rate_limits
+//     Document ID: {bucketId}
+//     Access: Strictly server-only Admin SDK access (client read and write forbidden)
+//
+// ===============================================================
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // =============================================================
+    // Helper Functions: Authentication & Role-Based Access Control
+    // =============================================================
+
+    // Check if request is from an authenticated user
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Check if user is owner of document based on userId path parameter
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // Check if user profile document exists in Firestore
+    function hasUserDoc() {
+      return isAuthenticated() && exists(/databases/$(database)/documents/users/$(request.auth.uid));
+    }
+
+    // Retrieve caller's user document
+    function getUserDoc() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    // Check custom claims in Firebase Auth Token for admin role
+    function isCustomAdmin() {
+      return isAuthenticated() &&
+        (('admin' in request.auth.token && request.auth.token.admin == true) ||
+         ('role' in request.auth.token && request.auth.token.role == 'admin'));
+    }
+
+    // Check Firestore user document for admin role
+    function isDocAdmin() {
+      return hasUserDoc() && ('role' in getUserDoc()) && getUserDoc().role == 'admin';
+    }
+
+    // Deprecated: Verified administrator bootstrap email check (deprecated for production in favor of custom claims & user documents)
+    function isBootstrapAdmin() {
+      return isAuthenticated() &&
+        ('email' in request.auth.token) &&
+        request.auth.token.email_verified == true &&
+        (request.auth.token.email in ['admin@janaseva.gov.in', 'admin@janaseva.in']);
+    }
+
+    // Unified Administrator Check (Server-controlled custom claims or verified Firestore user documents)
+    function isAdmin() {
+      return isCustomAdmin() || isDocAdmin();
+    }
+
+    // Check custom claims in Firebase Auth Token for receiver role
+    function isCustomReceiver() {
+      return isAuthenticated() &&
+        ('role' in request.auth.token && request.auth.token.role == 'receiver');
+    }
+
+    // Check Firestore user document for receiver role
+    function isDocReceiver() {
+      return hasUserDoc() && ('role' in getUserDoc()) && getUserDoc().role == 'receiver';
+    }
+
+    // Deprecated: Verified receiver bootstrap email check (deprecated for production in favor of custom claims & user documents)
+    function isBootstrapReceiver() {
+      return isAuthenticated() &&
+        ('email' in request.auth.token) &&
+        (request.auth.token.email in ['receiver@janaseva.in', 'receiver@janaseva.gov.in']);
+    }
+
+    // Unified Receiver Check (Server-controlled custom claims or verified Firestore user documents)
+    function isReceiver() {
+      return isCustomReceiver() || isDocReceiver();
+    }
+
+    // Retrieve assigned Panchayat ID for the authenticated receiver
+    function getReceiverPanchayatId() {
+      return !isAuthenticated() ? '' :
+        (('panchayatId' in request.auth.token && request.auth.token.panchayatId != null) ?
+          request.auth.token.panchayatId :
+          (hasUserDoc() && ('panchayatId' in getUserDoc()) && getUserDoc().panchayatId != null ? getUserDoc().panchayatId : ''));
+    }
+
+    // Check if the caller is the assigned Panchayat Receiver or an Administrator
+    function isReceiverForPanchayat(panchayatId) {
+      return isAdmin() || (isReceiver() && getReceiverPanchayatId() == panchayatId && panchayatId != '');
+    }
+
+    // =============================================================
+    // Helper Functions: Cross-Document Complaint Context Lookup
+    // =============================================================
+
+    function getComplaint(complaintId) {
+      return get(/databases/$(database)/documents/complaints/$(complaintId)).data;
+    }
+
+    function getComplaintAfter(complaintId) {
+      return getAfter(/databases/$(database)/documents/complaints/$(complaintId)).data;
+    }
+
+    function isComplaintOwnerExisting(complaintId) {
+      return exists(/databases/$(database)/documents/complaints/$(complaintId)) &&
+             getComplaint(complaintId).userId == request.auth.uid;
+    }
+
+    function isComplaintOwnerAfter(complaintId) {
+      return getAfter(/databases/$(database)/documents/complaints/$(complaintId)) != null &&
+             getComplaintAfter(complaintId).userId == request.auth.uid;
+    }
+
+    function isComplaintReceiverExisting(complaintId) {
+      return exists(/databases/$(database)/documents/complaints/$(complaintId)) &&
+             isReceiverForPanchayat(getComplaint(complaintId).panchayatId);
+    }
+
+    function isComplaintReceiverAfter(complaintId) {
+      return getAfter(/databases/$(database)/documents/complaints/$(complaintId)) != null &&
+             isReceiverForPanchayat(getComplaintAfter(complaintId).panchayatId);
+    }
+
+    // Check if authenticated caller is the intended recipient of a notification
+    function isNotificationRecipient() {
+      return isAuthenticated() && (
+        (('userId' in resource.data) && resource.data.userId == request.auth.uid) ||
+        (('email' in resource.data) && ('email' in request.auth.token) && resource.data.email == request.auth.token.email)
+      );
+    }
+
+    // =============================================================
+    // Helper Functions: Data Validation & Immutability Directives
+    // =============================================================
+
+    // Verify specified immutable fields have not been altered during update
+    function areImmutableFieldsUnchanged(fields) {
+      return !request.resource.data.diff(resource.data).affectedKeys().hasAny(fields);
+    }
+
+    // Validate email format and bounded length
+    function isValidEmail(email) {
+      return email is string &&
+        email.size() >= 5 &&
+        email.size() <= 100 &&
+        email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
+    }
+
+    // Validate phone number format (supports 10-digit Indian mobiles, +91 prefixes, landlines)
+    function isValidPhone(phone) {
+      return phone is string &&
+        phone.size() >= 10 &&
+        phone.size() <= 20 &&
+        phone.matches("^[+]?[0-9\\s-]{10,18}$");
+    }
+
+    // Validate timestamp or formatted date string within recent boundaries
+    function isValidTime(time) {
+      return (time is timestamp &&
+              time > request.time - duration.value(5, 'm') &&
+              time <= request.time + duration.value(2, 'm')) ||
+             (time is string && time.size() >= 5 && time.size() <= 50);
+    }
+
+    // Validate optional string field with bounds check
+    function isValidOptionalString(data, field, minLen, maxLen) {
+      return !(field in data) ||
+             data[field] == null ||
+             data[field] == '' ||
+             (data[field] is string &&
+              data[field].size() >= minLen &&
+              data[field].size() <= maxLen);
+    }
+
+    // Validate optional email field
+    function isValidOptionalEmail(data, field) {
+      return !(field in data) ||
+             data[field] == null ||
+             data[field] == '' ||
+             (data[field] is string && isValidEmail(data[field]));
+    }
+
+    // Validate optional timestamp or date string
+    function isValidOptionalTime(data, field) {
+      return !(field in data) ||
+             data[field] == null ||
+             data[field] == '' ||
+             isValidTime(data[field]);
+    }
+
+    // Validate optional image URL or local storage path with bounded size
+    function isValidOptionalUrl(data, field) {
+      return !(field in data) ||
+             data[field] == null ||
+             data[field] == '' ||
+             (data[field] is string &&
+              data[field].size() <= 1000 &&
+              (data[field].matches("^https?://.*") ||
+               data[field].matches("^gs://.*") ||
+               data[field].matches("^assets/.*") ||
+               data[field].matches("^data:image/.*")));
+    }
+
+    // Validate optional map field
+    function isValidOptionalMap(data, field) {
+      return !(field in data) ||
+             data[field] == null ||
+             data[field] is map;
+    }
+
+    // =============================================================
+    // Domain Validators (Applied to both create and update operations)
+    // =============================================================
+
+    // Domain Validator: Users Collection
+    function isValidUser(data) {
+      return data.keys().hasAll(['uid', 'name', 'email', 'mobile', 'role', 'createdAt']) &&
+        data.keys().hasOnly([
+          'uid', 'name', 'email', 'mobile', 'role', 'panchayatId', 'panchayatName',
+          'preferredLang', 'uiPreferences', 'createdAt', 'updatedAt', 'updatedBy'
+        ]) &&
+        data.uid is string && data.uid.size() >= 1 && data.uid.size() <= 128 &&
+        data.name is string && data.name.size() >= 1 && data.name.size() <= 100 &&
+        data.email is string && isValidEmail(data.email) &&
+        data.mobile is string && isValidPhone(data.mobile) &&
+        data.role is string && (data.role in ['citizen', 'receiver', 'admin']) &&
+        isValidOptionalString(data, 'panchayatId', 1, 50) &&
+        isValidOptionalString(data, 'panchayatName', 0, 100) &&
+        (!('preferredLang' in data) || data.preferredLang == null || (data.preferredLang is string && data.preferredLang in ['en', 'kn', 'hi'])) &&
+        (!('uiPreferences' in data) || data.uiPreferences == null || (data.uiPreferences is map && data.uiPreferences.size() <= 12)) &&
+        (data.createdAt is timestamp || (data.createdAt is string && data.createdAt.size() >= 5 && data.createdAt.size() <= 50)) &&
+        isValidOptionalTime(data, 'updatedAt') &&
+        isValidOptionalString(data, 'updatedBy', 0, 100);
+    }
+
+    // Domain Validator: Panchayats Collection
+    function isValidPanchayat(data) {
+      return data.keys().hasAll(['panchayatId', 'name', 'district', 'block', 'receiverEmail', 'contactNumber', 'createdAt']) &&
+        data.keys().hasOnly(['panchayatId', 'name', 'district', 'block', 'receiverEmail', 'contactNumber', 'createdAt', 'president', 'secretary', 'officeAddress', 'announcementText', 'attachedFileName', 'attachedFileData']) &&
+        data.panchayatId is string && data.panchayatId.size() >= 1 && data.panchayatId.size() <= 50 &&
+        data.name is string && data.name.size() >= 1 && data.name.size() <= 100 &&
+        data.district is string && data.district.size() >= 1 && data.district.size() <= 100 &&
+        data.block is string && data.block.size() >= 1 && data.block.size() <= 100 &&
+        data.receiverEmail is string && isValidEmail(data.receiverEmail) &&
+        data.contactNumber is string && isValidPhone(data.contactNumber) &&
+        isValidOptionalString(data, 'president', 1, 100) &&
+        isValidOptionalString(data, 'secretary', 1, 100) &&
+        isValidOptionalString(data, 'officeAddress', 1, 250) &&
+        isValidOptionalString(data, 'announcementText', 0, 1000) &&
+        isValidOptionalString(data, 'attachedFileName', 0, 200) &&
+        isValidTime(data.createdAt);
+    }
+
+    // Domain Validator: Complaints Collection
+    // Supports the full official grievance workflow, assignees, reasons, response notes & history
+    function isValidComplaint(data) {
+      return data.keys().hasAll([
+        'complaintId', 'userId', 'citizenName', 'citizenEmail', 'panchayatId',
+        'category', 'description', 'status', 'createdAt', 'updatedAt'
+      ]) &&
+      data.keys().hasOnly([
+        'complaintId', 'userId', 'citizenName', 'citizenEmail', 'panchayatId', 'panchayatName',
+        'category', 'description', 'photoURL', 'status', 'createdAt', 'updatedAt', 'officialResponse',
+        'assignedReceiverId', 'assignedReceiverEmail', 'assignedReceiverName',
+        'latestResponse', 'latestResponseAt', 'latestResponseBy',
+        'rejectionReason', 'reopenReason', 'expectedResolutionDate',
+        'internalNotes', 'officialResponses', 'statusHistory',
+        'subject', 'citizenPhone', 'citizenMobileNumber', 'citizenUid', 'submissionDate',
+        'submissionTimestamp', 'lastUpdatedDate', 'resolutionDate', 'assignedDepartment',
+        'assignedReceiverUid', 'supportingDocuments', 'citizenFeedback',
+        'aiPriority', 'aiCategory', 'aiDepartment', 'aiRationale', 'isEmergency', 'emergencyDetails',
+        'documentAnalysis', 'offlineRequestId', 'syncStatus', 'synchronizedAt',
+        'workProgress', 'deletedByCitizen', 'deletedAt', 'deletionReason',
+        'village', 'location', 'clientSubmissionId', 'sourceChannel'
+      ]) &&
+      data.complaintId is string && data.complaintId.size() >= 1 && data.complaintId.size() <= 50 &&
+      data.userId is string && data.userId.size() >= 1 && data.userId.size() <= 128 &&
+      data.citizenName is string && data.citizenName.size() >= 1 && data.citizenName.size() <= 100 &&
+      data.citizenEmail is string && isValidEmail(data.citizenEmail) &&
+      data.panchayatId is string && data.panchayatId.size() >= 1 && data.panchayatId.size() <= 50 &&
+      isValidOptionalString(data, 'panchayatName', 1, 100) &&
+      data.category is string && data.category.size() >= 1 && data.category.size() <= 50 &&
+      data.description is string && data.description.size() >= 5 && data.description.size() <= 2000 &&
+      isValidOptionalUrl(data, 'photoURL') &&
+      data.status is string && (data.status in [
+        'Submitted', 'Assigned', 'In Progress', 'Under Review', 'Action Taken', 'Resolved', 'Rejected', 'Reopened',
+        'SUBMITTED', 'ASSIGNED', 'IN PROGRESS', 'UNDER REVIEW', 'ACTION TAKEN', 'RESOLVED', 'REJECTED', 'REOPENED'
+      ]) &&
+      isValidTime(data.createdAt) &&
+      isValidTime(data.updatedAt) &&
+      isValidOptionalString(data, 'officialResponse', 0, 2000) &&
+      isValidOptionalString(data, 'assignedReceiverId', 1, 128) &&
+      isValidOptionalEmail(data, 'assignedReceiverEmail') &&
+      isValidOptionalString(data, 'assignedReceiverName', 1, 100) &&
+      isValidOptionalString(data, 'latestResponse', 0, 2000) &&
+      isValidOptionalTime(data, 'latestResponseAt') &&
+      isValidOptionalString(data, 'latestResponseBy', 1, 100) &&
+      isValidOptionalString(data, 'rejectionReason', 0, 1000) &&
+      isValidOptionalString(data, 'reopenReason', 0, 1000) &&
+      isValidOptionalTime(data, 'expectedResolutionDate') &&
+      isValidOptionalString(data, 'internalNotes', 0, 4000) &&
+      (!('officialResponses' in data) || data.officialResponses == null || (data.officialResponses is list && data.officialResponses.size() <= 100)) &&
+      (!('statusHistory' in data) || data.statusHistory == null || (data.statusHistory is list && data.statusHistory.size() <= 100)) &&
+      isValidOptionalString(data, 'subject', 1, 200) &&
+      isValidOptionalString(data, 'citizenPhone', 0, 30) &&
+      isValidOptionalString(data, 'citizenMobileNumber', 0, 30) &&
+      isValidOptionalString(data, 'citizenUid', 0, 128) &&
+      isValidOptionalString(data, 'submissionDate', 0, 50) &&
+      isValidOptionalString(data, 'submissionTimestamp', 0, 50) &&
+      isValidOptionalString(data, 'lastUpdatedDate', 0, 50) &&
+      isValidOptionalString(data, 'resolutionDate', 0, 50) &&
+      isValidOptionalString(data, 'assignedDepartment', 0, 100) &&
+      isValidOptionalString(data, 'assignedReceiverUid', 0, 100) &&
+      (!('supportingDocuments' in data) || data.supportingDocuments is list) &&
+      (!('citizenFeedback' in data) || data.citizenFeedback == null || data.citizenFeedback is map) &&
+      (!('aiPriority' in data) || data.aiPriority in ['LOW', 'NORMAL', 'HIGH', 'URGENT', 'low', 'normal', 'high', 'urgent']) &&
+      isValidOptionalString(data, 'aiCategory', 0, 100) &&
+      isValidOptionalString(data, 'aiDepartment', 0, 100) &&
+      isValidOptionalString(data, 'aiRationale', 0, 500) &&
+      (!('isEmergency' in data) || data.isEmergency is bool) &&
+      (!('emergencyDetails' in data) || data.emergencyDetails == null || data.emergencyDetails is map) &&
+      (!('documentAnalysis' in data) || data.documentAnalysis == null || data.documentAnalysis is map) &&
+      isValidOptionalString(data, 'offlineRequestId', 0, 100) &&
+      isValidOptionalString(data, 'syncStatus', 0, 50) &&
+      isValidOptionalString(data, 'synchronizedAt', 0, 50) &&
+      isValidOptionalMap(data, 'workProgress') &&
+      (!('deletedByCitizen' in data) || data.deletedByCitizen is bool) &&
+      isValidOptionalString(data, 'deletedAt', 0, 100) &&
+      isValidOptionalString(data, 'deletionReason', 0, 1000) &&
+      isValidOptionalString(data, 'village', 0, 100) &&
+      isValidOptionalString(data, 'location', 0, 200) &&
+      isValidOptionalString(data, 'clientSubmissionId', 0, 100) &&
+      isValidOptionalString(data, 'sourceChannel', 0, 50);
+    }
+
+    // Domain Validator: Citizen AI Chat Sessions Subcollection (users/{userId}/chatSessions/{sessionId})
+    function isValidChatSession(data) {
+      return data.keys().hasAll([
+        'sessionId', 'userId', 'title', 'language',
+        'messages', 'conversationStatus', 'createdAt', 'updatedAt'
+      ]) &&
+      data.keys().hasOnly([
+        'sessionId', 'userId', 'title', 'language',
+        'messages', 'conversationStatus', 'createdAt', 'updatedAt', 'messageCount'
+      ]) &&
+      data.sessionId is string && data.sessionId.size() >= 1 && data.sessionId.size() <= 80 &&
+      data.userId is string && data.userId.size() >= 1 && data.userId.size() <= 128 &&
+      data.title is string && data.title.size() >= 1 && data.title.size() <= 150 &&
+      data.language is string && (data.language in ['en-IN', 'kn-IN', 'hi-IN', 'en', 'kn', 'hi']) &&
+      data.messages is list && data.messages.size() <= 100 &&
+      data.conversationStatus is string && (data.conversationStatus in ['active', 'archived', 'completed']) &&
+      (!('messageCount' in data) || data.messageCount == null || ((data.messageCount is int || data.messageCount is number) && data.messageCount >= 0 && data.messageCount <= 100)) &&
+      isValidTime(data.createdAt) &&
+      isValidTime(data.updatedAt);
+    }
+
+    // Domain Validator: AI Assistant Citizen Feedback Collection (assistantFeedback/{feedbackId})
+    function isValidAssistantFeedback(data) {
+      return data.keys().hasAll(['feedbackId', 'userId', 'rating', 'status', 'createdAt']) &&
+        data.keys().hasOnly([
+          'feedbackId', 'userId', 'userRole', 'sessionId', 'messageId',
+          'rating', 'reason', 'messageSnippet', 'language', 'status', 'createdAt',
+          'adminNote', 'reviewedBy', 'reviewedAt'
+        ]) &&
+        data.feedbackId is string && data.feedbackId.size() >= 1 && data.feedbackId.size() <= 80 &&
+        data.userId is string && data.userId.size() >= 1 && data.userId.size() <= 128 &&
+        isValidOptionalString(data, 'userRole', 0, 30) &&
+        isValidOptionalString(data, 'sessionId', 0, 80) &&
+        isValidOptionalString(data, 'messageId', 0, 80) &&
+        data.rating is string && (data.rating in ['helpful', 'not_helpful', 'incorrect']) &&
+        isValidOptionalString(data, 'reason', 0, 1000) &&
+        isValidOptionalString(data, 'messageSnippet', 0, 500) &&
+        (!('language' in data) || data.language == null || data.language == '' || (data.language is string && data.language in ['en-IN', 'kn-IN', 'hi-IN', 'en', 'kn', 'hi'])) &&
+        data.status is string && (data.status in ['open', 'reviewed', 'resolved', 'dismissed']) &&
+        isValidTime(data.createdAt) &&
+        isValidOptionalString(data, 'adminNote', 0, 1000) &&
+        isValidOptionalString(data, 'reviewedBy', 0, 128) &&
+        isValidOptionalTime(data, 'reviewedAt');
+    }
+
+    // Domain Validator: Non-Secret AI Assistant Runtime Config (systemSettings/assistantConfig)
+    function isValidAssistantConfig(data) {
+      return !data.keys().hasAny([
+          'apiKey', 'geminiKey', 'openaiKey', 'secret', 'apiSecret', 'token',
+          'password', 'privateKey', 'clientSecret', 'secretKey', 'accessToken',
+          'refreshToken', 'authToken', 'bearerToken', 'api_key', 'gemini_key',
+          'openai_key', 'api_secret', 'geminiApiKey', 'openaiApiKey',
+          'GEMINI_API_KEY', 'OPENAI_API_KEY', 'AI_API_KEY'
+        ]) &&
+        data.keys().hasOnly([
+          'aiEnabled', 'preferredProvider', 'temperature', 'maxOutputTokens',
+          'timeoutMs', 'rateLimitPerMinute', 'rateLimitPerDay', 'welcomeNotice',
+          'updatedBy', 'updatedAt'
+        ]) &&
+        (!('aiEnabled' in data) || data.aiEnabled is bool) &&
+        (!('preferredProvider' in data) || (data.preferredProvider is string && data.preferredProvider in ['auto', 'gemini', 'openai', 'guided'])) &&
+        (!('temperature' in data) || ((data.temperature is int || data.temperature is number) && data.temperature >= 0 && data.temperature <= 2)) &&
+        (!('maxOutputTokens' in data) || ((data.maxOutputTokens is int || data.maxOutputTokens is number) && data.maxOutputTokens >= 1 && data.maxOutputTokens <= 8192)) &&
+        (!('timeoutMs' in data) || ((data.timeoutMs is int || data.timeoutMs is number) && data.timeoutMs >= 1000 && data.timeoutMs <= 60000)) &&
+        (!('rateLimitPerMinute' in data) || ((data.rateLimitPerMinute is int || data.rateLimitPerMinute is number) && data.rateLimitPerMinute >= 1 && data.rateLimitPerMinute <= 500)) &&
+        (!('rateLimitPerDay' in data) || ((data.rateLimitPerDay is int || data.rateLimitPerDay is number) && data.rateLimitPerDay >= 1 && data.rateLimitPerDay <= 10000)) &&
+        isValidOptionalString(data, 'welcomeNotice', 0, 500) &&
+        isValidOptionalString(data, 'updatedBy', 0, 128) &&
+        isValidOptionalTime(data, 'updatedAt');
+    }
+
+    // Domain Validator: Portal Maintenance Mode Configuration (systemSettings/maintenance)
+    function isValidMaintenanceSettings(data) {
+      return data.keys().hasAll(['active']) &&
+        data.keys().hasOnly([
+          'active', 'message', 'reason', 'updatedAt', 'updatedBy',
+          'updatedByName', 'scheduledStart', 'scheduledEnd', 'allowAdminBypass'
+        ]) &&
+        data.active is bool &&
+        isValidOptionalString(data, 'message', 0, 500) &&
+        isValidOptionalString(data, 'reason', 0, 500) &&
+        isValidOptionalTime(data, 'updatedAt') &&
+        isValidOptionalString(data, 'updatedBy', 0, 128) &&
+        isValidOptionalString(data, 'updatedByName', 0, 100) &&
+        isValidOptionalTime(data, 'scheduledStart') &&
+        isValidOptionalTime(data, 'scheduledEnd') &&
+        (!('allowAdminBypass' in data) || data.allowAdminBypass == null || data.allowAdminBypass is bool);
+    }
+
+    // Domain Validator: Status History Collection
+    function isValidStatusHistory(data) {
+      return data.keys().hasAll(['complaintId', 'newStatus', 'updatedBy', 'timestamp']) &&
+        data.keys().hasOnly(['complaintId', 'oldStatus', 'newStatus', 'updatedBy', 'timestamp', 'officialNote', 'historyId']) &&
+        data.complaintId is string && data.complaintId.size() >= 1 && data.complaintId.size() <= 50 &&
+        isValidOptionalString(data, 'oldStatus', 0, 50) &&
+        data.newStatus is string && (data.newStatus in [
+          'Submitted', 'Assigned', 'In Progress', 'Under Review', 'Action Taken', 'Resolved', 'Rejected', 'Reopened',
+          'SUBMITTED', 'ASSIGNED', 'IN PROGRESS', 'UNDER REVIEW', 'ACTION TAKEN', 'RESOLVED', 'REJECTED', 'REOPENED'
+        ]) &&
+        data.updatedBy is string && data.updatedBy.size() >= 1 && data.updatedBy.size() <= 100 &&
+        isValidOptionalString(data, 'officialNote', 0, 2000) &&
+        isValidOptionalString(data, 'historyId', 1, 100) &&
+        isValidTime(data.timestamp);
+    }
+
+    // Domain Validator: Messages & Official Responses Collection
+    function isValidMessage(data) {
+      return data.keys().hasAll(['complaintId', 'senderId', 'senderName', 'senderRole', 'message', 'visibility', 'createdAt']) &&
+        data.keys().hasOnly(['complaintId', 'messageId', 'senderId', 'senderName', 'senderEmail', 'senderRole', 'message', 'visibility', 'createdAt', 'panchayatId', 'officialDesignation', 'attachments']) &&
+        data.complaintId is string && data.complaintId.size() >= 1 && data.complaintId.size() <= 50 &&
+        isValidOptionalString(data, 'messageId', 1, 100) &&
+        data.senderId is string && data.senderId.size() >= 1 && data.senderId.size() <= 128 &&
+        data.senderName is string && data.senderName.size() >= 1 && data.senderName.size() <= 100 &&
+        isValidOptionalEmail(data, 'senderEmail') &&
+        data.senderRole is string && (data.senderRole in ['citizen', 'receiver', 'admin', 'CITIZEN', 'RECEIVER', 'ADMIN']) &&
+        data.message is string && data.message.size() >= 1 && data.message.size() <= 4000 &&
+        data.visibility is string && (data.visibility in ['public', 'internal', 'PUBLIC', 'INTERNAL']) &&
+        isValidTime(data.createdAt) &&
+        isValidOptionalString(data, 'panchayatId', 1, 50) &&
+        isValidOptionalString(data, 'officialDesignation', 1, 100) &&
+        (!('attachments' in data) || data.attachments == null || (data.attachments is list && data.attachments.size() <= 10));
+    }
+
+    // Domain Validator: Email Logs Collection
+    function isValidEmailLog(data) {
+      return data.keys().hasAll(['complaintId', 'recipient', 'emailType', 'deliveryStatus', 'timestamp']) &&
+        data.keys().hasOnly(['complaintId', 'recipient', 'emailType', 'deliveryStatus', 'timestamp', 'logId', 'errorMessage', 'formattedTime']) &&
+        data.complaintId is string && data.complaintId.size() >= 1 && data.complaintId.size() <= 50 &&
+        data.recipient is string && data.recipient.size() >= 3 && data.recipient.size() <= 100 &&
+        data.emailType is string && data.emailType.size() >= 1 && data.emailType.size() <= 50 &&
+        data.deliveryStatus is string && data.deliveryStatus.size() >= 1 && data.deliveryStatus.size() <= 50 &&
+        isValidOptionalString(data, 'logId', 1, 100) &&
+        isValidOptionalString(data, 'errorMessage', 0, 1000) &&
+        isValidOptionalString(data, 'formattedTime', 0, 100) &&
+        isValidTime(data.timestamp);
+    }
+
+    // Domain Validator: Administrative Audit Logs Collection
+    function isValidAdminAuditLog(data) {
+      return data.keys().hasAll(['action', 'adminId', 'timestamp']) &&
+        data.keys().hasOnly([
+          'action', 'adminId', 'timestamp', 'logId',
+          'adminEmail', 'statusId', 'previousConfig', 'newConfig',
+          'reason', 'formattedTime', 'actorId', 'actorEmail', 'actorRole',
+          'actor', 'targetType', 'targetId', 'complaintId', 'details',
+          'panchayatId', 'metadata'
+        ]) &&
+        data.action is string && data.action.size() >= 1 && data.action.size() <= 100 &&
+        data.adminId is string && data.adminId.size() >= 1 && data.adminId.size() <= 128 &&
+        isValidTime(data.timestamp) &&
+        isValidOptionalString(data, 'logId', 1, 100) &&
+        isValidOptionalString(data, 'adminEmail', 1, 100) &&
+        isValidOptionalString(data, 'statusId', 1, 100) &&
+        (!('previousConfig' in data) || data.previousConfig == null || data.previousConfig is map || data.previousConfig is string) &&
+        (!('newConfig' in data) || data.newConfig == null || data.newConfig is map || data.newConfig is string) &&
+        isValidOptionalString(data, 'reason', 0, 1000) &&
+        isValidOptionalString(data, 'formattedTime', 0, 100) &&
+        isValidOptionalString(data, 'actorId', 1, 128) &&
+        isValidOptionalString(data, 'actorEmail', 1, 100) &&
+        isValidOptionalString(data, 'actorRole', 1, 50) &&
+        isValidOptionalString(data, 'actor', 1, 100) &&
+        isValidOptionalString(data, 'targetType', 1, 50) &&
+        isValidOptionalString(data, 'targetId', 1, 100) &&
+        isValidOptionalString(data, 'complaintId', 1, 100) &&
+        isValidOptionalString(data, 'panchayatId', 1, 50) &&
+        (!('details' in data) || data.details == null || data.details is map || (data.details is string && data.details.size() <= 5000)) &&
+        (!('metadata' in data) || data.metadata == null || data.metadata is map);
+    }
+
+    // Domain Validator: Dynamic Complaint Status Configuration
+    function isValidComplaintStatusConfig(data) {
+      return data.keys().hasAll(['statuses', 'updatedAt', 'updatedBy']) &&
+        data.keys().hasOnly(['statuses', 'updatedAt', 'updatedBy', 'configId', 'version', 'createdAt', 'description']) &&
+        (
+          (data.statuses is list && data.statuses.size() >= 1 && data.statuses.size() <= 100) ||
+          (data.statuses is map && data.statuses.size() >= 1 && data.statuses.size() <= 100)
+        ) &&
+        isValidTime(data.updatedAt) &&
+        (data.updatedBy is string && data.updatedBy.size() >= 1 && data.updatedBy.size() <= 100) &&
+        isValidOptionalString(data, 'configId', 1, 50) &&
+        isValidOptionalString(data, 'version', 1, 50) &&
+        isValidOptionalTime(data, 'createdAt') &&
+        isValidOptionalString(data, 'description', 0, 1000);
+    }
+
+    // Domain Validator: Complaint Transition Rules Collection
+    function isValidComplaintTransitionRule(data) {
+      return (!('allowedRoles' in data) || (data.allowedRoles is list && data.allowedRoles.size() <= 10)) &&
+        (!('mandatoryRemarks' in data) || data.mandatoryRemarks is bool) &&
+        (!('mandatoryEvidence' in data) || data.mandatoryEvidence is bool) &&
+        (!('requiresReceiver' in data) || data.requiresReceiver is bool) &&
+        (!('requiresPanchayat' in data) || data.requiresPanchayat is bool) &&
+        (!('notificationTrigger' in data) || data.notificationTrigger is bool) &&
+        isValidOptionalString(data, 'ruleId', 1, 100) &&
+        isValidOptionalString(data, 'fromStatus', 1, 50) &&
+        isValidOptionalString(data, 'toStatus', 1, 50) &&
+        isValidOptionalString(data, 'updatedBy', 1, 100) &&
+        isValidOptionalTime(data, 'updatedAt') &&
+        (!('rules' in data) || data.rules is map || (data.rules is list && data.rules.size() <= 50));
+    }
+
+    // Domain Validator: Notifications Collection
+    function isValidNotification(data) {
+      return data.keys().hasAll(['title', 'body', 'read', 'createdAt']) &&
+        data.keys().hasOnly(['title', 'body', 'read', 'createdAt', 'userId', 'email', 'complaintId', 'type', 'readAt', 'notifId', 'panchayatId']) &&
+        data.title is string && data.title.size() >= 1 && data.title.size() <= 200 &&
+        data.body is string && data.body.size() >= 1 && data.body.size() <= 1000 &&
+        data.read is bool &&
+        isValidTime(data.createdAt) &&
+        isValidOptionalString(data, 'userId', 1, 128) &&
+        isValidOptionalEmail(data, 'email') &&
+        isValidOptionalString(data, 'complaintId', 1, 50) &&
+        isValidOptionalString(data, 'type', 1, 50) &&
+        isValidOptionalTime(data, 'readAt') &&
+        isValidOptionalString(data, 'notifId', 1, 100) &&
+        isValidOptionalString(data, 'panchayatId', 1, 50);
+    }
+
+    // Domain Validator: Receiver Settings Collection (Strict Receiver-Only Configuration)
+    // Enforces strict key allowlist so private API secret keys can never be stored in Firestore.
+    function isValidReceiverSettings(data) {
+      return data.keys().hasAll(['receiverEmail', 'updatedAt']) &&
+        data.keys().hasOnly([
+          'receiverEmail', 'previousReceiverEmail', 'emailjsPublicKey', 'emailjsServiceId',
+          'emailjsTemplateId', 'emailProvider', 'notificationPreferences',
+          'updatedAt', 'updatedBy', 'lastSectionUpdated'
+        ]) &&
+        data.receiverEmail is string && isValidEmail(data.receiverEmail) &&
+        (!('previousReceiverEmail' in data) || data.previousReceiverEmail == null || data.previousReceiverEmail == '' || (data.previousReceiverEmail is string && isValidEmail(data.previousReceiverEmail))) &&
+        (!('emailjsPublicKey' in data) || data.emailjsPublicKey == null || (data.emailjsPublicKey is string && data.emailjsPublicKey.size() <= 100)) &&
+        (!('emailjsServiceId' in data) || data.emailjsServiceId == null || (data.emailjsServiceId is string && data.emailjsServiceId.size() <= 100)) &&
+        (!('emailjsTemplateId' in data) || data.emailjsTemplateId == null || (data.emailjsTemplateId is string && data.emailjsTemplateId.size() <= 100)) &&
+        (!('emailProvider' in data) || data.emailProvider == null || (data.emailProvider is string && data.emailProvider in ['emailjs', 'smtp', 'both', 'simulation'])) &&
+        (!('notificationPreferences' in data) || data.notificationPreferences == null || (data.notificationPreferences is map && data.notificationPreferences.size() <= 20)) &&
+        isValidOptionalString(data, 'updatedBy', 0, 100) &&
+        isValidOptionalString(data, 'lastSectionUpdated', 0, 60) &&
+        isValidTime(data.updatedAt);
+    }
+
+    // Domain Validator: Emergency Reset Audit Logs Collection (Immutable Audit Trail)
+    function isValidEmergencyResetAuditLog(data) {
+      return data.keys().hasAll([
+        'operationId', 'adminId', 'adminEmail', 'resetType',
+        'backupId', 'recordsDeleted', 'filesDeleted', 'status',
+        'startedAt', 'completedAt'
+      ]) &&
+      data.keys().hasOnly([
+        'operationId', 'adminId', 'adminEmail', 'resetType',
+        'backupId', 'recordsDeleted', 'filesDeleted', 'status',
+        'startedAt', 'completedAt', 'verificationReport', 'logId',
+        'id', 'resetId', 'mode', 'executedBy', 'executedAt',
+        'timestamp', 'timestampIso', 'backupChecksum', 'preservedEntities',
+        'verificationStatus', 'action', 'restoredBy', 'restoredCounts',
+        'deletedBy', 'clientIp'
+      ]) &&
+      data.operationId is string && data.operationId.size() >= 1 && data.operationId.size() <= 100 &&
+      data.adminId is string && data.adminId.size() >= 1 && data.adminId.size() <= 128 &&
+      data.adminEmail is string && isValidEmail(data.adminEmail) &&
+      data.resetType is string && (data.resetType in [
+        'operational', 'complete', 'restore', 'delete_backup',
+        'temp_data', 'citizen_data', 'receiver_data'
+      ]) &&
+      data.backupId is string && (data.backupId == 'N/A' || (data.backupId.size() >= 1 && data.backupId.size() <= 100)) &&
+      (((data.recordsDeleted is int || data.recordsDeleted is number) && data.recordsDeleted >= 0) ||
+       (data.recordsDeleted is map && data.recordsDeleted.size() <= 50)) &&
+      (data.filesDeleted is int || data.filesDeleted is number) && data.filesDeleted >= 0 &&
+      data.status is string && (data.status in ['SUCCESS', 'PARTIAL_FAILURE', 'FAILED', 'RESTORED']) &&
+      (data.startedAt is timestamp || (data.startedAt is string && data.startedAt.size() >= 5 && data.startedAt.size() <= 50)) &&
+      (data.completedAt is timestamp || (data.completedAt is string && data.completedAt.size() >= 5 && data.completedAt.size() <= 50)) &&
+      (!('verificationReport' in data) || data.verificationReport == null || data.verificationReport is map || (data.verificationReport is string && data.verificationReport.size() <= 100000)) &&
+      isValidOptionalString(data, 'logId', 1, 100) &&
+      isValidOptionalString(data, 'id', 1, 100) &&
+      isValidOptionalString(data, 'resetId', 1, 100) &&
+      isValidOptionalString(data, 'mode', 1, 100) &&
+      isValidOptionalString(data, 'executedBy', 1, 128) &&
+      (!('executedAt' in data) || data.executedAt == null || data.executedAt == '' || data.executedAt is timestamp || (data.executedAt is string && data.executedAt.size() >= 5 && data.executedAt.size() <= 50)) &&
+      (!('timestamp' in data) || data.timestamp == null || data.timestamp == '' || data.timestamp is timestamp || (data.timestamp is string && data.timestamp.size() >= 5 && data.timestamp.size() <= 50)) &&
+      isValidOptionalString(data, 'timestampIso', 5, 50) &&
+      isValidOptionalString(data, 'backupChecksum', 1, 128) &&
+      (!('preservedEntities' in data) || data.preservedEntities == null || (data.preservedEntities is list && data.preservedEntities.size() <= 50)) &&
+      isValidOptionalString(data, 'verificationStatus', 1, 100) &&
+      isValidOptionalString(data, 'action', 1, 100) &&
+      isValidOptionalString(data, 'restoredBy', 1, 128) &&
+      (!('restoredCounts' in data) || data.restoredCounts == null || (data.restoredCounts is map && data.restoredCounts.size() <= 50)) &&
+      isValidOptionalString(data, 'deletedBy', 1, 128) &&
+      isValidOptionalString(data, 'clientIp', 1, 100);
+    }
+
+    // Domain Validator: Emergency Reset Backups Collection (Disaster Recovery Pre-Reset Snapshots)
+    function isValidEmergencyResetBackup(data) {
+      return data.keys().hasAll([
+        'backupId', 'adminId', 'createdAt', 'verified'
+      ]) &&
+      data.keys().hasOnly([
+        'backupId', 'adminId', 'adminEmail', 'createdBy', 'mode',
+        'scope', 'snapshotData', 'checksum', 'sha256Checksum',
+        'totalRecords', 'recordCounts', 'storageType', 'storagePath',
+        'storageUrl', 'isChunked', 'createdAt', 'timestamp',
+        'verified', 'verifiedAt', 'updatedAt', 'notes', 'status'
+      ]) &&
+      (('adminEmail' in data) || ('createdBy' in data && data.createdBy is string && data.createdBy.size() >= 1)) &&
+      data.backupId is string && data.backupId.size() >= 1 && data.backupId.size() <= 100 &&
+      data.adminId is string && data.adminId.size() >= 1 && data.adminId.size() <= 128 &&
+      (!('adminEmail' in data) || (data.adminEmail is string && isValidEmail(data.adminEmail))) &&
+      isValidOptionalString(data, 'createdBy', 1, 128) &&
+      isValidOptionalString(data, 'mode', 1, 100) &&
+      (!('scope' in data) || (data.scope is list && data.scope.size() <= 50) || data.scope is map || (data.scope is string && data.scope.size() <= 1000)) &&
+      (!('snapshotData' in data) || data.snapshotData is map || (data.snapshotData is string && data.snapshotData.size() <= 1000000)) &&
+      (!('checksum' in data) || (data.checksum is string && data.checksum.size() >= 1 && data.checksum.size() <= 128)) &&
+      (!('sha256Checksum' in data) || (data.sha256Checksum is string && data.sha256Checksum.size() >= 1 && data.sha256Checksum.size() <= 128)) &&
+      (!('totalRecords' in data) || ((data.totalRecords is int || data.totalRecords is number) && data.totalRecords >= 0)) &&
+      (!('recordCounts' in data) || (data.recordCounts is map && data.recordCounts.size() <= 50)) &&
+      isValidOptionalString(data, 'storageType', 1, 50) &&
+      (!('storagePath' in data) || data.storagePath == null || (data.storagePath is string && data.storagePath.size() <= 500)) &&
+      (!('storageUrl' in data) || data.storageUrl == null || (data.storageUrl is string && data.storageUrl.size() <= 2000)) &&
+      (!('isChunked' in data) || data.isChunked is bool) &&
+      (data.createdAt is timestamp || (data.createdAt is string && data.createdAt.size() >= 5 && data.createdAt.size() <= 50)) &&
+      (!('timestamp' in data) || data.timestamp == null || data.timestamp == '' || data.timestamp is timestamp || (data.timestamp is string && data.timestamp.size() >= 5 && data.timestamp.size() <= 50)) &&
+      data.verified is bool &&
+      isValidOptionalTime(data, 'verifiedAt') &&
+      isValidOptionalTime(data, 'updatedAt') &&
+      isValidOptionalString(data, 'notes', 0, 2000) &&
+      isValidOptionalString(data, 'status', 0, 50);
+    }
+
+    // Domain Validator: Admin Banner Image Metadata (Admin Banner Image Management)
+    function isValidAdminBanner(data) {
+      return data.keys().hasAll([
+        'bannerId', 'filename', 'fileSize', 'mimeType',
+        'imageUrl', 'uploadedBy', 'uploadedAt', 'updatedAt', 'active'
+      ]) &&
+      data.keys().hasOnly([
+        'bannerId', 'filename', 'fileSize', 'mimeType',
+        'imageUrl', 'uploadedBy', 'uploadedAt', 'updatedAt', 'active',
+        'originalFilename', 'formattedSize', 'storagePath',
+        'uploadedByEmail', 'uploadedByName', 'width', 'height', 'aspectRatio'
+      ]) &&
+      data.bannerId is string && data.bannerId.size() >= 1 && data.bannerId.size() <= 100 &&
+      data.filename is string && data.filename.size() >= 1 && data.filename.size() <= 255 &&
+      (data.fileSize is int || data.fileSize is number) && data.fileSize >= 0 && data.fileSize <= 10485760 &&
+      data.mimeType is string && (data.mimeType in ['image/jpeg', 'image/png', 'image/webp']) &&
+      data.imageUrl is string && data.imageUrl.size() >= 1 && data.imageUrl.size() <= 2000 &&
+      data.uploadedBy is string && data.uploadedBy.size() >= 1 && data.uploadedBy.size() <= 128 &&
+      (data.uploadedAt is timestamp || (data.uploadedAt is string && data.uploadedAt.size() >= 1 && data.uploadedAt.size() <= 100)) &&
+      (data.updatedAt is timestamp || (data.updatedAt is string && data.updatedAt.size() >= 1 && data.updatedAt.size() <= 100)) &&
+      data.active is bool &&
+      isValidOptionalString(data, 'originalFilename', 0, 255) &&
+      isValidOptionalString(data, 'formattedSize', 0, 50) &&
+      isValidOptionalString(data, 'storagePath', 0, 500) &&
+      isValidOptionalString(data, 'uploadedByEmail', 0, 100) &&
+      isValidOptionalString(data, 'uploadedByName', 0, 100) &&
+      (!('width' in data) || (data.width is int || data.width is number)) &&
+      (!('height' in data) || (data.height is int || data.height is number)) &&
+      isValidOptionalString(data, 'aspectRatio', 0, 20);
+    }
+
+    // Domain Validator: Complaint Updates Collection (and Subcollection)
+    function isValidComplaintUpdate(data) {
+      return data.keys().hasAll(['updateId', 'complaintId', 'newStatus', 'updateType', 'authorName', 'authorRole', 'timestamp']) &&
+        data.keys().hasOnly([
+          'updateId', 'complaintId', 'citizenName', 'citizenEmail', 'category',
+          'panchayatId', 'panchayatName', 'oldStatus', 'newStatus', 'updateType',
+          'remarks', 'resolutionDetails', 'authorName', 'authorEmail', 'authorRole',
+          'authorUid', 'timestamp', 'formattedDate'
+        ]) &&
+        data.updateId is string && data.updateId.size() >= 1 && data.updateId.size() <= 100 &&
+        data.complaintId is string && data.complaintId.size() >= 1 && data.complaintId.size() <= 50 &&
+        isValidOptionalString(data, 'citizenName', 1, 100) &&
+        isValidOptionalEmail(data, 'citizenEmail') &&
+        isValidOptionalString(data, 'category', 1, 50) &&
+        isValidOptionalString(data, 'panchayatId', 0, 50) &&
+        isValidOptionalString(data, 'panchayatName', 0, 100) &&
+        isValidOptionalString(data, 'oldStatus', 0, 50) &&
+        data.newStatus is string && data.newStatus.size() >= 1 && data.newStatus.size() <= 50 &&
+        data.updateType is string && data.updateType.size() >= 1 && data.updateType.size() <= 50 &&
+        isValidOptionalString(data, 'remarks', 0, 4000) &&
+        isValidOptionalString(data, 'resolutionDetails', 0, 4000) &&
+        data.authorName is string && data.authorName.size() >= 1 && data.authorName.size() <= 100 &&
+        isValidOptionalEmail(data, 'authorEmail') &&
+        data.authorRole is string && (data.authorRole in ['admin', 'receiver', 'citizen', 'ADMIN', 'RECEIVER', 'CITIZEN']) &&
+        isValidOptionalString(data, 'authorUid', 0, 128) &&
+        isValidTime(data.timestamp) &&
+        isValidOptionalString(data, 'formattedDate', 0, 100);
+    }
+
+    // Domain Validator: Recycle Bin Collection (Quarantined Soft-Deleted Grievance Records)
+    function isValidRecycleBinItem(data) {
+      return data.keys().hasAll(['recycleId', 'complaintId', 'complaintData', 'deletedBy', 'deletedByRole', 'deletedAt', 'status']) &&
+        data.keys().hasOnly([
+          'recycleId', 'complaintId', 'complaintData', 'deletedBy',
+          'deletedByName', 'deletedByRole', 'deletedAt', 'formattedDeletedAt',
+          'reason', 'status'
+        ]) &&
+        data.recycleId is string && data.recycleId.size() >= 1 && data.recycleId.size() <= 100 &&
+        data.complaintId is string && data.complaintId.size() >= 1 && data.complaintId.size() <= 50 &&
+        data.complaintData is map &&
+        data.deletedBy is string && data.deletedBy.size() >= 3 && data.deletedBy.size() <= 100 &&
+        isValidOptionalString(data, 'deletedByName', 1, 100) &&
+        data.deletedByRole is string && (data.deletedByRole in ['admin', 'ADMIN']) &&
+        isValidTime(data.deletedAt) &&
+        isValidOptionalString(data, 'formattedDeletedAt', 0, 100) &&
+        isValidOptionalString(data, 'reason', 0, 1000) &&
+        data.status is string && (data.status in ['IN_BIN', 'RESTORED', 'PURGED', 'in_bin', 'restored', 'purged']);
+    }
+
+    // Domain Validator: Activity Logs Collection (Administrative & Operational Audit Trail)
+    function isValidActivityLog(data) {
+      return data.keys().hasAll(['logId', 'action', 'recordId', 'timestamp']) &&
+        data.keys().hasOnly([
+          'logId', 'action', 'recordId', 'details', 'actorEmail',
+          'actorName', 'actorRole', 'actorUid', 'timestamp', 'formattedDate'
+        ]) &&
+        data.logId is string && data.logId.size() >= 1 && data.logId.size() <= 100 &&
+        data.action is string && data.action.size() >= 1 && data.action.size() <= 100 &&
+        data.recordId is string && data.recordId.size() >= 1 && data.recordId.size() <= 100 &&
+        isValidOptionalString(data, 'details', 0, 5000) &&
+        isValidOptionalEmail(data, 'actorEmail') &&
+        isValidOptionalString(data, 'actorName', 1, 100) &&
+        (!('actorRole' in data) || data.actorRole == null || data.actorRole == '' || (data.actorRole is string && data.actorRole in ['admin', 'receiver', 'citizen', 'ADMIN', 'RECEIVER', 'CITIZEN'])) &&
+        isValidOptionalString(data, 'actorUid', 0, 128) &&
+        isValidTime(data.timestamp) &&
+        isValidOptionalString(data, 'formattedDate', 0, 100);
+    }
+
+    // Domain Validator: Complaint Attachments Collection (Evidence & Document Metadata)
+    function isValidComplaintAttachment(data) {
+      return data.keys().hasAll(['attachmentId', 'complaintId', 'createdAt']) &&
+        data.keys().hasOnly([
+          'attachmentId', 'complaintId', 'photoURL', 'hasPhoto', 'hasDocument',
+          'createdAt', 'fileName', 'fileUrl', 'fileSize', 'fileType',
+          'uploadedBy', 'uploaderUid', 'uploaderEmail', 'panchayatId'
+        ]) &&
+        data.attachmentId is string && data.attachmentId.size() >= 1 && data.attachmentId.size() <= 100 &&
+        data.complaintId is string && data.complaintId.size() >= 1 && data.complaintId.size() <= 50 &&
+        (!('photoURL' in data) || data.photoURL == null || data.photoURL is bool || (data.photoURL is string && data.photoURL.size() <= 2000)) &&
+        (!('hasPhoto' in data) || data.hasPhoto == null || data.hasPhoto is bool) &&
+        (!('hasDocument' in data) || data.hasDocument == null || data.hasDocument is bool) &&
+        isValidTime(data.createdAt) &&
+        isValidOptionalString(data, 'fileName', 0, 255) &&
+        isValidOptionalString(data, 'fileUrl', 0, 2000) &&
+        (!('fileSize' in data) || data.fileSize == null || ((data.fileSize is int || data.fileSize is number) && data.fileSize >= 0)) &&
+        isValidOptionalString(data, 'fileType', 0, 100) &&
+        isValidOptionalString(data, 'uploadedBy', 0, 100) &&
+        isValidOptionalString(data, 'uploaderUid', 0, 128) &&
+        isValidOptionalEmail(data, 'uploaderEmail') &&
+        isValidOptionalString(data, 'panchayatId', 0, 50);
+    }
+
+    // Domain Validator: Complaint Assignments Collection (Receiver Allocation Register)
+    function isValidComplaintAssignment(data) {
+      return data.keys().hasAll(['assignmentId', 'complaintId', 'panchayatId', 'assignedAt']) &&
+        data.keys().hasOnly([
+          'assignmentId', 'complaintId', 'panchayatId', 'receiverId',
+          'receiverEmail', 'receiverName', 'assignedAt', 'assignedBy',
+          'assignedByEmail', 'status', 'notes'
+        ]) &&
+        data.assignmentId is string && data.assignmentId.size() >= 1 && data.assignmentId.size() <= 100 &&
+        data.complaintId is string && data.complaintId.size() >= 1 && data.complaintId.size() <= 50 &&
+        data.panchayatId is string && data.panchayatId.size() >= 1 && data.panchayatId.size() <= 50 &&
+        isValidOptionalString(data, 'receiverId', 0, 128) &&
+        isValidOptionalEmail(data, 'receiverEmail') &&
+        isValidOptionalString(data, 'receiverName', 0, 100) &&
+        isValidTime(data.assignedAt) &&
+        isValidOptionalString(data, 'assignedBy', 0, 100) &&
+        isValidOptionalEmail(data, 'assignedByEmail') &&
+        isValidOptionalString(data, 'status', 0, 50) &&
+        isValidOptionalString(data, 'notes', 0, 2000);
+    }
+
+    // Domain Validator: AI Knowledge Centre Async Processing Jobs (knowledge_processing_jobs/{jobId})
+    function isValidKnowledgeProcessingJob(data) {
+      return data.keys().hasAll([
+        'jobId', 'filename', 'tempStoragePath', 'status', 'startedAt', 'sourceReliability'
+      ]) &&
+      data.keys().hasOnly([
+        'jobId', 'filename', 'tempStoragePath', 'status', 'startedAt', 'sourceReliability',
+        'mimeType', 'sizeBytes', 'fileHash', 'contributorId', 'contributorName',
+        'contributorRole', 'categoryHint', 'replaceDocId', 'updatedAt', 'sourceChannel'
+      ]) &&
+      data.jobId is string && data.jobId.size() >= 1 && data.jobId.size() <= 100 &&
+      data.filename is string && data.filename.size() >= 1 && data.filename.size() <= 200 &&
+      data.tempStoragePath is string &&
+      data.tempStoragePath.size() >= 39 &&
+      data.tempStoragePath.size() <= 400 &&
+      data.tempStoragePath.matches("^AI_KNOWLEDGE_CENTRE/temporary_uploads/[^/].*") &&
+      !data.tempStoragePath.matches(".*\\.\\..*") &&
+      data.status is string && data.status == 'QUEUED' &&
+      isValidTime(data.startedAt) &&
+      data.sourceReliability is string && data.sourceReliability == 'community' &&
+      isValidOptionalString(data, 'mimeType', 0, 120) &&
+      (!('sizeBytes' in data) || data.sizeBytes == null || ((data.sizeBytes is int || data.sizeBytes is number) && data.sizeBytes >= 0 && data.sizeBytes <= 52428800)) &&
+      isValidOptionalString(data, 'fileHash', 0, 128) &&
+      isValidOptionalString(data, 'contributorId', 0, 128) &&
+      isValidOptionalString(data, 'contributorName', 0, 80) &&
+      (!('contributorRole' in data) || data.contributorRole == null || data.contributorRole == '' || (data.contributorRole is string && data.contributorRole in ['public', 'citizen', 'admin'])) &&
+      isValidOptionalString(data, 'categoryHint', 0, 80) &&
+      isValidOptionalString(data, 'replaceDocId', 0, 100) &&
+      isValidOptionalTime(data, 'updatedAt') &&
+      isValidOptionalString(data, 'sourceChannel', 0, 50);
+    }
+
+    // =============================================================
+    // Collection Rules
+    // =============================================================
+
+    // -------------------------------------------------------------
+    // 1. Users Collection
+    // -------------------------------------------------------------
+    match /users/{userId} {
+      // PII Protection: Users can read their own profile. Admins can read all profiles.
+      // Blanket read (allow read: if isAuthenticated();) is strictly denied.
+      allow read: if isAuthenticated() && (isOwner(userId) || isAdmin());
+
+      // User Registration:
+      // - Users can register their own profile with default role 'citizen'.
+      // - Users cannot self-elevate to 'admin' or 'receiver'.
+      // - Admins can create user profiles with any valid role.
+      allow create: if isAuthenticated() &&
+        isValidUser(request.resource.data) &&
+        isValidTime(request.resource.data.createdAt) &&
+        request.resource.data.uid == userId &&
+        (
+          // Self-registration: enforce role 'citizen' and ownership
+          (
+            isOwner(userId) &&
+            request.resource.data.uid == request.auth.uid &&
+            request.resource.data.role == 'citizen' &&
+            (!('panchayatId' in request.resource.data) || request.resource.data.panchayatId == null || request.resource.data.panchayatId == '')
+          ) ||
+          // Admin can provision any role
+          isAdmin()
+        );
+
+      // User Profile & Preferences Update:
+      // - Owners can update their own profile, language & UI preferences ('name', 'mobile',
+      //   'panchayatName', 'preferredLang', 'uiPreferences', 'updatedAt', 'updatedBy') while
+      //   'uid', 'createdAt', 'role', 'email', and 'panchayatId' remain strictly unchanged.
+      // - Admins can update all user profiles and roles, but cannot tamper with uid or createdAt.
+      allow update: if isAuthenticated() &&
+        isValidUser(request.resource.data) &&
+        areImmutableFieldsUnchanged(['uid', 'createdAt']) &&
+        (
+          // Owner self-update: restricted to profile, language & UI preference fields
+          (
+            isOwner(userId) &&
+            request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+              'name', 'mobile', 'panchayatName', 'preferredLang', 'uiPreferences', 'updatedAt', 'updatedBy'
+            ]) &&
+            areImmutableFieldsUnchanged(['uid', 'createdAt', 'role', 'email', 'panchayatId']) &&
+            request.resource.data.uid == resource.data.uid &&
+            request.resource.data.createdAt == resource.data.createdAt &&
+            request.resource.data.role == resource.data.role &&
+            request.resource.data.email == resource.data.email
+          ) ||
+          // Admin full profile & role management
+          isAdmin()
+        );
+
+      // Only administrators can delete user accounts
+      allow delete: if isAdmin();
+
+      // -----------------------------------------------------------
+      // 1b. Citizen AI Chat Sessions Subcollection (Strictly Owner-Only)
+      // -----------------------------------------------------------
+      match /chatSessions/{sessionId} {
+        // Strictly owner-only: even admins and receivers must NOT read private citizen chat history.
+        allow read: if isAuthenticated() && isOwner(userId);
+
+        allow create: if isAuthenticated() &&
+          isOwner(userId) &&
+          isValidChatSession(request.resource.data) &&
+          request.resource.data.sessionId == sessionId &&
+          request.resource.data.userId == userId &&
+          request.resource.data.userId == request.auth.uid;
+
+        allow update: if isAuthenticated() &&
+          isOwner(userId) &&
+          isValidChatSession(request.resource.data) &&
+          areImmutableFieldsUnchanged(['sessionId', 'userId', 'createdAt']) &&
+          request.resource.data.sessionId == sessionId &&
+          request.resource.data.userId == userId &&
+          request.resource.data.userId == request.auth.uid;
+
+        allow delete: if isAuthenticated() && isOwner(userId);
+      }
+    }
+
+    // -------------------------------------------------------------
+    // 2. Panchayats Collection
+    // -------------------------------------------------------------
+    match /panchayats/{panchayatId} {
+      // Public directory read access so citizens can browse Panchayat directory
+      // and select their Gram Panchayat in registration and complaint forms.
+      allow read: if true;
+
+      // Only administrators can create, update, or delete panchayats
+      allow create: if isAdmin() &&
+        isValidPanchayat(request.resource.data) &&
+        request.resource.data.panchayatId == panchayatId;
+
+      allow update: if isAdmin() &&
+        isValidPanchayat(request.resource.data) &&
+        areImmutableFieldsUnchanged(['panchayatId', 'createdAt']);
+
+      allow delete: if isAdmin();
+    }
+
+    // -------------------------------------------------------------
+    // 3. Officers Collection (Gram Panchayat Officers Directory)
+    // -------------------------------------------------------------
+    match /officers/{officerId} {
+      // Directory access to inspect official Gram Panchayat officers
+      allow read: if true;
+
+      // Only administrators can manage officers
+      allow create, update: if isAdmin() &&
+        request.resource.data.keys().hasAll(['name', 'designation', 'panchayatId']) &&
+        (request.resource.data.name is string && request.resource.data.name.size() <= 100) &&
+        (request.resource.data.designation is string && request.resource.data.designation.size() <= 100) &&
+        (request.resource.data.panchayatId is string && request.resource.data.panchayatId.size() <= 50);
+
+      allow delete: if isAdmin();
+    }
+
+    // -------------------------------------------------------------
+    // 4. Complaints Collection
+    // -------------------------------------------------------------
+    match /complaints/{complaintId} {
+      // Document Read & Collection Queries / List: Authenticated and strictly scoped:
+      // - Citizens can query their own complaints (userId == auth.uid)
+      // - Panchayat receivers can query complaints assigned to their panchayat
+      // - Admins can query all complaints
+      allow get, list: if isAuthenticated() && (
+        resource.data.userId == request.auth.uid ||
+        isReceiverForPanchayat(resource.data.panchayatId) ||
+        isAdmin()
+      );
+
+      // Citizen Complaint Submission:
+      // - Must be authenticated citizen
+      // - userId must match creator's auth.uid
+      // - Initial status must strictly start as 'Submitted' or 'SUBMITTED'
+      // - Citizens cannot inject official responses, receiver assignment, or internal notes upon creation
+      allow create: if isAuthenticated() &&
+        isValidComplaint(request.resource.data) &&
+        request.resource.data.complaintId == complaintId &&
+        (
+          (
+            request.resource.data.userId == request.auth.uid &&
+            (request.resource.data.status in ['Submitted', 'SUBMITTED']) &&
+            (!('officialResponse' in request.resource.data) ||
+             request.resource.data.officialResponse == null ||
+             request.resource.data.officialResponse == '' ||
+             request.resource.data.officialResponse == 'Your grievance has been successfully submitted and permanently recorded. It has been routed to the Gram Panchayat processing queue.') &&
+            (!('internalNotes' in request.resource.data) ||
+             request.resource.data.internalNotes == null ||
+             request.resource.data.internalNotes == '') &&
+            (!('assignedReceiverId' in request.resource.data) ||
+             request.resource.data.assignedReceiverId == null ||
+             request.resource.data.assignedReceiverId == '' ||
+             request.resource.data.assignedReceiverId == ('rec-' + request.resource.data.panchayatId))
+          ) ||
+          isAdmin()
+        );
+
+      // Complaint Updates:
+      // - Immutable core metadata: complaintId, userId, and createdAt cannot be altered under any circumstances.
+      // - Receiver Assignment Validation: When an official updates assignedReceiverId, validate that it matches the complaint's actual Panchayat.
+      // - Admins: Can update statuses, assign receivers, record rejection/reopen reasons, and add official responses/notes
+      //   while preserving core immutable identifiers ['complaintId', 'userId', 'createdAt'].
+      // - Panchayat Receivers: Can update permitted workflow keys (including workProgress) for complaints within their assigned Gram Panchayat.
+      // - Citizens: Can submit feedback, reopen their own complaints with a valid reopenReason, or soft-delete their own grievance.
+      allow update: if isAuthenticated() &&
+        isValidComplaint(request.resource.data) &&
+        areImmutableFieldsUnchanged(['complaintId', 'userId', 'createdAt']) &&
+        (
+          !request.resource.data.diff(resource.data).affectedKeys().hasAny(['assignedReceiverId']) ||
+          request.resource.data.assignedReceiverId == ('rec-' + resource.data.panchayatId) ||
+          isReceiverForPanchayat(resource.data.panchayatId) ||
+          isAdmin()
+        ) &&
+        (
+          // Admin superuser update
+          isAdmin() ||
+          // Panchayat Receiver official update
+          (
+            isReceiverForPanchayat(resource.data.panchayatId) &&
+            request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+              'status', 'updatedAt', 'officialResponse',
+              'assignedReceiverId', 'assignedReceiverEmail', 'assignedReceiverName',
+              'latestResponse', 'latestResponseAt', 'latestResponseBy',
+              'rejectionReason', 'reopenReason', 'expectedResolutionDate',
+              'internalNotes', 'officialResponses', 'statusHistory',
+              'resolutionDate', 'lastUpdatedDate', 'assignedDepartment', 'assignedReceiverUid',
+              'aiPriority', 'documentAnalysis', 'workProgress'
+            ]) &&
+            areImmutableFieldsUnchanged(['citizenName', 'citizenEmail', 'panchayatId', 'category', 'description', 'photoURL'])
+          ) ||
+          // Citizen owner update: Citizen Feedback submission
+          (
+            isOwner(resource.data.userId) &&
+            request.resource.data.diff(resource.data).affectedKeys().hasOnly(['citizenFeedback'])
+          ) ||
+          // Citizen owner update: Request reopening
+          (
+            isOwner(resource.data.userId) &&
+            request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'reopenReason', 'updatedAt']) &&
+            request.resource.data.status in ['Reopened', 'REOPENED']
+          ) ||
+          // Citizen owner update: Soft-delete own complaint
+          (
+            isOwner(resource.data.userId) &&
+            request.resource.data.diff(resource.data).affectedKeys().hasOnly(['deletedByCitizen', 'deletedAt', 'deletionReason', 'updatedAt'])
+          )
+        );
+
+      // Only administrators can delete complaint records
+      allow delete: if isAdmin();
+
+      // Subcollection: Status History for this specific complaint
+      match /statusHistory/{subHistoryId} {
+        allow read: if isAuthenticated() && (
+          isAdmin() ||
+          isComplaintOwnerExisting(complaintId) ||
+          isComplaintReceiverExisting(complaintId)
+        );
+
+        allow create: if isAuthenticated() &&
+          isValidStatusHistory(request.resource.data) &&
+          request.resource.data.complaintId == complaintId &&
+          (
+            isAdmin() ||
+            (
+              request.resource.data.updatedBy == request.auth.uid &&
+              (
+                ((request.resource.data.newStatus in ['Submitted', 'SUBMITTED']) &&
+                 (isComplaintOwnerExisting(complaintId) || isComplaintOwnerAfter(complaintId))) ||
+                ((request.resource.data.newStatus in ['Reopened', 'REOPENED']) &&
+                 isComplaintOwnerExisting(complaintId))
+              )
+            ) ||
+            (isReceiver() && isComplaintReceiverExisting(complaintId))
+          );
+
+        allow update: if false;
+        allow delete: if isAdmin();
+      }
+
+      // Subcollection: Messages & Official Responses for this specific complaint
+      match /messages/{messageId} {
+        // READ:
+        // - Admins can read all messages
+        // - Panchayat receivers can read messages for complaints in their panchayat
+        // - Citizens can read messages for their own complaint ONLY IF visibility == 'public' (citizens cannot read internal notes)
+        allow read: if isAuthenticated() && (
+          isAdmin() ||
+          isComplaintReceiverExisting(complaintId) ||
+          (isComplaintOwnerExisting(complaintId) && (resource.data.visibility in ['public', 'PUBLIC']))
+        );
+
+        // CREATE:
+        // - Admins can create official responses (public) and internal notes (internal)
+        // - Panchayat receivers can create responses and notes for complaints in their panchayat
+        // - Citizens can create citizen messages for their own complaint (senderRole == 'citizen', visibility == 'public')
+        allow create: if isAuthenticated() &&
+          isValidMessage(request.resource.data) &&
+          request.resource.data.complaintId == complaintId &&
+          request.resource.data.senderId == request.auth.uid &&
+          (
+            isAdmin() ||
+            isComplaintReceiverExisting(complaintId) ||
+            (
+              (isComplaintOwnerExisting(complaintId) || isComplaintOwnerAfter(complaintId)) &&
+              (request.resource.data.senderRole in ['citizen', 'CITIZEN']) &&
+              (request.resource.data.visibility in ['public', 'PUBLIC'])
+            )
+          );
+
+        // UPDATE: Admins can delete or archive/update if needed; citizens cannot alter or delete messages
+        allow update: if isAdmin() &&
+          isValidMessage(request.resource.data) &&
+          areImmutableFieldsUnchanged(['complaintId', 'senderId', 'createdAt']);
+
+        // DELETE: Only admins can delete/purge messages
+        allow delete: if isAdmin();
+      }
+
+      // Subcollection: Dedicated Updates Folder for this specific complaint
+      match /updates/{updateId} {
+        // READ:
+        // - Admin can read all updates
+        // - Receiver can read updates for complaints in their panchayat
+        // - Citizen can read updates for their own complaint
+        allow read: if isAuthenticated() && (
+          isAdmin() ||
+          isComplaintReceiverExisting(complaintId) ||
+          isComplaintOwnerExisting(complaintId) ||
+          (resource.data.authorUid == request.auth.uid) ||
+          (('citizenEmail' in resource.data) && ('email' in request.auth.token) && resource.data.citizenEmail == request.auth.token.email)
+        );
+
+        // CREATE:
+        // - Admin can create updates
+        // - Assigned Panchayat Receiver can create updates
+        // - Complaint Owner (Citizen) can create updates (initial submission, withdrawal, or citizen remarks)
+        allow create: if isAuthenticated() &&
+          isValidComplaintUpdate(request.resource.data) &&
+          request.resource.data.updateId == updateId &&
+          request.resource.data.complaintId == complaintId &&
+          (
+            isAdmin() ||
+            isComplaintReceiverExisting(complaintId) ||
+            isComplaintReceiverAfter(complaintId) ||
+            (
+              (
+                isComplaintOwnerExisting(complaintId) ||
+                isComplaintOwnerAfter(complaintId) ||
+                request.resource.data.authorUid == request.auth.uid
+              ) &&
+              (request.resource.data.authorRole in ['citizen', 'CITIZEN'])
+            )
+          );
+
+        // UPDATE: Strictly restricted to Admin with immutable core identifiers
+        allow update: if isAdmin() &&
+          isValidComplaintUpdate(request.resource.data) &&
+          areImmutableFieldsUnchanged(['updateId', 'complaintId', 'timestamp', 'authorUid']);
+
+        // DELETE: Strictly restricted to Admin
+        allow delete: if isAdmin();
+      }
+    }
+
+    // -------------------------------------------------------------
+    // 5. Status History Collection (Root / Collection-Group)
+    // -------------------------------------------------------------
+    match /statusHistory/{historyId} {
+      // Readable by the complaint's creator, assigned receiver, or admin
+      allow read: if isAuthenticated() && (
+        isAdmin() ||
+        isComplaintOwnerExisting(resource.data.complaintId) ||
+        isComplaintReceiverExisting(resource.data.complaintId)
+      );
+
+      // Created when complaint status changes:
+      // - Initial status record created by complaint submitter
+      // - Status transition logged by authorized receiver or admin
+      allow create: if isAuthenticated() &&
+        isValidStatusHistory(request.resource.data) &&
+        (
+          isAdmin() ||
+          (
+            request.resource.data.updatedBy == request.auth.uid &&
+            (
+              ((request.resource.data.newStatus in ['Submitted', 'SUBMITTED']) &&
+               (isComplaintOwnerExisting(request.resource.data.complaintId) ||
+                isComplaintOwnerAfter(request.resource.data.complaintId))) ||
+              ((request.resource.data.newStatus in ['Reopened', 'REOPENED']) &&
+               isComplaintOwnerExisting(request.resource.data.complaintId))
+            )
+          ) ||
+          (
+            isReceiver() &&
+            (isComplaintReceiverExisting(request.resource.data.complaintId) ||
+             isComplaintReceiverAfter(request.resource.data.complaintId))
+          )
+        );
+
+      // Status history entries are an append-only, immutable audit trail
+      allow update: if false;
+
+      // Only administrators can purge audit log records
+      allow delete: if isAdmin();
+    }
+
+    // -------------------------------------------------------------
+    // 6. Complaint Messages Root Collection / Collection-Group
+    // -------------------------------------------------------------
+    match /complaintMessages/{messageId} {
+      // READ:
+      // - Admins can read all messages
+      // - Panchayat receivers can read messages for complaints in their panchayat
+      // - Citizens can read messages for their own complaint ONLY IF visibility == 'public'
+      allow read: if isAuthenticated() && (
+        isAdmin() ||
+        isComplaintReceiverExisting(resource.data.complaintId) ||
+        (isComplaintOwnerExisting(resource.data.complaintId) && (resource.data.visibility in ['public', 'PUBLIC']))
+      );
+
+      // CREATE:
+      // - Admins can create responses (public) and internal notes (internal)
+      // - Panchayat receivers can create responses for complaints in their panchayat
+      // - Citizens can create citizen messages for their own complaint (senderRole == 'citizen', visibility == 'public')
+      allow create: if isAuthenticated() &&
+        isValidMessage(request.resource.data) &&
+        request.resource.data.senderId == request.auth.uid &&
+        (
+          isAdmin() ||
+          isComplaintReceiverExisting(request.resource.data.complaintId) ||
+          (
+            (isComplaintOwnerExisting(request.resource.data.complaintId) || isComplaintOwnerAfter(request.resource.data.complaintId)) &&
+            (request.resource.data.senderRole in ['citizen', 'CITIZEN']) &&
+            (request.resource.data.visibility in ['public', 'PUBLIC'])
+          )
+        );
+
+      // UPDATE: Admins can delete or archive/update if needed; citizens cannot alter or delete messages
+      allow update: if isAdmin() &&
+        isValidMessage(request.resource.data) &&
+        areImmutableFieldsUnchanged(['complaintId', 'senderId', 'createdAt']);
+
+      // DELETE: Only admins can delete/purge messages
+      allow delete: if isAdmin();
+    }
+
+    // -------------------------------------------------------------
+    // 7. Email Logs Collection (Receiver Email Delivery Audit Records)
+    // -------------------------------------------------------------
+    match /emailLogs/{logId} {
+      // READ: Strictly Receiver only. Admin and Citizen must NOT be permitted to read receiver email logs.
+      allow read: if isReceiver();
+
+      // CREATE: Receiver-only for browser-originated test/manual log entries.
+      // Cloud Functions use the Admin SDK and bypass rules for trusted system logs.
+      // This prevents citizens from forging delivery records or injecting misleading audit data.
+      allow create: if isReceiver() &&
+        isValidEmailLog(request.resource.data);
+
+      // UPDATE: Strictly Receiver only with schema validation
+      allow update: if isReceiver() &&
+        isValidEmailLog(request.resource.data);
+
+      // DELETE: Strictly authorized Receiver only, allowing the receiver to delete individual email delivery audit records or clear their history as required by the Receiver Settings module.
+      allow delete: if isReceiver();
+    }
+
+    // -------------------------------------------------------------
+    // 8. Administrative Audit Logs Collection
+    // -------------------------------------------------------------
+    match /adminAuditLogs/{logId} {
+      // READ: Strictly Administrator only
+      allow read: if isAdmin();
+
+      // CREATE: Strictly Administrator only, requiring mandatory fields (action, adminId, timestamp)
+      allow create: if isAdmin() &&
+        isValidAdminAuditLog(request.resource.data);
+
+      // UPDATE & DELETE: Strictly forbidden (Immutable audit trail)
+      allow update, delete: if false;
+    }
+
+    // -------------------------------------------------------------
+    // 9. Notifications Collection
+    // -------------------------------------------------------------
+    match /notifications/{notifId} {
+      // READ:
+      // Authenticated recipient (userId matches auth.uid or email matches token email) or Admin
+      allow read: if isAuthenticated() && (
+        isNotificationRecipient() ||
+        isAdmin()
+      );
+
+      // CREATE:
+      // Administrators or Receivers dispatching notifications
+      allow create: if (isAdmin() || isReceiver()) &&
+        isValidNotification(request.resource.data);
+
+      // UPDATE:
+      // Recipient owner can mark read (only 'read' and 'readAt' can be updated)
+      allow update: if isAuthenticated() &&
+        isValidNotification(request.resource.data) &&
+        areImmutableFieldsUnchanged(['createdAt', 'userId', 'email']) &&
+        (
+          (
+            isNotificationRecipient() &&
+            request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read', 'readAt'])
+          ) ||
+          isAdmin()
+        );
+
+      // DELETE:
+      // Recipient owner or administrator can delete
+      allow delete: if isAuthenticated() && (
+        isNotificationRecipient() ||
+        isAdmin()
+      );
+    }
+
+    // -------------------------------------------------------------
+    // 10. Receiver Settings Collection (STRICTLY RECEIVER-ONLY)
+    // -------------------------------------------------------------
+    match /receiverSettings/{settingId} {
+      // Access: STRICTLY RECEIVER-ONLY. Admin is EXPLICITLY FORBIDDEN from reading receiverSettings.
+      allow read: if isReceiver();
+
+      // Access: STRICTLY RECEIVER-ONLY. Admin is EXPLICITLY FORBIDDEN from creating or updating receiverSettings.
+      allow create: if isReceiver() &&
+        isValidReceiverSettings(request.resource.data);
+
+      allow update: if isReceiver() &&
+        isValidReceiverSettings(request.resource.data);
+
+      // Deletion is strictly forbidden
+      allow delete: if false;
+    }
+
+    // -------------------------------------------------------------
+    // 11. Receiver Settings Audit Collection (STRICTLY RECEIVER-ONLY)
+    // -------------------------------------------------------------
+    match /receiverSettingsAudit/{auditId} {
+      // READ: Strictly authorized Receiver only
+      allow read: if isReceiver();
+
+      // CREATE: Strictly authorized Receiver only, requiring mandatory audit fields and bounded payload sizes
+      allow create: if isReceiver() &&
+        request.resource.data.keys().hasAll(['changedBy', 'timestamp']) &&
+        request.resource.data.keys().size() <= 20 &&
+        (request.resource.data.changedBy is string && request.resource.data.changedBy.size() >= 1 && request.resource.data.changedBy.size() <= 100) &&
+        isValidOptionalString(request.resource.data, 'auditId', 0, 100) &&
+        isValidOptionalString(request.resource.data, 'previousEmail', 0, 100) &&
+        isValidOptionalString(request.resource.data, 'newEmail', 0, 100) &&
+        isValidOptionalString(request.resource.data, 'section', 0, 60) &&
+        isValidOptionalString(request.resource.data, 'action', 0, 100) &&
+        isValidOptionalString(request.resource.data, 'userAgent', 0, 1000) &&
+        isValidOptionalString(request.resource.data, 'status', 0, 50) &&
+        isValidTime(request.resource.data.timestamp);
+
+      // UPDATE & DELETE: Strictly forbidden (Immutable audit trail)
+      allow update, delete: if false;
+    }
+
+    // -------------------------------------------------------------
+    // 12. Backups Collection (System Database Snapshots)
+    // -------------------------------------------------------------
+    match /backups/{backupId} {
+      // READ, CREATE, UPDATE, DELETE: strictly isAdmin()
+      allow read, create, update, delete: if isAdmin();
+    }
+
+    // -------------------------------------------------------------
+    // 13. Offline Sync Records Collection (Offline Synchronization)
+    // -------------------------------------------------------------
+    match /offlineSyncRecords/{recordId} {
+      allow read, write: if isAuthenticated() && (request.auth.uid == resource.data.userId || request.auth.uid == request.resource.data.userId || isAdmin());
+    }
+
+    // -------------------------------------------------------------
+    // 14. Panchayat Analytics Collection (Intelligence & Hotspots)
+    // -------------------------------------------------------------
+    match /panchayatAnalytics/{docId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    // -------------------------------------------------------------
+    // 15. Dynamic Complaint Status Configuration Collection
+    // -------------------------------------------------------------
+    match /complaintStatusConfig/{configId} {
+      // READ: Any authenticated user (Citizens, Receivers, Admins) has access to active status configuration
+      allow read: if isAuthenticated();
+
+      // CREATE, UPDATE: STRICTLY Administrator only
+      allow create: if isAdmin() &&
+        isValidComplaintStatusConfig(request.resource.data);
+
+      allow update: if isAdmin() &&
+        isValidComplaintStatusConfig(request.resource.data);
+
+      // DELETE: Strictly forbidden to preserve historical stability
+      allow delete: if false;
+
+      // Subcollections: Complaint Transition Rules attached to specific configuration
+      match /complaintTransitionRules/{ruleId} {
+        allow read: if isAuthenticated();
+        allow create: if isAdmin() && isValidComplaintTransitionRule(request.resource.data);
+        allow update: if isAdmin() && isValidComplaintTransitionRule(request.resource.data);
+        allow delete: if false;
+      }
+
+      match /transitionRules/{ruleId} {
+        allow read: if isAuthenticated();
+        allow create: if isAdmin() && isValidComplaintTransitionRule(request.resource.data);
+        allow update: if isAdmin() && isValidComplaintTransitionRule(request.resource.data);
+        allow delete: if false;
+      }
+    }
+
+    // -------------------------------------------------------------
+    // 16. Complaint Transition Rules Collection (Root Level)
+    // -------------------------------------------------------------
+    match /complaintTransitionRules/{ruleId} {
+      // READ: Any authenticated user can read workflow transition rules
+      allow read: if isAuthenticated();
+
+      // CREATE, UPDATE: STRICTLY Administrator only
+      allow create: if isAdmin() &&
+        isValidComplaintTransitionRule(request.resource.data);
+
+      allow update: if isAdmin() &&
+        isValidComplaintTransitionRule(request.resource.data);
+
+      // DELETE: Strictly forbidden
+      allow delete: if false;
+    }
+
+    // -------------------------------------------------------------
+    // 17. Citizens Collection (Dedicated alias/collection for citizen records)
+    // -------------------------------------------------------------
+    match /citizens/{citizenId} {
+      allow read: if isAuthenticated() && (isOwner(citizenId) || isAdmin() || isReceiver());
+      allow create, update: if isAuthenticated() && (isOwner(citizenId) || isAdmin());
+      allow delete: if isAdmin();
+    }
+
+    // -------------------------------------------------------------
+    // 18. Emergency Reset Audit Logs Collection (Immutable Audit Trail)
+    // -------------------------------------------------------------
+    match /emergencyResetAuditLogs/{logId} {
+      // READ: strictly isAdmin() only
+      allow read: if isAdmin();
+
+      // CREATE: strictly isAdmin() only, validating schema, adminId matching uid, and email matching token
+      allow create: if isAdmin() &&
+        isValidEmergencyResetAuditLog(request.resource.data) &&
+        request.resource.data.adminId == request.auth.uid &&
+        (('email' in request.auth.token) && request.resource.data.adminEmail == request.auth.token.email);
+
+      // UPDATE: strictly forbidden
+      allow update: if false;
+
+      // DELETE: strictly isAdmin() only
+      allow delete: if isAdmin();
+    }
+
+    // -------------------------------------------------------------
+    // 19. Emergency Reset Backups Collection (Disaster Recovery Snapshots)
+    // -------------------------------------------------------------
+    match /emergencyResetBackups/{backupId} {
+      // READ: strictly isAdmin() only
+      allow read: if isAdmin();
+
+      // CREATE: strictly isAdmin() only, validating schema and admin ownership
+      allow create: if isAdmin() &&
+        isValidEmergencyResetBackup(request.resource.data) &&
+        request.resource.data.adminId == request.auth.uid;
+
+      // UPDATE: strictly isAdmin() only, validating schema and preserving immutable fields
+      allow update: if isAdmin() &&
+        isValidEmergencyResetBackup(request.resource.data) &&
+        areImmutableFieldsUnchanged(['backupId', 'createdAt']);
+
+      // DELETE: strictly isAdmin() only, allowing administrators to remove old emergency backup snapshots
+      allow delete: if isAdmin();
+
+      match /{allChildren=**} {
+        allow read, write: if isAdmin();
+      }
+    }
+
+    // -------------------------------------------------------------
+    // 20. System Settings Collection (Maintenance Mode, Emergency Locks, Admin Banner & Assistant Config)
+    // -------------------------------------------------------------
+    match /systemSettings/{settingId} {
+      // READ:
+      // - Public single-doc GET allowed for 'adminBanner', 'banner', and 'maintenance' so visitors and citizens
+      //   can see the active portal banner and maintenance mode status.
+      // - Authenticated read/list (including isAdmin()) allowed for all systemSettings docs (no secrets stored).
+      allow get: if (settingId in ['adminBanner', 'banner', 'maintenance']) || isAuthenticated();
+      allow list: if isAuthenticated();
+
+      // CREATE, UPDATE: strictly authenticated Administrators (isAdmin()) only.
+      // - 'maintenance': validated with isValidMaintenanceSettings (bool active, bounded message/reason <= 500, timestamps).
+      // - 'assistantConfig': validated with isValidAssistantConfig (strictly forbids secret credential keys).
+      // - 'adminBanner': validated with isValidAdminBanner.
+      // - Other system settings (e.g. 'resetLock', 'banner'): strictly forbid secret credential keys & bound key count.
+      allow create, update: if isAdmin() && (
+        (settingId == 'maintenance' && isValidMaintenanceSettings(request.resource.data)) ||
+        (settingId == 'assistantConfig' && isValidAssistantConfig(request.resource.data)) ||
+        (settingId == 'adminBanner' && isValidAdminBanner(request.resource.data)) ||
+        (!(settingId in ['maintenance', 'assistantConfig', 'adminBanner']) &&
+          !request.resource.data.keys().hasAny([
+            'apiKey', 'geminiKey', 'openaiKey', 'secret', 'apiSecret', 'token',
+            'password', 'privateKey', 'clientSecret', 'secretKey', 'accessToken',
+            'refreshToken', 'authToken', 'bearerToken', 'api_key', 'gemini_key',
+            'openai_key', 'api_secret', 'geminiApiKey', 'openaiApiKey',
+            'GEMINI_API_KEY', 'OPENAI_API_KEY', 'AI_API_KEY'
+          ]) &&
+          request.resource.data.keys().size() <= 30
+        )
+      );
+
+      // DELETE:
+      // - Non-essential portal state/banner documents ('adminBanner', 'banner', 'maintenance'):
+      //   can be deleted/reset by authenticated Administrators (isAdmin()).
+      // - Critical lock/config settings ('resetLock', 'assistantConfig'): strictly forbidden to prevent lockout.
+      allow delete: if (settingId in ['adminBanner', 'banner', 'maintenance']) && isAdmin();
+    }
+
+    // -------------------------------------------------------------
+    // 21. Admin Banners Collection (Hero Banner Image Management)
+    // -------------------------------------------------------------
+    match /adminBanners/{bannerId} {
+      // READ:
+      // - Single document get is public (allow get: if true;) so visitors can view the portal banner.
+      // - Collection queries (list) allowed for all authenticated users.
+      allow get: if true;
+      allow list: if isAuthenticated();
+
+      // CREATE: Strictly restricted to authenticated Administrators (isAdmin()) with schema validation and matching bannerId
+      allow create: if isAdmin() &&
+        isValidAdminBanner(request.resource.data) &&
+        request.resource.data.bannerId == bannerId;
+
+      // UPDATE: Strictly restricted to authenticated Administrators (isAdmin()) with schema validation and immutable field checks
+      allow update: if isAdmin() &&
+        isValidAdminBanner(request.resource.data) &&
+        areImmutableFieldsUnchanged(['bannerId', 'uploadedAt']);
+
+      // DELETE: Strictly restricted to authenticated Administrators (isAdmin())
+      allow delete: if isAdmin();
+    }
+
+    // -------------------------------------------------------------
+    // 22. Complaint Updates Collection (Dedicated Complaint Updates Folder)
+    // -------------------------------------------------------------
+    match /complaint_updates/{updateId} {
+      // READ:
+      // - Admin can read all updates.
+      // - Receivers can read updates for grievances in their assigned Panchayat or assigned to them.
+      // - Citizens can read updates corresponding to their own complaints (matching citizenEmail or authorUid or complaint owner).
+      allow read: if isAuthenticated() && (
+        isAdmin() ||
+        (isReceiver() && (
+          resource.data.panchayatId == getReceiverPanchayatId() ||
+          isReceiverForPanchayat(resource.data.panchayatId) ||
+          isComplaintReceiverExisting(resource.data.complaintId)
+        )) ||
+        (resource.data.authorUid == request.auth.uid) ||
+        (('citizenEmail' in resource.data) && ('email' in request.auth.token) && resource.data.citizenEmail == request.auth.token.email) ||
+        isComplaintOwnerExisting(resource.data.complaintId)
+      );
+
+      // CREATE:
+      // - Admin and authenticated Receivers can write updates.
+      // - Citizens can record initial submission updates or withdrawal/reopen requests.
+      allow create: if isAuthenticated() &&
+        isValidComplaintUpdate(request.resource.data) &&
+        request.resource.data.updateId == updateId &&
+        (
+          isAdmin() ||
+          (
+            isReceiver() &&
+            (
+              isReceiverForPanchayat(request.resource.data.panchayatId) ||
+              isComplaintReceiverExisting(request.resource.data.complaintId) ||
+              isComplaintReceiverAfter(request.resource.data.complaintId)
+            )
+          ) ||
+          (
+            (
+              isComplaintOwnerExisting(request.resource.data.complaintId) ||
+              isComplaintOwnerAfter(request.resource.data.complaintId) ||
+              request.resource.data.authorUid == request.auth.uid
+            ) &&
+            (request.resource.data.authorRole in ['citizen', 'CITIZEN'])
+          )
+        );
+
+      // UPDATE: Restricted to Admin with immutable core checks
+      allow update: if isAdmin() &&
+        isValidComplaintUpdate(request.resource.data) &&
+        areImmutableFieldsUnchanged(['updateId', 'complaintId', 'timestamp', 'authorUid']);
+
+      // DELETE: Restricted to Admin
+      allow delete: if isAdmin();
+    }
+
+    // -------------------------------------------------------------
+    // 23. Recycle Bin Collection (Quarantined Soft-Deleted Complaints)
+    // -------------------------------------------------------------
+    match /recycle_bin/{recycleId} {
+      // READ: Strictly Administrator only (isAdmin()). Citizens and Receivers have NO read access.
+      allow read: if isAdmin();
+
+      // CREATE: Strictly Administrator only (moving complaint to quarantine).
+      allow create: if isAdmin() &&
+        isValidRecycleBinItem(request.resource.data) &&
+        request.resource.data.recycleId == recycleId;
+
+      // UPDATE: Strictly Administrator only (updating restore status/notes).
+      allow update: if isAdmin() &&
+        isValidRecycleBinItem(request.resource.data) &&
+        areImmutableFieldsUnchanged(['recycleId', 'complaintId', 'deletedAt']);
+
+      // DELETE: Strictly Administrator only (permanent eradication / purge).
+      allow delete: if isAdmin();
+    }
+
+    // -------------------------------------------------------------
+    // 24. Activity Logs Collection (Administrative & Operational Audit Logs)
+    // -------------------------------------------------------------
+    match /activity_logs/{logId} {
+      // READ: Strictly Administrator only (isAdmin())
+      allow read: if isAdmin();
+
+      // CREATE: Authenticated users (admin or receiver) logging authorized operations
+      allow create: if isAuthenticated() &&
+        (isAdmin() || isReceiver()) &&
+        isValidActivityLog(request.resource.data) &&
+        request.resource.data.logId == logId;
+
+      // UPDATE: Strictly forbidden (immutable audit records)
+      allow update: if false;
+
+      // DELETE: Strictly Administrator only (emergency reset / pruning)
+      allow delete: if isAdmin();
+    }
+
+    // -------------------------------------------------------------
+    // 25. Complaint Attachments Collection (Evidence & Document Metadata)
+    // -------------------------------------------------------------
+    match /complaint_attachments/{attachmentId} {
+      // READ: Admin, assigned Panchayat Receiver, or the Citizen owner
+      allow read: if isAuthenticated() && (
+        isAdmin() ||
+        isComplaintOwnerExisting(resource.data.complaintId) ||
+        isComplaintReceiverExisting(resource.data.complaintId) ||
+        (resource.data.uploaderUid == request.auth.uid) ||
+        (('uploaderEmail' in resource.data) && ('email' in request.auth.token) && resource.data.uploaderEmail == request.auth.token.email)
+      );
+
+      // CREATE: Authenticated Citizen or Official attaching evidence
+      allow create: if isAuthenticated() &&
+        isValidComplaintAttachment(request.resource.data) &&
+        request.resource.data.attachmentId == attachmentId &&
+        (
+          isAdmin() ||
+          isComplaintReceiverExisting(request.resource.data.complaintId) ||
+          isComplaintReceiverAfter(request.resource.data.complaintId) ||
+          isComplaintOwnerExisting(request.resource.data.complaintId) ||
+          isComplaintOwnerAfter(request.resource.data.complaintId) ||
+          (request.resource.data.uploaderUid == request.auth.uid)
+        );
+
+      // UPDATE: Admin only
+      allow update: if isAdmin() &&
+        isValidComplaintAttachment(request.resource.data) &&
+        areImmutableFieldsUnchanged(['attachmentId', 'complaintId', 'createdAt']);
+
+      // DELETE: Admin only
+      allow delete: if isAdmin();
+    }
+
+    // -------------------------------------------------------------
+    // 26. Complaint Assignments Collection (Receiver Allocation Register)
+    // -------------------------------------------------------------
+    match /complaint_assignments/{assignmentId} {
+      // READ: Admin and designated Receiver
+      allow read: if isAuthenticated() && (
+        isAdmin() ||
+        (isReceiver() && (
+          resource.data.panchayatId == getReceiverPanchayatId() ||
+          resource.data.receiverId == request.auth.uid ||
+          (('receiverEmail' in resource.data) && ('email' in request.auth.token) && resource.data.receiverEmail == request.auth.token.email)
+        ))
+      );
+
+      // WRITE (CREATE, UPDATE, DELETE): Strictly Administrator only
+      allow create: if isAdmin() &&
+        isValidComplaintAssignment(request.resource.data) &&
+        request.resource.data.assignmentId == assignmentId;
+
+      allow update: if isAdmin() &&
+        isValidComplaintAssignment(request.resource.data) &&
+        areImmutableFieldsUnchanged(['assignmentId', 'complaintId', 'assignedAt']);
+
+      allow delete: if isAdmin();
+    }
+
+    // -------------------------------------------------------------
+    // 27. AI Assistant Citizen Feedback Collection
+    // -------------------------------------------------------------
+    match /assistantFeedback/{feedbackId} {
+      // READ: Creator citizen can read their own feedback; Admins can read all feedback reports
+      allow read: if isAuthenticated() && (
+        resource.data.userId == request.auth.uid ||
+        isAdmin()
+      );
+
+      // CREATE: Authenticated users can submit feedback under their own UID with initial status 'open'
+      allow create: if isAuthenticated() &&
+        isValidAssistantFeedback(request.resource.data) &&
+        request.resource.data.feedbackId == feedbackId &&
+        request.resource.data.userId == request.auth.uid &&
+        request.resource.data.status == 'open' &&
+        (!('adminNote' in request.resource.data) || request.resource.data.adminNote == null || request.resource.data.adminNote == '') &&
+        (!('reviewedBy' in request.resource.data) || request.resource.data.reviewedBy == null || request.resource.data.reviewedBy == '') &&
+        (!('reviewedAt' in request.resource.data) || request.resource.data.reviewedAt == null || request.resource.data.reviewedAt == '');
+
+      // UPDATE: Strictly Administrator only (review workflow), preserving immutable submission fields
+      allow update: if isAdmin() &&
+        isValidAssistantFeedback(request.resource.data) &&
+        areImmutableFieldsUnchanged(['feedbackId', 'userId', 'rating', 'createdAt']);
+
+      // DELETE: Strictly Administrator only
+      allow delete: if isAdmin();
+    }
+
+    // -------------------------------------------------------------
+    // 28. AI Assistant Analytics Collection (Server-Aggregated Metrics)
+    // -------------------------------------------------------------
+    match /assistantAnalytics/{docId} {
+      // READ: Strictly Administrator only
+      allow read: if isAdmin();
+
+      // WRITE: Strictly forbidden from clients (written exclusively via Cloud Functions Admin SDK)
+      allow write: if false;
+    }
+
+    // -------------------------------------------------------------
+    // 29. AI Assistant Rate Limits Collection (Server-Only Quota State)
+    // -------------------------------------------------------------
+    match /assistantRateLimits/{limitId} {
+      // Strictly server-only Admin SDK access
+      allow read, write: if false;
+    }
+
+    // -------------------------------------------------------------
+    // 30. Complaint Submission Idempotency Nonces (Server-Only Replay Guard)
+    // -------------------------------------------------------------
+    match /submissionNonces/{nonceId} {
+      // Strictly server-only Admin SDK access
+      allow read, write: if false;
+    }
+
+    // -------------------------------------------------------------
+    // 31. AI Knowledge Centre Documents (Server-Managed RAG Corpus)
+    // -------------------------------------------------------------
+    match /knowledge_documents/{docId} {
+      // READ: Any user (public or signed in) can read ONLY active, indexed, non-quarantined, non-deleted documents;
+      // Administrators (isAdmin()) can read all documents (including disabled, failed, quarantined, superseded, deleted).
+      allow read: if isAdmin() || (
+        resource.data.status == 'INDEXED' &&
+        resource.data.enabled == true &&
+        resource.data.quarantined == false &&
+        resource.data.deleted == false
+      );
+
+      // WRITE: Strictly server-only Cloud Functions via Admin SDK (prevents client forgery of sourceReliability, status, enabled, or quarantined)
+      allow create, update, delete: if false;
+    }
+
+    // -------------------------------------------------------------
+    // 32. AI Knowledge Centre Document Chunks
+    // -------------------------------------------------------------
+    match /knowledge_chunks/{chunkId} {
+      // READ: Active chunks readable publicly for retrieval; Admins can inspect all chunks
+      allow read: if isAdmin() || resource.data.active == true;
+
+      // WRITE: Strictly server-only via Admin SDK
+      allow create, update, delete: if false;
+    }
+
+    // -------------------------------------------------------------
+    // 33. AI Knowledge Centre Vector Embeddings
+    // -------------------------------------------------------------
+    match /knowledge_embeddings/{embeddingId} {
+      // READ: Active embeddings readable publicly for retrieval; Admins can inspect all embeddings
+      allow read: if isAdmin() || resource.data.active == true;
+
+      // WRITE: Strictly server-only via Admin SDK
+      allow create, update, delete: if false;
+    }
+
+    // -------------------------------------------------------------
+    // 34. AI Knowledge Centre Uploaders (Contributor PII & Quota Metadata)
+    // -------------------------------------------------------------
+    match /knowledge_uploaders/{uploaderId} {
+      // READ: Strictly Administrator-only (protects contributor emails and private metadata from public scraping)
+      allow read: if isAdmin();
+
+      // WRITE: Strictly server-only via Admin SDK
+      allow write: if false;
+    }
+
+    // -------------------------------------------------------------
+    // 35. AI Knowledge Centre Async Processing Jobs
+    // -------------------------------------------------------------
+    match /knowledge_processing_jobs/{jobId} {
+      // READ: Strictly Administrator-only
+      allow read: if isAdmin();
+
+      // CREATE: Allow queued async staging ONLY with strict schema validation, QUEUED status,
+      // community reliability (clients cannot force 'official'), and scoped temporary_uploads storage path.
+      allow create: if isValidKnowledgeProcessingJob(request.resource.data) &&
+        request.resource.data.jobId == jobId &&
+        request.resource.data.status == 'QUEUED' &&
+        request.resource.data.sourceReliability == 'community' &&
+        (!('replaceDocId' in request.resource.data) || request.resource.data.replaceDocId == null || request.resource.data.replaceDocId == '' || isAdmin()) &&
+        (
+          isAdmin() ||
+          (
+            (!('contributorRole' in request.resource.data) || request.resource.data.contributorRole == null || request.resource.data.contributorRole == '' || request.resource.data.contributorRole == 'public' || (isAuthenticated() && request.resource.data.contributorRole == 'citizen')) &&
+            (!('contributorId' in request.resource.data) || request.resource.data.contributorId == null || request.resource.data.contributorId == '' || request.resource.data.contributorId == 'public' || request.resource.data.contributorId == 'public-contributor' || request.resource.data.contributorId.matches("^pub-[a-zA-Z0-9_-]{1,32}$") || (isAuthenticated() && request.resource.data.contributorId == request.auth.uid))
+          )
+        );
+
+      // UPDATE, DELETE: Strictly forbidden from clients (server Cloud Functions manage job lifecycle)
+      allow update, delete: if false;
+    }
+
+    // -------------------------------------------------------------
+    // 36. AI Knowledge Centre Receiver API Configuration
+    // -------------------------------------------------------------
+    match /knowledge_api_receivers/{receiverId} {
+      // READ: Strictly Administrator-only (NEVER readable by public users, citizens, or grievance receivers)
+      allow read: if isAdmin();
+
+      // WRITE: Strictly forbidden from clients (managed via updateKnowledgeApiSettings callable)
+      allow write: if false;
+    }
+
+    // -------------------------------------------------------------
+    // 37. AI Knowledge Centre Receiver API Secrets (Hashes & HMAC Keys)
+    // -------------------------------------------------------------
+    match /knowledge_api_secrets/{secretId} {
+      // Strictly server-only Admin SDK access (NEVER client readable or writable)
+      allow read, write: if false;
+    }
+
+    // -------------------------------------------------------------
+    // 38. AI Knowledge Centre Receiver API Request Logs
+    // -------------------------------------------------------------
+    match /knowledge_api_logs/{logId} {
+      // READ: Strictly Administrator-only
+      allow read: if isAdmin();
+
+      // WRITE: Strictly server-only via Admin SDK
+      allow write: if false;
+    }
+
+    // -------------------------------------------------------------
+    // 39. AI Knowledge Centre Audit Logs (Immutable Append-Only Ledger)
+    // -------------------------------------------------------------
+    match /knowledge_audit_logs/{auditId} {
+      // READ: Strictly Administrator-only
+      allow read: if isAdmin();
+
+      // WRITE: Strictly server-only via Admin SDK
+      allow write: if false;
+    }
+
+    // -------------------------------------------------------------
+    // 40. AI Knowledge Centre Storage Usage Metrics
+    // -------------------------------------------------------------
+    match /knowledge_storage_usage/{docId} {
+      // READ: Strictly Administrator-only
+      allow read: if isAdmin();
+
+      // WRITE: Strictly server-only via Admin SDK
+      allow write: if false;
+    }
+
+    // -------------------------------------------------------------
+    // 41. AI Knowledge Centre Disaster Recovery Backups
+    // -------------------------------------------------------------
+    match /knowledge_backups/{backupId} {
+      // READ: Strictly Administrator-only
+      allow read: if isAdmin();
+
+      // WRITE: Strictly server-only via Admin SDK
+      allow write: if false;
+    }
+
+    // -------------------------------------------------------------
+    // 42. AI Knowledge Centre Receiver API Idempotency Keys
+    // -------------------------------------------------------------
+    match /knowledge_idempotency/{key} {
+      // Strictly server-only Admin SDK access
+      allow read, write: if false;
+    }
+
+    // -------------------------------------------------------------
+    // 43. AI Knowledge Centre Rate Limit Buckets
+    // -------------------------------------------------------------
+    match /knowledge_rate_limits/{bucketId} {
+      // Strictly server-only Admin SDK access
+      allow read, write: if false;
+    }
+
+    // -------------------------------------------------------------
+    // Default Deny Rule for All Other Collections
+    // -------------------------------------------------------------
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

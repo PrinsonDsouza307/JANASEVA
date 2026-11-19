@@ -1,0 +1,67 @@
+{
+  "rules": {
+    ".read": "auth != null",
+    ".write": "auth != null",
+    "complaints": {
+      ".indexOn": ["panchayatId", "userId", "citizenEmail", "status", "createdAt"],
+      "$complaintId": {
+        ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || data.child('userId').val() === auth.uid || (root.child('users').child(auth.uid).child('role').val() === 'receiver' && root.child('users').child(auth.uid).child('panchayatId').val() === data.child('panchayatId').val()))",
+        ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || (data.child('userId').val() === auth.uid) || (root.child('users').child(auth.uid).child('role').val() === 'receiver' && root.child('users').child(auth.uid).child('panchayatId').val() === data.child('panchayatId').val()))"
+      }
+    },
+    "users": {
+      "$userId": {
+        ".read": "auth != null && (auth.uid === $userId || root.child('users').child(auth.uid).child('role').val() === 'admin')",
+        ".write": "auth != null && (auth.uid === $userId || root.child('users').child(auth.uid).child('role').val() === 'admin')"
+      }
+    },
+    "panchayats": {
+      ".read": "auth != null",
+      ".write": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'admin'"
+    },
+    "officers": {
+      ".read": "auth != null",
+      ".write": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'admin'"
+    },
+    "notifications": {
+      ".indexOn": ["userId", "createdAt"],
+      "$notifId": {
+        ".read": "auth != null && (data.child('userId').val() === auth.uid || root.child('users').child(auth.uid).child('role').val() === 'admin')",
+        ".write": "auth != null"
+      }
+    },
+    "complaint_updates": {
+      ".indexOn": ["complaintId", "panchayatId", "timestamp"],
+      ".read": "auth != null",
+      ".write": "auth != null"
+    },
+    "emailLogs": {
+      ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'receiver' || root.child('users').child(auth.uid).child('role').val() === 'admin')",
+      ".write": "auth != null"
+    },
+    "receiverSettings": {
+      ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'receiver' || root.child('users').child(auth.uid).child('role').val() === 'admin')",
+      ".write": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'receiver'"
+    },
+    "systemSettings": {
+      ".read": true,
+      ".write": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'admin'"
+    },
+    "adminBanners": {
+      ".read": true,
+      ".write": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'admin'"
+    },
+    "complaintStatusConfig": {
+      ".read": "auth != null",
+      ".write": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'admin'"
+    },
+    "activity_logs": {
+      ".read": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'admin'",
+      ".write": "auth != null"
+    },
+    "recycle_bin": {
+      ".read": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'admin'",
+      ".write": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'admin'"
+    }
+  }
+}

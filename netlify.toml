@@ -1,0 +1,85 @@
+# Netlify Configuration for JANASEVA Gram Panchayat Grievance Portal
+
+[build]
+  publish = "website/public"
+  command = "python3 tools/build_public.py"
+
+# Clean URLs configuration
+[build.processing.html]
+  pretty_urls = true
+
+# The inherited Netlify API gateway is intentionally NOT published because it lacks
+# required request authentication and safe outbound request validation.
+# Retained for hardening at backend/netlify/functions/api-gateway.js.
+
+# Clean URL Rewrites
+[[redirects]]
+  from = "/login"
+  to = "/login.html"
+  status = 200
+
+[[redirects]]
+  from = "/complaint"
+  to = "/complaint.html"
+  status = 200
+
+[[redirects]]
+  from = "/track"
+  to = "/track.html"
+  status = 200
+
+[[redirects]]
+  from = "/citizen-dashboard"
+  to = "/citizen-dashboard.html"
+  status = 200
+
+[[redirects]]
+  from = "/receiver-dashboard"
+  to = "/receiver-dashboard.html"
+  status = 200
+
+[[redirects]]
+  from = "/directory"
+  to = "/directory.html"
+  status = 200
+
+[[redirects]]
+  from = "/knowledge-centre"
+  to = "/knowledge-centre.html"
+  status = 200
+
+[[redirects]]
+  from = "/about"
+  to = "/about.html"
+  status = 200
+
+# Website headers
+[[headers]]
+  for = "/sw.js"
+  [headers.values]
+    Cache-Control = "no-cache, no-store, must-revalidate"
+    Content-Type = "application/javascript"
+
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=7200"
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "SAMEORIGIN"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+
+[[headers]]
+  for = "/android/*"
+  [headers.values]
+    Cache-Control = "no-store"
+    X-Content-Type-Options = "nosniff"
+
+[[headers]]
+  for = "/android/JANASEVA-latest.apk"
+  [headers.values]
+    Content-Type = "application/vnd.android.package-archive"
+    Content-Disposition = 'attachment; filename="JANASEVA.apk"'

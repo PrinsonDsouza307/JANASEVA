@@ -1,0 +1,13 @@
+{
+  "packageId": "com.janaseva.mobile",
+  "versionName": "1.0",
+  "versionCode": 1,
+  "minSdkVersion": 26,
+  "targetSdkVersion": 34,
+  "sizeBytes": 12799064,
+  "sha256": "0a22fee96165c6f7ca65d23ad38bc56cbab9683dab1c2d21b9d7e0c758549f40",
+  "signerCertificateSha256": "c4766573d7784766524a2b96619ce54364a2a2a64de280ce3cd55dcd327d9300",
+  "downloadPath": "android/JANASEVA-latest.apk",
+  "rebuilt": false,
+  "sharedBackendConfigured": false
+}

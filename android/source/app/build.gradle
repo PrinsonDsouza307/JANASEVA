@@ -1,0 +1,44 @@
+plugins { id 'com.android.application' }
+def site = providers.gradleProperty('JANASEVA_URL').orElse('').get()
+def parsed = site ? new URI(site) : null
+def isLocalDev = parsed && parsed.scheme == 'http' && (parsed.host == '10.0.2.2' || parsed.host == 'localhost' || parsed.host == '127.0.0.1')
+if (!parsed || (!isLocalDev && parsed.scheme != 'https') || !parsed.host || parsed.userInfo || parsed.query || parsed.fragment) {
+    throw new GradleException('Set -PJANASEVA_URL=https://your-real-host/ (or http://10.0.2.2:PORT/ for debug emulator testing).')
+}
+android {
+    namespace 'com.janaseva.mobile'
+    compileSdk 35
+    defaultConfig {
+        applicationId 'com.janaseva.mobile'
+        minSdk 26
+        targetSdk 35
+        versionCode 2
+        versionName '1.1'
+        buildConfigField 'String', 'SITE_URL', '"' + site + '"'
+    }
+    buildFeatures { buildConfig true }
+    signingConfigs {
+        release {
+            if (System.getenv('JANASEVA_KEYSTORE')) {
+                storeFile file(System.getenv('JANASEVA_KEYSTORE'))
+                storePassword System.getenv('JANASEVA_STORE_PASSWORD')
+                keyAlias System.getenv('JANASEVA_KEY_ALIAS')
+                keyPassword System.getenv('JANASEVA_KEY_PASSWORD')
+            }
+        }
+    }
+    buildTypes {
+        release { signingConfig signingConfigs.release; minifyEnabled false }
+        debug { applicationIdSuffix '.debug' }
+    }
+}
+gradle.taskGraph.whenReady { graph ->
+    if (graph.allTasks.any { it.name.toLowerCase().contains('release') }) {
+        if (!parsed || parsed.scheme != 'https') {
+            throw new GradleException('Release builds strictly require -PJANASEVA_URL=https://... (cleartext HTTP forbidden in release)')
+        }
+        ['JANASEVA_KEYSTORE','JANASEVA_STORE_PASSWORD','JANASEVA_KEY_ALIAS','JANASEVA_KEY_PASSWORD'].each {
+            if (!System.getenv(it)) throw new GradleException('Missing release signing variable: ' + it)
+        }
+    }
+}

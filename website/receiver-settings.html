@@ -1,0 +1,1724 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Ultimate API Management & Recovery Control Centre – JANASEVA</title>
+  
+  <!-- Favicon & Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+Kannada:wght@400;600;700&family=Noto+Sans+Devanagari:wght@400;600;700&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/responsive.css">
+  
+  <!-- Favicon & Brand Identity -->
+  <link rel="icon" type="image/x-icon" href="assets/branding/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/branding/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/branding/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/branding/apple-touch-icon.png">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0b2545">
+</head>
+<body class="page-receiver-settings">
+
+  <!-- Toast Container -->
+  <div id="toast-container" class="toast-container" aria-live="polite"></div>
+
+  <!-- Auth Guard Overlay (Strict Receiver / Admin Guard) -->
+  <div id="auth-guard-overlay" class="auth-guard-overlay">
+    <div class="auth-guard-box">
+      <img src="assets/branding/janaseva-icon.png" alt="JANASEVA" class="auth-guard-logo">
+      <div class="auth-guard-spinner"></div>
+      <div class="auth-guard-title">JANASEVA</div>
+      <div class="auth-guard-sub" id="auth-guard-sub">Verifying official API credentials...</div>
+    </div>
+  </div>
+
+  <!-- Header -->
+  <header class="portal-header">
+    <div class="header-container">
+      <a href="index.html" class="brand-section">
+        <img src="assets/branding/janaseva-icon.png" alt="JANASEVA Official Logo" class="emblem-img brand-logo-img">
+        <div class="brand-text-block">
+          <span class="brand-main-title">JANASEVA</span>
+          <div class="brand-divider"></div>
+          <div class="brand-sub-titles">
+            <span class="brand-subtitle">Gram Panchayat Grievance Portal</span>
+            <span class="brand-tagline">Report • Submit • Track • Resolve</span>
+          </div>
+        </div>
+      </a>
+
+      <!-- Header Action Controls: Notification Bell (Always visible in Android toolbar & Desktop header) + Mobile Menu Toggle -->
+      <div class="header-action-controls" id="header-action-controls">
+        <button class="nav-notif-bell-btn" id="nav-notif-bell-btn" type="button" aria-label="View Notifications">
+          <i class="fa-regular fa-bell"></i>
+          <span class="nav-notif-badge" id="nav-notif-badge" style="display: none;">0</span>
+        </button>
+        <button class="nav-toggle-btn" id="mobile-nav-toggle" aria-label="Toggle Navigation">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+      </div>
+
+      <nav class="main-nav" id="main-navigation">
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="complaint.html" class="nav-link">Submit Complaint</a>
+        <a href="track.html" class="nav-link">Track Status</a>
+        <a href="directory.html" class="nav-link">Panchayat Directory</a>
+        <a href="knowledge-centre.html" class="nav-link">Knowledge Centre</a>
+        <a href="https://ipchat.in/" class="nav-link nav-link-external" target="_blank" rel="noopener noreferrer"><i class="fa-solid fa-comments" aria-hidden="true"></i> <span>IP Chat</span> <i class="fa-solid fa-arrow-up-right-from-square nav-ext-icon" aria-hidden="true"></i></a>
+        <a href="about.html" class="nav-link">About</a>
+        <div class="lang-selector-wrapper">
+          <i class="fa-solid fa-globe lang-icon"></i>
+          <select class="janaseva-lang-select" aria-label="Select Language">
+            <option value="en">English</option>
+            <option value="kn">ಕನ್ನಡ (Kannada)</option>
+            <option value="hi">हिन्दी (Hindi)</option>
+          </select>
+        </div>
+        <div id="nav-auth-container" style="display: inline-flex; align-items: center; gap: 8px;">
+          <!-- Injected dynamically by auth.js -->
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Offline Sync Alert Banner (shown when connection drops) -->
+  <div id="offline-sync-banner" style="display: none; background: #fffbeb; border-bottom: 2px solid #fde68a; padding: 10px 20px; align-items: center; justify-content: space-between; font-size: 13px; color: #92400e;">
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <i class="fa-solid fa-cloud-arrow-down" style="color: #d97706; font-size: 16px;"></i>
+      <span><strong>Offline Mode Active:</strong> You are currently disconnected. All configuration saves, notification copies, and operations are safely queued in local IndexedDB. Automatic sync will resume once internet returns.</span>
+    </div>
+    <span class="admin-tab-badge" style="background: #f59e0b; color: #fff;">OFFLINE PERSISTENCE</span>
+  </div>
+
+  <!-- Main Content Layout -->
+  <main class="page-main-content" style="max-width: min(1280px, 100%); margin: 0 auto; padding: 20px 16px;">
+    
+    <!-- EXECUTIVE OFFICER CONTEXT CARD -->
+    <section class="receiver-profile-box" id="receiver-profile-card" aria-labelledby="receiver-profile-name" style="flex-direction: column; align-items: stretch; gap: 14px; margin-bottom: 20px;">
+      <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
+        <div class="receiver-avatar-icon" style="background: #0b2545; color: #ffffff;">
+          <i class="fa-solid fa-server"></i>
+        </div>
+        <div class="receiver-profile-meta" style="flex: 1 1 240px; min-width: 0;">
+          <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+            <h1 class="receiver-profile-name" id="receiver-profile-name" style="font-size: 19px; font-weight: 800; color: #0b2545; margin: 0;">
+              API Management &amp; Recovery Control Centre
+            </h1>
+            <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+              <span id="network-status-indicator" class="receiver-active-pill" style="background: #dcfce7; color: #15803d; border-color: #bbf7d0;">
+                <i class="fa-solid fa-circle-check" style="color: #16a34a;"></i> <span>Online</span>
+              </span>
+              <span class="receiver-active-pill" id="receiver-profile-status" style="background: #e0f2fe; color: #0369a1; border-color: #bae6fd;">
+                <i class="fa-solid fa-user-shield"></i> <span id="receiver-status-text">Authorized User • Personal &amp; System Scope</span>
+              </span>
+            </div>
+          </div>
+          <p class="receiver-meta-line" style="margin: 4px 0 0; font-size: 13px; color: #475569;">
+            Centralized hub for managing personal and system API configurations, Unitpost email &amp; SMS delivery, personal notification copy addresses, Supabase cloud databases, 1-Click recovery, and SSRF-safe custom endpoints.
+          </p>
+        </div>
+      </div>
+
+      <!-- Quick Action Toolbar with Compulsory 3 Buttons + Custom Builder -->
+      <div class="api-quick-toolbar">
+        <button type="button" class="btn-cta-primary" onclick="openCustomApiBuilderModal()" style="background: #0f766e; border: none;">
+          <i class="fa-solid fa-plus-circle"></i> <span>Add New Custom API</span>
+        </button>
+        <button type="button" class="btn-secondary-action" onclick="refreshAllApiData()">
+          <i class="fa-solid fa-arrows-rotate"></i> <span>Refresh Telemetry</span>
+        </button>
+        <button type="button" class="btn-secondary-action" onclick="openCreateBackupModal()">
+          <i class="fa-solid fa-cloud-arrow-up"></i> <span>Snapshot Backup</span>
+        </button>
+        <button type="button" class="btn-secondary-action" onclick="openRestoreBackupModal()">
+          <i class="fa-solid fa-clock-rotate-left"></i> <span>Restore Snapshot</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- CONTROL CENTRE NAVIGATION (18 SECTIONS/TABS) -->
+    <div class="admin-tab-nav api-subnav-container" role="tablist" aria-label="API Management Control Centre Navigation">
+      
+      <!-- Top Category Switcher -->
+      <div class="api-filter-toolbar" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid #e2e8f0;">
+        <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+          <span style="font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.6px; margin-right: 4px;">
+            <i class="fa-solid fa-layer-group" style="color: #0f56b3; margin-right: 4px;"></i> Category:
+          </span>
+          <button type="button" class="api-filter-pill active" data-filter="all" onclick="filterApiNav('all')">All Modules (18)</button>
+          <button type="button" class="api-filter-pill" data-filter="overview" onclick="filterApiNav('overview')">Core Overviews (5)</button>
+          <button type="button" class="api-filter-pill" data-filter="providers" onclick="filterApiNav('providers')">Provider Integrations (6)</button>
+          <button type="button" class="api-filter-pill" data-filter="operations" onclick="filterApiNav('operations')">Operations &amp; Diagnostics (4)</button>
+          <button type="button" class="api-filter-pill" data-filter="governance" onclick="filterApiNav('governance')">Recovery &amp; Audit (3)</button>
+        </div>
+        <div id="active-tab-counter-badge" style="font-size: 12px; color: #0369a1; background: #e0f2fe; padding: 4px 12px; border-radius: 12px; font-weight: 700; border: 1px solid #bae6fd;">
+          Active View: <strong id="current-active-tab-label">Dashboard</strong>
+        </div>
+      </div>
+
+      <!-- Navigation Tab Buttons (18) -->
+      <div class="api-subnav" id="api-buttons-flow">
+        <!-- Group 1: Core Overviews (5) -->
+        <button type="button" class="admin-tab-btn api-subnav-btn active" data-api-tab="dashboard" data-category="overview" role="tab" aria-selected="true" title="API Health &amp; Operations Dashboard">
+          <i class="fa-solid fa-chart-line" style="color: #0f56b3;"></i> <span>Dashboard</span>
+        </button>
+        <button type="button" class="admin-tab-btn api-subnav-btn" data-api-tab="personal" data-category="overview" role="tab" aria-selected="false" title="My Personal API Configurations">
+          <i class="fa-solid fa-user-gear" style="color: #0d9488;"></i> <span>My Personal APIs</span>
+        </button>
+        <button type="button" class="admin-tab-btn api-subnav-btn" data-api-tab="system" data-category="overview" role="tab" aria-selected="false" title="System-Wide Shared APIs">
+          <i class="fa-solid fa-server" style="color: #0b2545;"></i> <span>System APIs</span>
+        </button>
+        <button type="button" class="admin-tab-btn api-subnav-btn" data-api-tab="configuration" data-category="overview" role="tab" aria-selected="false" title="Active Integration Pipeline Configurations">
+          <i class="fa-solid fa-sliders" style="color: #0f766e;"></i> <span>All Configurations</span>
+        </button>
+        <button type="button" class="admin-tab-btn api-subnav-btn" data-api-tab="builder" data-category="overview" role="tab" aria-selected="false" title="Universal Custom API Builder">
+          <i class="fa-solid fa-cube" style="color: #7c3aed;"></i> <span>Custom API Builder</span>
+        </button>
+
+        <!-- Group 2: Provider Integrations (6) -->
+        <button type="button" class="admin-tab-btn api-subnav-btn" data-api-tab="email" data-category="providers" role="tab" aria-selected="false" title="Unitpost Email &amp; Administrative Copy Address">
+          <i class="fa-solid fa-envelope" style="color: #0284c7;"></i> <span>Email &amp; Copy Recipient</span>
+        </button>
+        <button type="button" class="admin-tab-btn api-subnav-btn" data-api-tab="sms-whatsapp" data-category="providers" role="tab" aria-selected="false" title="Unitpost SMS &amp; Meta WhatsApp Business Cloud API">
+          <i class="fa-brands fa-whatsapp" style="color: #16a34a;"></i> <span>SMS &amp; WhatsApp</span>
+        </button>
+        <button type="button" class="admin-tab-btn api-subnav-btn" data-api-tab="ai" data-category="providers" role="tab" aria-selected="false" title="Google Gemini 2.5 Flash &amp; OpenAI Failover Assistant">
+          <i class="fa-solid fa-brain" style="color: #8b5cf6;"></i> <span>AI Assistant</span>
+        </button>
+        <button type="button" class="admin-tab-btn api-subnav-btn" data-api-tab="maps" data-category="providers" role="tab" aria-selected="false" title="Smart Village Maps, Geocoding &amp; GIS">
+          <i class="fa-solid fa-map-location-dot" style="color: #059669;"></i> <span>Maps &amp; GIS</span>
+        </button>
+        <button type="button" class="admin-tab-btn api-subnav-btn" data-api-tab="ocr" data-category="providers" role="tab" aria-selected="false" title="Hybrid Document Verification &amp; OCR Engine">
+          <i class="fa-solid fa-file-invoice" style="color: #d97706;"></i> <span>OCR &amp; Vision</span>
+        </button>
+        <button type="button" class="admin-tab-btn api-subnav-btn" data-api-tab="database" data-category="providers" role="tab" aria-selected="false" title="Supabase Cloud Database &amp; Sub-System Telemetry">
+          <i class="fa-solid fa-database" style="color: #059669;"></i> <span>Supabase Database</span>
+        </button>
+
+        <!-- Group 3: Operations & Diagnostics (4) -->
+        <button type="button" class="admin-tab-btn api-subnav-btn" data-api-tab="connection-test" data-category="operations" role="tab" aria-selected="false" title="Interactive API Connection Diagnostics">
+          <i class="fa-solid fa-bolt" style="color: #f59e0b;"></i> <span>Connection Test</span>
+        </button>
+        <button type="button" class="admin-tab-btn api-subnav-btn" data-api-tab="monitoring" data-category="operations" role="tab" aria-selected="false" title="Live Health Telemetry, Latency &amp; Resilience">
+          <i class="fa-solid fa-heart-pulse" style="color: #e11d48;"></i> <span>Monitoring &amp; Health</span>
+        </button>
+        <button type="button" class="admin-tab-btn api-subnav-btn" data-api-tab="offline" data-category="operations" role="tab" aria-selected="false" title="IndexedDB Offline Outbox &amp; Idempotent Sync">
+          <i class="fa-solid fa-network-wired" style="color: #0284c7;"></i> <span>Offline &amp; Sync</span>
+        </button>
+        <button type="button" class="admin-tab-btn api-subnav-btn" data-api-tab="recovery" data-category="operations" role="tab" aria-selected="false" title="Fast Emergency Recovery &amp; State Restoral">
+          <i class="fa-solid fa-rotate-left" style="color: #ea580c;"></i> <span>1-Click Recovery</span>
+        </button>
+
+        <!-- Group 4: Governance & Backups (3) -->
+        <button type="button" class="admin-tab-btn api-subnav-btn" data-api-tab="backup-restore" data-category="governance" role="tab" aria-selected="false" title="SHA-256 Configuration Snapshot Backup &amp; Rollback">
+          <i class="fa-solid fa-cloud-arrow-up" style="color: #2563eb;"></i> <span>Backup &amp; Restore</span>
+        </button>
+        <button type="button" class="admin-tab-btn api-subnav-btn" data-api-tab="error-logs" data-category="governance" role="tab" aria-selected="false" title="Forensic API Error &amp; Failure Log Inspector">
+          <i class="fa-solid fa-triangle-exclamation" style="color: #dc2626;"></i> <span>Error Logs</span>
+        </button>
+        <button type="button" class="admin-tab-btn api-subnav-btn" data-api-tab="history" data-category="governance" role="tab" aria-selected="false" title="Tamper-Evident API Audit Trail &amp; Lifecycle Ledger">
+          <i class="fa-solid fa-clock-rotate-left" style="color: #475569;"></i> <span>Audit History</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- SECTION 1: API DASHBOARD -->
+    <section class="portal-card api-tab-panel active" id="section-api-dashboard" style="margin-bottom: 20px;">
+      <div class="portal-card-header" style="border-bottom: 1px solid #e2e8f0; padding: 14px 20px;">
+        <div class="card-title-group">
+          <i class="fa-solid fa-chart-line card-header-icon" style="color: #0f56b3;"></i>
+          <div>
+            <h2 class="card-heading" style="font-size: 16px;">API Health &amp; Operations Dashboard</h2>
+            <p class="card-subheading" style="font-size: 12.5px;">Real-time integration status, active vs failed services, 24-hour latency, and resilience metrics.</p>
+          </div>
+        </div>
+        <div id="api-dashboard-usm-status"></div>
+      </div>
+      <div class="portal-card-body" style="padding: 20px;">
+        <div class="api-kpi-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 14px; margin-bottom: 24px;">
+          <div class="api-kpi-card" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px; text-align: center;">
+            <div class="api-kpi-num" id="kpi-total-apis" style="font-size: 24px; font-weight: 800; color: #0b2545;">6</div>
+            <div class="api-kpi-label" style="font-size: 11.5px; color: #64748b; font-weight: 700; text-transform: uppercase;">Total APIs</div>
+          </div>
+          <div class="api-kpi-card" style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 14px; text-align: center;">
+            <div class="api-kpi-num" id="kpi-connected-apis" style="font-size: 24px; font-weight: 800; color: #16a34a;">6</div>
+            <div class="api-kpi-label" style="font-size: 11.5px; color: #166534; font-weight: 700; text-transform: uppercase;">Connected</div>
+          </div>
+          <div class="api-kpi-card" style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 14px; text-align: center;">
+            <div class="api-kpi-num" id="kpi-failed-apis" style="font-size: 24px; font-weight: 800; color: #dc2626;">0</div>
+            <div class="api-kpi-label" style="font-size: 11.5px; color: #991b1b; font-weight: 700; text-transform: uppercase;">Failed</div>
+          </div>
+          <div class="api-kpi-card" style="background: #fefce8; border: 1px solid #fef08a; border-radius: 8px; padding: 14px; text-align: center;">
+            <div class="api-kpi-num" id="kpi-disabled-apis" style="font-size: 24px; font-weight: 800; color: #ca8a04;">0</div>
+            <div class="api-kpi-label" style="font-size: 11.5px; color: #854d0e; font-weight: 700; text-transform: uppercase;">Disabled</div>
+          </div>
+          <div class="api-kpi-card" style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 14px; text-align: center;">
+            <div class="api-kpi-num" id="kpi-total-recoveries" style="font-size: 24px; font-weight: 800; color: #2563eb;">0</div>
+            <div class="api-kpi-label" style="font-size: 11.5px; color: #1e40af; font-weight: 700; text-transform: uppercase;">Recoveries</div>
+          </div>
+        </div>
+
+        <div class="directory-table-responsive">
+          <table class="directory-table">
+            <thead>
+              <tr>
+                <th>Service Name</th>
+                <th>Provider / Transport</th>
+                <th>Category</th>
+                <th>Connection Status</th>
+                <th>Uptime (24h)</th>
+                <th>Avg Latency</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="api-dashboard-matrix-body">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 2: MY PERSONAL APIS -->
+    <section class="portal-card api-tab-panel" id="section-api-personal" style="display: none; margin-bottom: 20px;">
+      <div class="portal-card-header" style="border-bottom: 1px solid #e2e8f0; padding: 14px 20px; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+        <div class="card-title-group">
+          <i class="fa-solid fa-user-gear card-header-icon" style="color: #0d9488;"></i>
+          <div>
+            <h2 class="card-heading" style="font-size: 16px;">My Personal API Configurations</h2>
+            <p class="card-subheading" style="font-size: 12.5px;">Account-scoped integrations. You have complete freedom to create, edit, save, delete, test, and recover your own personal APIs.</p>
+          </div>
+        </div>
+        <button type="button" class="btn-cta-primary" onclick="openCustomApiBuilderModal('personal')" style="background: #0d9488; border: none; padding: 6px 14px; font-size: 12.5px; border-radius: 6px;">
+          <i class="fa-solid fa-plus"></i> Add Personal API
+        </button>
+      </div>
+      <div class="portal-card-body" style="padding: 20px;">
+        <div id="personal-apis-container" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px;">
+          <!-- Dynamically populated -->
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 3: ALL CONFIGURATIONS (Legacy backward compatibility) -->
+    <section class="portal-card api-tab-panel" id="section-api-configuration" style="display: none; margin-bottom: 20px;">
+      <div class="portal-card-header" style="border-bottom: 1px solid #e2e8f0; padding: 14px 20px;">
+        <div class="card-title-group">
+          <i class="fa-solid fa-sliders card-header-icon" style="color: #0f766e;"></i>
+          <div>
+            <h2 class="card-heading" style="font-size: 16px;">Active Integration Pipeline Configurations</h2>
+            <p class="card-subheading" style="font-size: 12.5px;">Manage endpoints, rate limits, timeouts, and credentials with server-side masking across all 6 core APIs.</p>
+          </div>
+        </div>
+        <div id="api-config-usm-status"></div>
+      </div>
+      <div class="portal-card-body" style="padding: 20px;">
+        <div id="api-configurations-container" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px;">
+          <!-- Dynamically populated -->
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 4: SYSTEM APIS -->
+    <section class="portal-card api-tab-panel" id="section-api-system" style="display: none; margin-bottom: 20px;">
+      <div class="portal-card-header" style="border-bottom: 1px solid #e2e8f0; padding: 14px 20px;">
+        <div class="card-title-group">
+          <i class="fa-solid fa-server card-header-icon" style="color: #0b2545;"></i>
+          <div>
+            <h2 class="card-heading" style="font-size: 16px;">System-Wide Shared APIs (Admin Authority)</h2>
+            <p class="card-subheading" style="font-size: 12.5px;">Global infrastructure powering JANASEVA civic dispatches, government SMS gateways, and shared AI pipelines.</p>
+          </div>
+        </div>
+        <span class="admin-tab-badge" style="background: #0b2545; color: #fff;">SHARED INFRASTRUCTURE</span>
+      </div>
+      <div class="portal-card-body" style="padding: 20px;">
+        <div id="system-apis-container" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px;">
+          <!-- Dynamically populated -->
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 5: UNIVERSAL CUSTOM API BUILDER -->
+    <section class="portal-card api-tab-panel" id="section-api-builder" style="display: none; margin-bottom: 20px;">
+      <div class="portal-card-header" style="border-bottom: 1px solid #e2e8f0; padding: 14px 20px;">
+        <div class="card-title-group">
+          <i class="fa-solid fa-cube card-header-icon" style="color: #7c3aed;"></i>
+          <div>
+            <h2 class="card-heading" style="font-size: 16px;">Universal Custom API Builder</h2>
+            <p class="card-subheading" style="font-size: 12.5px;">Create and test custom REST integrations with SSRF protection, dynamic request templates, and custom authentication.</p>
+          </div>
+        </div>
+        <button type="button" class="btn-cta-primary" onclick="openCustomApiBuilderModal()" style="background: #7c3aed; border: none; padding: 6px 14px; font-size: 12.5px; border-radius: 6px;">
+          <i class="fa-solid fa-plus"></i> Open Full Builder Modal
+        </button>
+      </div>
+      <div class="portal-card-body" style="padding: 20px;">
+        <div style="display: flex; justify-content: flex-end; margin-bottom: 16px;">
+          <button type="button" class="btn-cta-primary" onclick="window.JanasevaCustomApiManager && window.JanasevaCustomApiManager.openBuilderWizard()" style="background: linear-gradient(135deg, #0d9488, #0f766e); border: none; padding: 8px 18px; font-size: 13px; border-radius: 6px; font-weight: 700; cursor: pointer; color: #fff;">
+            <i class="fa-solid fa-plus-circle"></i> + CREATE MY OWN API
+          </button>
+        </div>
+        <div id="custom-apis-dashboard-container">
+          <!-- Populated by JanasevaCustomApiManager -->
+        </div>
+        <div style="margin-top: 24px;">
+          <h3 style="font-size: 15px; font-weight: 700; color: #0b2545; margin-bottom: 12px;">
+            <i class="fa-solid fa-book-bookmark" style="color: #0284c7;"></i> HOW TO CONNECT MY API (DOCUMENTATION GUIDE)
+          </h3>
+          <div id="api-doc-guide-container">
+            <!-- Populated by JanasevaCustomApiManager -->
+          </div>
+        </div>
+        <div id="custom-builder-list" style="display: none;"></div>
+      </div>
+    </section>
+
+    <!-- SECTION 6: EMAIL API & PERSONAL COPY RECIPIENT SETTINGS -->
+    <section class="portal-card api-tab-panel" id="section-api-email" style="display: none; margin-bottom: 20px;">
+      <div class="portal-card-header" style="border-bottom: 1px solid #e2e8f0; padding: 14px 20px;">
+        <div class="card-title-group">
+          <i class="fa-solid fa-envelope card-header-icon" style="color: #0284c7;"></i>
+          <div>
+            <h2 class="card-heading" style="font-size: 16px;">Email API &amp; Personal Notification Copy Settings</h2>
+            <p class="card-subheading" style="font-size: 12.5px;">Unitpost and SMTP configuration. Configure your personal email address to receive administrative duplicate copies of citizen grievances.</p>
+          </div>
+        </div>
+      </div>
+      <div class="portal-card-body" style="padding: 20px;">
+        
+        <!-- Personal Copy Email Box -->
+        <div style="background: #f0f9ff; border: 1.5px solid #bae6fd; border-radius: 8px; padding: 18px; margin-bottom: 20px;">
+          <h3 style="margin: 0 0 8px; font-size: 15px; color: #0369a1; display: flex; align-items: center; gap: 8px;">
+            <i class="fa-solid fa-copy"></i> Personal Administrative Notification Copy Feature
+          </h3>
+          <p style="font-size: 13px; color: #334155; margin-bottom: 14px;">
+            Configure your own email address to automatically receive administrative copies of citizen complaint receipts, status transitions, and official response updates. This is independent of the provider API credentials.
+          </p>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; margin-bottom: 14px;">
+            <div class="form-group" style="margin: 0;">
+              <label class="form-label" style="font-size: 12.5px; font-weight: 700;">My Personal Receiving Email Address</label>
+              <input type="email" id="pref-personal-copy-email" class="form-input" placeholder="e.g. officer.personal@gmail.com">
+            </div>
+            <div style="display: flex; flex-direction: column; justify-content: center; gap: 6px;">
+              <label style="display: flex; align-items: center; gap: 8px; font-size: 12.5px; cursor: pointer;">
+                <input type="checkbox" id="pref-copy-on-submission" checked>
+                <span>Receive duplicate on new citizen submission</span>
+              </label>
+              <label style="display: flex; align-items: center; gap: 8px; font-size: 12.5px; cursor: pointer;">
+                <input type="checkbox" id="pref-copy-on-status" checked>
+                <span>Receive duplicate on official status changes</span>
+              </label>
+            </div>
+          </div>
+          <div style="display: flex; gap: 8px; justify-content: flex-end;">
+            <button type="button" class="btn-cta-primary" onclick="savePersonalEmailPreferences()" style="background: #0284c7; border: none; padding: 7px 16px; font-size: 12.5px;">
+              <i class="fa-solid fa-floppy-disk"></i> Save Personal Email Settings
+            </button>
+          </div>
+        </div>
+
+        <!-- Email Provider Card (Unitpost / SMTP) -->
+        <div id="email-provider-card-container">
+          <!-- Populated dynamically with Unitpost card and compulsory Save/Delete/Refresh buttons -->
+        </div>
+
+      </div>
+    </section>
+
+    <!-- SECTION 7: SMS & WHATSAPP API SETTINGS -->
+    <section class="portal-card api-tab-panel" id="section-api-sms-whatsapp" style="display: none; margin-bottom: 20px;">
+      <div class="portal-card-header" style="border-bottom: 1px solid #e2e8f0; padding: 14px 20px;">
+        <div class="card-title-group">
+          <i class="fa-brands fa-whatsapp card-header-icon" style="color: #16a34a;"></i>
+          <div>
+            <h2 class="card-heading" style="font-size: 16px;">SMS &amp; WhatsApp Business API Settings</h2>
+            <p class="card-subheading" style="font-size: 12.5px;">Meta WhatsApp Cloud API &amp; Unitpost SMS Gateway. Real connection verification ensures WhatsApp only displays connected when verified.</p>
+          </div>
+        </div>
+      </div>
+      <div class="portal-card-body" style="padding: 20px;">
+        <div id="sms-whatsapp-card-container">
+          <!-- Populated dynamically -->
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 8: AI API SETTINGS -->
+    <section class="portal-card api-tab-panel" id="section-api-ai" style="display: none; margin-bottom: 20px;">
+      <div class="portal-card-header" style="border-bottom: 1px solid #e2e8f0; padding: 14px 20px;">
+        <div class="card-title-group">
+          <i class="fa-solid fa-brain card-header-icon" style="color: #0f56b3;"></i>
+          <div>
+            <h2 class="card-heading" style="font-size: 16px;">AI Assistant &amp; Knowledge Centre API</h2>
+            <p class="card-subheading" style="font-size: 12.5px;">Configure Google Gemini 2.5 Flash as Primary and OpenAI GPT-4o as Secondary fallback with Kannada, Hindi, and English support.</p>
+          </div>
+        </div>
+      </div>
+      <div class="portal-card-body" style="padding: 20px;">
+        <div id="ai-provider-card-container">
+          <!-- Populated dynamically -->
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 9: MAPS & GIS API SETTINGS -->
+    <section class="portal-card api-tab-panel" id="section-api-maps" style="display: none; margin-bottom: 20px;">
+      <div class="portal-card-header" style="border-bottom: 1px solid #e2e8f0; padding: 14px 20px;">
+        <div class="card-title-group">
+          <i class="fa-solid fa-map-location-dot card-header-icon" style="color: #0d9488;"></i>
+          <div>
+            <h2 class="card-heading" style="font-size: 16px;">Smart Village GIS &amp; Map API Settings</h2>
+            <p class="card-subheading" style="font-size: 12.5px;">OpenStreetMap Nominatim and Google Maps Platform for Gram Panchayat boundary navigation and geolocation pins.</p>
+          </div>
+        </div>
+      </div>
+      <div class="portal-card-body" style="padding: 20px;">
+        <div id="maps-provider-card-container">
+          <!-- Populated dynamically -->
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 10: OCR & DOCUMENT SCANNING API -->
+    <section class="portal-card api-tab-panel" id="section-api-ocr" style="display: none; margin-bottom: 20px;">
+      <div class="portal-card-header" style="border-bottom: 1px solid #e2e8f0; padding: 14px 20px;">
+        <div class="card-title-group">
+          <i class="fa-solid fa-file-invoice card-header-icon" style="color: #d97706;"></i>
+          <div>
+            <h2 class="card-heading" style="font-size: 16px;">OCR &amp; Document Verification API</h2>
+            <p class="card-subheading" style="font-size: 12.5px;">Google Cloud Vision API paired with genuine client-side Tesseract.js Web Worker offline fallback for Kannada, Hindi, and English certificates.</p>
+          </div>
+        </div>
+      </div>
+      <div class="portal-card-body" style="padding: 20px;">
+        <div id="ocr-provider-card-container">
+          <!-- Populated dynamically -->
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 11: DATABASE & SUPABASE SUB-SYSTEMS -->
+    <section class="portal-card api-tab-panel" id="section-api-database" style="display: none; margin-bottom: 20px;">
+      <div class="portal-card-header" style="border-bottom: 1px solid #e2e8f0; padding: 14px 20px;">
+        <div class="card-title-group">
+          <i class="fa-solid fa-database card-header-icon" style="color: #2563eb;"></i>
+          <div>
+            <h2 class="card-heading" style="font-size: 16px;">Database &amp; Supabase Cloud Backend API</h2>
+            <p class="card-subheading" style="font-size: 12.5px;">PostgreSQL Database, Supabase Auth, Storage, and Realtime sub-systems with independent health diagnostics.</p>
+          </div>
+        </div>
+      </div>
+      <div class="portal-card-body" style="padding: 20px;">
+        <div id="supabase-subsystems-status-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin-bottom: 20px;">
+          <!-- Populated dynamically with Database, Auth, Storage, Realtime, Edge Functions cards -->
+        </div>
+        <div id="database-provider-card-container">
+          <!-- Populated dynamically -->
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 12: CONNECTION TEST DIAGNOSTIC STUDIO -->
+    <section class="portal-card api-tab-panel" id="section-api-connection-test" style="display: none; margin-bottom: 20px;">
+      <div class="portal-card-header" style="border-bottom: 1px solid #e2e8f0; padding: 14px 20px;">
+        <div class="card-title-group">
+          <i class="fa-solid fa-bolt card-header-icon" style="color: #f59e0b;"></i>
+          <div>
+            <h2 class="card-heading" style="font-size: 16px;">Live Connection Test Studio</h2>
+            <p class="card-subheading" style="font-size: 12.5px;">Perform safe, non-destructive provider pings to verify transport latency, TLS handshakes, and credential validity.</p>
+          </div>
+        </div>
+        <div id="api-test-usm-status"></div>
+      </div>
+      <div class="portal-card-body" style="padding: 20px;">
+        <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 16px; flex-wrap: wrap;">
+          <select id="test-api-select" class="form-select" style="max-width: 280px;">
+            <option value="email_api">Unitpost / Email Delivery API</option>
+            <option value="ai_api">Google Gemini AI API</option>
+            <option value="whatsapp_api">Meta WhatsApp Cloud API</option>
+            <option value="ocr_api">Google Cloud Vision OCR API</option>
+            <option value="notification_api">Firebase Push Notification API</option>
+            <option value="knowledge_api">Knowledge Inward Receiver API</option>
+          </select>
+          <button type="button" class="btn-cta-primary" onclick="executeSelectedApiTest()" style="background: #0f766e; border: none; padding: 8px 18px;">
+            <i class="fa-solid fa-play"></i> Run Live Connection Test
+          </button>
+        </div>
+        <div id="api-test-results-panel" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px;">
+          <p style="margin: 0; color: #64748b; font-size: 13px;">Select an integrated service above and run a connection probe to inspect live latency and HTTP response status.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 13: MONITORING & HEALTH -->
+    <section class="portal-card api-tab-panel" id="section-api-monitoring" style="display: none; margin-bottom: 20px;">
+      <div class="portal-card-header" style="border-bottom: 1px solid #e2e8f0; padding: 14px 20px;">
+        <div class="card-title-group">
+          <i class="fa-solid fa-heart-pulse card-header-icon" style="color: #dc2626;"></i>
+          <div>
+            <h2 class="card-heading" style="font-size: 16px;">API Telemetry &amp; Uptime Monitoring</h2>
+            <p class="card-subheading" style="font-size: 12.5px;">24-hour service uptime records, mean latency ms, and hourly failure distributions.</p>
+          </div>
+        </div>
+      </div>
+      <div class="portal-card-body" style="padding: 20px;">
+        <div id="api-monitoring-telemetry-container">
+          <!-- Dynamically populated -->
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 14: OFFLINE & SYNC QUEUE -->
+    <section class="portal-card api-tab-panel" id="section-api-offline" style="display: none; margin-bottom: 20px;">
+      <div class="portal-card-header" style="border-bottom: 1px solid #e2e8f0; padding: 14px 20px; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+        <div class="card-title-group">
+          <i class="fa-solid fa-network-wired card-header-icon" style="color: #f59e0b;"></i>
+          <div>
+            <h2 class="card-heading" style="font-size: 16px;">Offline Resilience &amp; Reconnection Sync Queue</h2>
+            <p class="card-subheading" style="font-size: 12.5px;">Monitors operations stored locally in IndexedDB when internet is disconnected. Operations automatically dispatch with idempotency upon reconnection.</p>
+          </div>
+        </div>
+        <button type="button" class="btn-secondary-action" onclick="window.JanasevaSyncEngine.syncPendingQueues()" style="padding: 6px 14px; font-size: 12.5px;">
+          <i class="fa-solid fa-rotate"></i> Sync Queues Now
+        </button>
+      </div>
+      <div class="portal-card-body" style="padding: 20px;">
+        <div id="offline-queue-list-container">
+          <!-- Dynamically populated with pending notifications and grievance sync tasks -->
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 15: 1-CLICK RECOVERY & ROLLBACK STUDIO -->
+    <section class="portal-card api-tab-panel" id="section-api-recovery" style="display: none; margin-bottom: 20px;">
+      <div class="portal-card-header" style="border-bottom: 1px solid #e2e8f0; padding: 14px 20px;">
+        <div class="card-title-group">
+          <i class="fa-solid fa-rotate-left card-header-icon" style="color: #7c3aed;"></i>
+          <div>
+            <h2 class="card-heading" style="font-size: 16px;">1-Click Rollback &amp; Disaster Recovery</h2>
+            <p class="card-subheading" style="font-size: 12.5px;">Instantly revert broken or degraded configurations to the last known working state with side-by-side JSON diff inspection.</p>
+          </div>
+        </div>
+        <div id="api-recovery-usm-status"></div>
+      </div>
+      <div class="portal-card-body" style="padding: 20px;">
+        <div id="api-rollback-cards-container" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px;">
+          <!-- Dynamically populated -->
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 16: BACKUP & VERSIONING -->
+    <section class="portal-card api-tab-panel" id="section-api-backup-restore" style="display: none; margin-bottom: 20px;">
+      <div class="portal-card-header" style="border-bottom: 1px solid #e2e8f0; padding: 14px 20px; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+        <div class="card-title-group">
+          <i class="fa-solid fa-cloud-arrow-up card-header-icon" style="color: #2563eb;"></i>
+          <div>
+            <h2 class="card-heading" style="font-size: 16px;">Configuration Snapshots &amp; Versioned Backups</h2>
+            <p class="card-subheading" style="font-size: 12.5px;">Export and import cryptographically signed snapshots (SHA-256). Backups preserve metadata and safe references; secrets are never dumped in plaintext.</p>
+          </div>
+        </div>
+        <div id="api-backup-usm-status"></div>
+      </div>
+      <div class="portal-card-body" style="padding: 20px;">
+        <div style="display: flex; gap: 10px; margin-bottom: 18px; flex-wrap: wrap;">
+          <button type="button" class="btn-cta-primary" onclick="openCreateBackupModal()" style="background: #2563eb; border: none; padding: 8px 18px;">
+            <i class="fa-solid fa-plus"></i> Create Manual Snapshot
+          </button>
+          <button type="button" class="btn-secondary-action" onclick="exportBackupToFile()" style="padding: 8px 18px;">
+            <i class="fa-solid fa-download"></i> Export Snapshot JSON
+          </button>
+          <label class="btn-secondary-action" style="padding: 8px 18px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+            <i class="fa-solid fa-upload"></i> <span>Import Snapshot JSON</span>
+            <input type="file" id="backup-file-importer" accept=".json" style="display: none;" onchange="importBackupFromFile(event)">
+          </label>
+        </div>
+        <div class="directory-table-responsive">
+          <table class="directory-table">
+            <thead>
+              <tr>
+                <th>Version ID</th>
+                <th>Label / Description</th>
+                <th>APIs Included</th>
+                <th>SHA-256 Digest</th>
+                <th>Created At</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="api-backup-table-body">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 17: SANITIZED ERROR LOGS -->
+    <section class="portal-card api-tab-panel" id="section-api-error-logs" style="display: none; margin-bottom: 20px;">
+      <div class="portal-card-header" style="border-bottom: 1px solid #e2e8f0; padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+        <div class="card-title-group">
+          <i class="fa-solid fa-triangle-exclamation card-header-icon" style="color: #dc2626;"></i>
+          <div>
+            <h2 class="card-heading" style="font-size: 16px;">Sanitized Integration Error Logs</h2>
+            <p class="card-subheading" style="font-size: 12.5px;">Review diagnostic failure records. API tokens, credentials, and passwords are strictly redacted from log entries.</p>
+          </div>
+        </div>
+        <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+          <button type="button" class="btn-secondary" onclick="clearAllErrorLogs()" style="padding: 7px 14px; font-size: 12.5px; color: #dc2626; border: 1px solid #fecaca; background: #fff5f5; border-radius: 6px; cursor: pointer;">
+            <i class="fa-solid fa-trash-can"></i> Clear Error Logs
+          </button>
+        </div>
+      </div>
+      <div class="portal-card-body" style="padding: 20px;">
+        <div class="directory-table-responsive">
+          <table class="directory-table">
+            <thead>
+              <tr>
+                <th>Timestamp</th>
+                <th>API Integration</th>
+                <th>Error Code / Status</th>
+                <th>Sanitized Error Details</th>
+                <th>Actionable Remediation</th>
+                <th style="text-align: center; width: 90px;">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="api-errors-table-body">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 18: AUDIT HISTORY -->
+    <section class="portal-card api-tab-panel" id="section-api-history" style="display: none; margin-bottom: 20px;">
+      <div class="portal-card-header" style="border-bottom: 1px solid #e2e8f0; padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+        <div class="card-title-group">
+          <i class="fa-solid fa-clock-rotate-left card-header-icon" style="color: #475569;"></i>
+          <div>
+            <h2 class="card-heading" style="font-size: 16px;">Chronological Audit Ledger</h2>
+            <p class="card-subheading" style="font-size: 12.5px;">Tamper-evident record of all configuration modifications, rotations, connection tests, and rollback events.</p>
+          </div>
+        </div>
+        <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+          <button type="button" class="btn-primary" onclick="exportAuditLogsToFile()" style="padding: 7px 14px; font-size: 12.5px; background: #0f766e; border-color: #0f766e; border-radius: 6px; cursor: pointer;">
+            <i class="fa-solid fa-file-arrow-down"></i> Export Ledger
+          </button>
+          <button type="button" class="btn-secondary" onclick="purgeOldAuditLogs(30)" style="padding: 7px 14px; font-size: 12.5px; color: #b45309; border: 1px solid #fde68a; background: #fffbeb; border-radius: 6px; cursor: pointer;">
+            <i class="fa-solid fa-clock-rotate-left"></i> Purge &gt;30 Days
+          </button>
+          <button type="button" class="btn-secondary" onclick="clearAllAuditLogs()" style="padding: 7px 14px; font-size: 12.5px; color: #dc2626; border: 1px solid #fecaca; background: #fff5f5; border-radius: 6px; cursor: pointer;">
+            <i class="fa-solid fa-trash-can"></i> Clear Ledger
+          </button>
+        </div>
+      </div>
+      <div class="portal-card-body" style="padding: 20px;">
+        <div class="directory-table-responsive">
+          <table class="directory-table">
+            <thead>
+              <tr>
+                <th>Timestamp</th>
+                <th>Action</th>
+                <th>API Scope &amp; Target</th>
+                <th>Audit Details</th>
+                <th>Authorized Actor</th>
+                <th style="text-align: center; width: 90px;">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="api-history-table-body">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="portal-footer">
+    <div class="footer-wave-line"></div>
+    <div class="footer-content">
+      <div class="footer-disclaimer">
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px;">
+          <img src="assets/branding/janaseva-icon.png" alt="JANASEVA Logo" class="footer-emblem-img" width="26" height="26" style="width: 26px; height: 26px; object-fit: contain;">
+          <strong>JANASEVA – Gram Panchayat Grievance Portal</strong>
+        </div>
+        This portal is an academic student project created for civic grievance demonstration. Not an official Government of India website.
+      </div>
+      <div class="footer-links-group">
+        <a href="index.html">Home</a>
+        <a href="complaint.html">Submit Complaint</a>
+        <a href="track.html">Track Status</a>
+        <a href="directory.html">Directory</a>
+        <a href="knowledge-centre.html">Knowledge Centre</a>
+        <a href="about.html">About</a>
+        <a href="https://ipchat.in/" target="_blank" rel="noopener noreferrer">IP Chat – External Messaging Service</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ========================================================================= -->
+  <!-- MODALS -->
+  <!-- ========================================================================= -->
+
+  <!-- MODAL: UNIVERSAL CUSTOM API BUILDER (24 SPECIFIC FIELDS) -->
+  <div class="modal-overlay" id="modal-custom-api-builder" style="display: none;">
+    <div class="modal-window" style="max-width: 860px; max-height: 90vh; overflow-y: auto;">
+      <div class="modal-header" style="background: #0f766e; color: #fff; padding: 16px 22px;">
+        <div class="modal-title" style="display: flex; align-items: center; gap: 10px; color: #fff;">
+          <i class="fa-solid fa-cube"></i>
+          <span>Universal Custom API Integration Builder</span>
+        </div>
+        <button type="button" class="modal-close-btn" onclick="closeCustomApiBuilderModal()" style="color: #fff;">&times;</button>
+      </div>
+
+      <form id="custom-api-builder-form" onsubmit="handleCustomApiBuilderSubmit(event)">
+        <div class="modal-body" style="padding: 22px;">
+          <p style="font-size: 13px; color: #475569; margin-bottom: 18px;">
+            Configure any external REST or webhook endpoint with custom authentication, request body templates, retry rules, and device compatibility without requiring code modifications.
+          </p>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; margin-bottom: 16px;">
+            <!-- 1. API Name -->
+            <div class="form-group">
+              <label class="form-label">1. API Name<span class="req-star">*</span></label>
+              <input type="text" id="builder-name" class="form-input" placeholder="e.g. Gram Panchayat SMS Alert" required>
+            </div>
+            <!-- 2. Provider Name -->
+            <div class="form-group">
+              <label class="form-label">2. Provider Name<span class="req-star">*</span></label>
+              <input type="text" id="builder-provider" class="form-input" placeholder="e.g. Unitpost / Twilio / Custom" required>
+            </div>
+            <!-- 3. Category -->
+            <div class="form-group">
+              <label class="form-label">3. API Category<span class="req-star">*</span></label>
+              <select id="builder-category" class="form-select" required>
+                <option value="email">Email API</option>
+                <option value="sms_whatsapp">SMS &amp; WhatsApp API</option>
+                <option value="ai">AI &amp; LLM Assistant API</option>
+                <option value="maps_gis">Maps &amp; GIS API</option>
+                <option value="ocr">OCR &amp; Document Scanning API</option>
+                <option value="database">Database &amp; Backend API</option>
+                <option value="custom" selected>Custom Integration API</option>
+              </select>
+            </div>
+            <!-- 4. Endpoint URL -->
+            <div class="form-group" style="grid-column: 1 / -1;">
+              <label class="form-label">4. API Endpoint URL (HTTPS)<span class="req-star">*</span></label>
+              <input type="url" id="builder-endpoint" class="form-input" placeholder="https://api.provider.com/v1/resource" required>
+            </div>
+            <!-- 5. HTTP Method -->
+            <div class="form-group">
+              <label class="form-label">5. HTTP Method<span class="req-star">*</span></label>
+              <select id="builder-method" class="form-select">
+                <option value="POST" selected>POST</option>
+                <option value="GET">GET</option>
+                <option value="PUT">PUT</option>
+                <option value="PATCH">PATCH</option>
+                <option value="DELETE">DELETE</option>
+              </select>
+            </div>
+            <!-- 6. Auth Method -->
+            <div class="form-group">
+              <label class="form-label">6. Authentication Method<span class="req-star">*</span></label>
+              <select id="builder-auth-type" class="form-select" onchange="toggleBuilderAuthFields(this.value)">
+                <option value="none">No Authentication</option>
+                <option value="api_key">API Key (Header / Query)</option>
+                <option value="bearer_token" selected>Bearer Token</option>
+                <option value="basic">Basic Auth (User &amp; Pass)</option>
+                <option value="oauth2">OAuth 2.0</option>
+                <option value="custom">Custom Headers Only</option>
+              </select>
+            </div>
+            <!-- 7. API Key -->
+            <div class="form-group" id="group-builder-api-key">
+              <label class="form-label">7. API Key / Token</label>
+              <input type="password" id="builder-api-key" class="form-input" placeholder="••••••••">
+            </div>
+            <!-- 8. Bearer Token -->
+            <div class="form-group" id="group-builder-bearer-token">
+              <label class="form-label">8. Bearer Token</label>
+              <input type="password" id="builder-bearer-token" class="form-input" placeholder="Bearer eyJhbGci...">
+            </div>
+            <!-- 9. Basic Auth Credentials -->
+            <div class="form-group" id="group-builder-basic-user" style="display: none;">
+              <label class="form-label">9a. Basic Auth Username</label>
+              <input type="text" id="builder-basic-user" class="form-input" placeholder="Username">
+            </div>
+            <div class="form-group" id="group-builder-basic-pass" style="display: none;">
+              <label class="form-label">9b. Basic Auth Password</label>
+              <input type="password" id="builder-basic-pass" class="form-input" placeholder="Password">
+            </div>
+            <!-- 10. OAuth 2.0 Token Endpoint -->
+            <div class="form-group" id="group-builder-oauth-token-url" style="display: none;">
+              <label class="form-label">10. OAuth 2.0 Token URL</label>
+              <input type="url" id="builder-oauth-token-url" class="form-input" placeholder="https://auth.provider.com/oauth/token">
+            </div>
+            <!-- 14. Content Type -->
+            <div class="form-group">
+              <label class="form-label">14. Content Type</label>
+              <select id="builder-content-type" class="form-select">
+                <option value="application/json" selected>application/json</option>
+                <option value="application/x-www-form-urlencoded">application/x-www-form-urlencoded</option>
+                <option value="multipart/form-data">multipart/form-data</option>
+              </select>
+            </div>
+            <!-- 15. Timeout -->
+            <div class="form-group">
+              <label class="form-label">15. Timeout Configuration (ms)</label>
+              <input type="number" id="builder-timeout" class="form-input" value="8000" min="1000" max="30000">
+            </div>
+            <!-- 16. Retry Settings -->
+            <div class="form-group">
+              <label class="form-label">16. Retry Settings (Max Retries)</label>
+              <input type="number" id="builder-retries" class="form-input" value="3" min="0" max="5">
+            </div>
+            <!-- 17. Rate Limits -->
+            <div class="form-group">
+              <label class="form-label">17. Rate Limits (Requests / min)</label>
+              <input type="number" id="builder-rate-limit" class="form-input" value="60" min="1" max="1000">
+            </div>
+            <!-- 21. Ownership -->
+            <div class="form-group">
+              <label class="form-label">21. API Ownership<span class="req-star">*</span></label>
+              <select id="builder-scope" class="form-select">
+                <option value="personal" selected>Personal API (My Account Only)</option>
+                <option value="system">System API (Shared JANASEVA)</option>
+              </select>
+            </div>
+            <!-- 22. Device Compatibility -->
+            <div class="form-group">
+              <label class="form-label">22. Device Compatibility</label>
+              <select id="builder-device" class="form-select">
+                <option value="all" selected>All (Mobile App &amp; Web Desktop)</option>
+                <option value="web">Web Desktop Only</option>
+                <option value="mobile">Mobile Application Only</option>
+              </select>
+            </div>
+            <!-- 23. Provider Role -->
+            <div class="form-group">
+              <label class="form-label">23. Provider Role</label>
+              <select id="builder-role" class="form-select">
+                <option value="primary" selected>Primary Provider</option>
+                <option value="secondary">Secondary Fallback Provider</option>
+                <option value="standalone">Standalone Integration</option>
+              </select>
+            </div>
+            <!-- 24. Activation Status -->
+            <div class="form-group">
+              <label class="form-label">24. Activation Status</label>
+              <select id="builder-status" class="form-select">
+                <option value="true" selected>Active &amp; Enabled</option>
+                <option value="false">Paused &amp; Disabled</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- 11 & 12: Headers & Query Params -->
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; margin-bottom: 16px;">
+            <div class="form-group">
+              <label class="form-label">11. Custom Headers (JSON)</label>
+              <textarea id="builder-headers" class="form-textarea" rows="2" placeholder='{"X-Custom-Client": "JANASEVA-V3"}'></textarea>
+            </div>
+            <div class="form-group">
+              <label class="form-label">12. Query Parameters (JSON)</label>
+              <textarea id="builder-query-params" class="form-textarea" rows="2" placeholder='{"format": "json"}'></textarea>
+            </div>
+          </div>
+
+          <!-- 13. Body Template -->
+          <div class="form-group" style="margin-bottom: 16px;">
+            <label class="form-label">13. JSON Request Body Template (supports {{complaint_id}}, {{citizen_name}}, {{status}}, {{message}})</label>
+            <textarea id="builder-body-template" class="form-textarea" rows="3" placeholder='{"complaintId": "{{complaint_id}}", "citizen": "{{citizen_name}}", "status": "{{status}}", "text": "{{message}}"}'></textarea>
+          </div>
+
+          <!-- 18, 19, 20: Response Mapping & Error Handling -->
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px;">
+            <div class="form-group">
+              <label class="form-label">18. Response Mapping (Status Path)</label>
+              <input type="text" id="builder-response-mapping" class="form-input" placeholder="data.status / result.success">
+            </div>
+            <div class="form-group">
+              <label class="form-label">19. Success HTTP Range</label>
+              <input type="text" id="builder-success-cond" class="form-input" value="200-299">
+            </div>
+            <div class="form-group">
+              <label class="form-label">20. Error Action</label>
+              <select id="builder-error-action" class="form-select">
+                <option value="failover" selected>Auto Failover to Secondary Provider</option>
+                <option value="queue">Queue in IndexedDB for Offline Sync</option>
+                <option value="retry">Retry 3 Times then Alert Officer</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- SSRF Protection Badge -->
+          <div style="margin-top: 14px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 6px; padding: 10px 14px; font-size: 12px; color: #166534; display: flex; align-items: center; gap: 8px;">
+            <i class="fa-solid fa-shield-halved" style="color: #16a34a;"></i>
+            <span><strong>SSRF Protection Active:</strong> Endpoint will be validated before execution. Requests to localhost, private subnets, or cloud metadata services are prohibited.</span>
+          </div>
+
+        </div>
+
+        <div class="modal-footer" style="display: flex; justify-content: space-between; gap: 10px; padding: 14px 22px; background: #f8fafc; border-top: 1px solid #e2e8f0;">
+          <button type="button" class="btn-secondary-action" onclick="testBuilderEndpointDraft()">
+            <i class="fa-solid fa-bolt"></i> Test Connection Before Saving
+          </button>
+          <div style="display: flex; gap: 10px;">
+            <button type="button" class="btn-cta-secondary" onclick="closeCustomApiBuilderModal()">Cancel</button>
+            <button type="submit" class="btn-cta-primary" style="background: #0f766e; border: none; padding: 8px 22px;">
+              <i class="fa-solid fa-floppy-disk"></i> Save &amp; Register API
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: SAFE DELETE CONFIRMATION WITH BACKUP OFFER -->
+  <div class="modal-overlay" id="modal-delete-api-confirm" style="display: none;">
+    <div class="modal-window" style="max-width: 500px;">
+      <div class="modal-header" style="background: #fef2f2; border-bottom: 1px solid #fecaca; color: #991b1b; padding: 16px 20px;">
+        <div class="modal-title" style="display: flex; align-items: center; gap: 10px; color: #991b1b;">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+          <span>Confirm Configuration Deletion</span>
+        </div>
+        <button type="button" class="modal-close-btn" onclick="closeDeleteApiModal()">&times;</button>
+      </div>
+      <div class="modal-body" style="padding: 20px;">
+        <p style="font-size: 13.5px; color: #334155; margin-bottom: 12px;">
+          Are you sure you want to delete the configuration for <strong id="delete-confirm-api-name">this API</strong>?
+        </p>
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 12px; font-size: 12.5px; color: #475569; margin-bottom: 14px;">
+          <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+            <input type="checkbox" id="delete-create-backup-chk" checked>
+            <span>Create a rollback snapshot backup before permanent deletion (Recommended)</span>
+          </label>
+        </div>
+        <p style="font-size: 12px; color: #64748b; margin: 0;">
+          <i class="fa-solid fa-circle-info"></i> Note: This operation will never delete citizen grievance records, panchayat databases, or submission history.
+        </p>
+      </div>
+      <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 10px; padding: 12px 20px; background: #f8fafc;">
+        <button type="button" class="btn-cta-secondary" onclick="closeDeleteApiModal()">Cancel</button>
+        <button type="button" class="btn-cta-primary" id="btn-execute-delete-api" style="background: #dc2626; border: none; padding: 7px 18px;">
+          <i class="fa-solid fa-trash-can"></i> Delete Configuration
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: EDIT API CONFIGURATION (Existing Backward Compatibility) -->
+  <div class="modal-overlay" id="modal-edit-api" style="display: none;">
+    <div class="modal-window" style="max-width: 620px;">
+      <div class="modal-header">
+        <div class="modal-title" style="display: flex; align-items: center; gap: 10px;">
+          <i class="fa-solid fa-pen-to-square" style="color: #0f766e;"></i>
+          <span id="modal-edit-api-title">Edit API Configuration</span>
+        </div>
+        <button type="button" class="modal-close-btn" onclick="closeEditApiModal()">&times;</button>
+      </div>
+      <form id="form-edit-api" onsubmit="handleSaveApiConfig(event)">
+        <div class="modal-body" style="padding: 20px;">
+          <input type="hidden" id="edit-api-id">
+          <div class="form-group" style="margin-bottom: 14px;">
+            <label class="form-label">API Service Name</label>
+            <input type="text" id="edit-api-name" class="form-input" readonly style="background: #f1f5f9;">
+          </div>
+          <div class="form-group" style="margin-bottom: 14px;">
+            <label class="form-label">Endpoint URL<span class="req-star">*</span></label>
+            <input type="url" id="edit-api-endpoint" class="form-input" required>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
+            <div class="form-group">
+              <label class="form-label">Rate Limit (req/min)</label>
+              <input type="number" id="edit-api-ratelimit" class="form-input" min="1" max="500">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Timeout (ms)</label>
+              <input type="number" id="edit-api-timeout" class="form-input" min="1000" max="30000" step="500">
+            </div>
+          </div>
+          <div class="form-group" style="margin-bottom: 14px;">
+            <label class="form-label">API Token / Secret Key (Leave blank to keep existing masked credential)</label>
+            <input type="password" id="edit-api-secret" class="form-input" placeholder="•••••••• (Unchanged)">
+          </div>
+          <div class="form-group">
+            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+              <input type="checkbox" id="edit-api-enabled">
+              <span style="font-size: 13.5px; font-weight: 600; color: #0f172a;">Enable Integration Pipeline</span>
+            </label>
+          </div>
+        </div>
+        <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 10px;">
+          <button type="button" class="btn-cta-secondary" onclick="closeEditApiModal()">Cancel</button>
+          <button type="submit" class="btn-cta-primary" style="background: #0f766e; border: none; padding: 8px 20px;">
+            <i class="fa-solid fa-floppy-disk"></i> Save Changes
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: 1-CLICK ROLLBACK & DIFF INSPECTOR -->
+  <div class="modal-overlay" id="modal-rollback-api" style="display: none;">
+    <div class="modal-window" style="max-width: 720px;">
+      <div class="modal-header" style="background: #f5f3ff; border-bottom: 1px solid #ede9fe; color: #6d28d9;">
+        <div class="modal-title" style="display: flex; align-items: center; gap: 10px; color: #6d28d9;">
+          <i class="fa-solid fa-clock-rotate-left"></i>
+          <span>1-Click Rollback – Configuration Diff Inspector</span>
+        </div>
+        <button type="button" class="modal-close-btn" onclick="closeRollbackModal()">&times;</button>
+      </div>
+      <div class="modal-body" style="padding: 20px;">
+        <p style="font-size: 13px; color: #475569; margin-bottom: 14px;">
+          Inspect changes between the currently deployed configuration and the last known working version before applying rollback.
+        </p>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
+          <div>
+            <h4 style="margin: 0 0 6px; font-size: 12.5px; color: #dc2626;">Current Version (Broken / Degraded)</h4>
+            <pre id="rollback-diff-current" style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 6px; padding: 10px; font-size: 11.5px; max-height: 220px; overflow-y: auto; color: #7f1d1d;"></pre>
+          </div>
+          <div>
+            <h4 style="margin: 0 0 6px; font-size: 12.5px; color: #16a34a;">Previous Working Version (Target)</h4>
+            <pre id="rollback-diff-target" style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 6px; padding: 10px; font-size: 11.5px; max-height: 220px; overflow-y: auto; color: #14532d;"></pre>
+          </div>
+        </div>
+        <input type="hidden" id="rollback-target-api-id">
+      </div>
+      <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 10px;">
+        <button type="button" class="btn-cta-secondary" onclick="closeRollbackModal()">Cancel</button>
+        <button type="button" class="btn-cta-primary" onclick="confirmExecuteRollback()" style="background: #7c3aed; border: none; padding: 8px 20px;">
+          <i class="fa-solid fa-rotate-left"></i> Confirm Rollback
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: CREATE MANUAL SNAPSHOT BACKUP -->
+  <div class="modal-overlay" id="modal-create-backup" style="display: none;">
+    <div class="modal-window" style="max-width: 520px;">
+      <div class="modal-header">
+        <div class="modal-title" style="display: flex; align-items: center; gap: 10px;">
+          <i class="fa-solid fa-cloud-arrow-up" style="color: #2563eb;"></i>
+          <span>Create Configuration Snapshot</span>
+        </div>
+        <button type="button" class="modal-close-btn" onclick="closeCreateBackupModal()">&times;</button>
+      </div>
+      <form onsubmit="handleCreateManualBackup(event)">
+        <div class="modal-body" style="padding: 20px;">
+          <div class="form-group" style="margin-bottom: 14px;">
+            <label class="form-label">Snapshot Label<span class="req-star">*</span></label>
+            <input type="text" id="backup-label-input" class="form-input" placeholder="e.g. Pre-Deployment Stable V3" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Officer Notes / Justification</label>
+            <textarea id="backup-notes-input" class="form-textarea" rows="3" placeholder="Reason for taking this snapshot..."></textarea>
+          </div>
+        </div>
+        <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 10px;">
+          <button type="button" class="btn-cta-secondary" onclick="closeCreateBackupModal()">Cancel</button>
+          <button type="submit" class="btn-cta-primary" style="background: #2563eb; border: none; padding: 8px 20px;">
+            <i class="fa-solid fa-floppy-disk"></i> Generate Snapshot
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: RESTORE BACKUP SNAPSHOT -->
+  <div class="modal-overlay" id="modal-restore-backup" style="display: none;">
+    <div class="modal-window" style="max-width: 560px;">
+      <div class="modal-header" style="background: #eff6ff; border-bottom: 1px solid #dbeafe; color: #1e40af;">
+        <div class="modal-title" style="display: flex; align-items: center; gap: 10px; color: #1e40af;">
+          <i class="fa-solid fa-clock-rotate-left"></i>
+          <span>Restore Configuration Snapshot</span>
+        </div>
+        <button type="button" class="modal-close-btn" onclick="closeRestoreBackupModal()">&times;</button>
+      </div>
+      <div class="modal-body" style="padding: 20px;">
+        <p style="font-size: 13px; color: #475569; margin-bottom: 14px;">
+          Select a versioned snapshot to restore. Restored configurations default to a paused state unless explicit activation confirmation is granted.
+        </p>
+        <div class="form-group" style="margin-bottom: 14px;">
+          <label class="form-label">Available Snapshots</label>
+          <select id="restore-snapshot-select" class="form-select">
+            <!-- Dynamically populated -->
+          </select>
+        </div>
+        <div style="background: #fffbeb; border: 1px solid #fef08a; border-radius: 6px; padding: 12px; margin-bottom: 14px;">
+          <label style="display: flex; align-items: flex-start; gap: 8px; font-size: 12.5px; color: #854d0e; cursor: pointer;">
+            <input type="checkbox" id="restore-confirm-activation" style="margin-top: 3px;">
+            <span><strong>Safety Safeguard:</strong> Explicitly confirm live activation of restored services immediately upon completion.</span>
+          </label>
+        </div>
+      </div>
+      <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 10px;">
+        <button type="button" class="btn-cta-secondary" onclick="closeRestoreBackupModal()">Cancel</button>
+        <button type="button" class="btn-cta-primary" onclick="confirmExecuteRestore()" style="background: #1e40af; border: none; padding: 8px 20px;">
+          <i class="fa-solid fa-rotate-left"></i> Restore Selected Snapshot
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Firebase, Supabase, OCR & Controllers -->
+  <!-- JANASEVA MongoDB Backend & Scripts -->
+  <script src="js/firebase-config.js"></script>
+  <script src="js/mongodb-adapter.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase-config.js"></script>
+  <script src="js/translations.js"></script>
+  <script src="js/universal-settings.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/universal-notifications.js"></script>
+<script src="js/email.js"></script>
+  <script src="js/unitpost-adapter.js"></script>
+  <script src="js/offline-sync-engine.js"></script>
+  <script src="js/api-management-store.js"></script>
+  <script src="js/custom-api-vault.js"></script>
+  <script src="js/custom-api-manager.js"></script>
+  <script src="js/receiver-settings.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      if (window.authService) {
+        window.authService.protectPage('receiver');
+      }
+    });
+  </script>
+
+  <!-- ========================================================================= -->
+  <!-- 7-STEP CUSTOM API BUILDER WIZARD MODAL -->
+  <!-- ========================================================================= -->
+  <div class="modal-overlay" id="modal-custom-api-wizard" style="display: none; z-index: 1050;">
+    <div class="modal-window" style="max-width: 860px; border-top: 5px solid #0d9488; max-height: 90vh; display: flex; flex-direction: column;">
+      <div class="modal-header" style="background: #fff; border-bottom: 1px solid #e2e8f0; padding: 18px 24px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div style="width: 40px; height: 40px; border-radius: 8px; background: #e6fffa; color: #0d9488; display: flex; align-items: center; justify-content: center; font-size: 18px;">
+              <i class="fa-solid fa-cube"></i>
+            </div>
+            <div>
+              <h3 id="wizard-modal-title" style="margin: 0; font-size: 17px; color: #0b2545; font-weight: 800;">
+                <i class="fa-solid fa-plus-circle"></i> Create My Own API Integration
+              </h3>
+              <p style="margin: 3px 0 0; font-size: 12.5px; color: #64748b;">
+                7-Step Guided Configuration Wizard with AES-GCM Vault &amp; Live SSRF Probe
+              </p>
+            </div>
+          </div>
+          <button type="button" class="modal-close-btn" onclick="window.JanasevaCustomApiManager.closeBuilderWizard()">&times;</button>
+        </div>
+      </div>
+
+      <!-- Step Progress Navigation Bar -->
+      <div style="background: #f8fafc; border-bottom: 1px solid #e2e8f0; padding: 12px 20px; overflow-x: auto;">
+        <div style="display: flex; align-items: center; justify-content: space-between; min-width: 640px; gap: 6px;">
+          <div class="wiz-step-pill active-step" id="wiz-step-pill-1" onclick="window.JanasevaCustomApiManager.goToStep(1)">
+            <span class="step-num">1</span> Provider
+          </div>
+          <div style="flex: 1; height: 2px; background: #cbd5e1;"></div>
+          <div class="wiz-step-pill" id="wiz-step-pill-2" onclick="window.JanasevaCustomApiManager.goToStep(2)">
+            <span class="step-num">2</span> Connection
+          </div>
+          <div style="flex: 1; height: 2px; background: #cbd5e1;"></div>
+          <div class="wiz-step-pill" id="wiz-step-pill-3" onclick="window.JanasevaCustomApiManager.goToStep(3)">
+            <span class="step-num">3</span> Auth &amp; Vault
+          </div>
+          <div style="flex: 1; height: 2px; background: #cbd5e1;"></div>
+          <div class="wiz-step-pill" id="wiz-step-pill-4" onclick="window.JanasevaCustomApiManager.goToStep(4)">
+            <span class="step-num">4</span> AI Model
+          </div>
+          <div style="flex: 1; height: 2px; background: #cbd5e1;"></div>
+          <div class="wiz-step-pill" id="wiz-step-pill-5" onclick="window.JanasevaCustomApiManager.goToStep(5)">
+            <span class="step-num">5</span> Service
+          </div>
+          <div style="flex: 1; height: 2px; background: #cbd5e1;"></div>
+          <div class="wiz-step-pill" id="wiz-step-pill-6" onclick="window.JanasevaCustomApiManager.goToStep(6)">
+            <span class="step-num">6</span> Test &amp; Verify
+          </div>
+          <div style="flex: 1; height: 2px; background: #cbd5e1;"></div>
+          <div class="wiz-step-pill" id="wiz-step-pill-7" onclick="window.JanasevaCustomApiManager.goToStep(7)">
+            <span class="step-num">7</span> Save &amp; Activate
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal Body (Wizard Steps) -->
+      <div class="modal-body" style="padding: 22px 24px; overflow-y: auto; flex: 1;">
+        <form id="custom-api-wizard-form" onsubmit="event.preventDefault();">
+          <input type="hidden" id="wiz-allow-dev-val" value="false">
+
+          <!-- STEP 1: PROVIDER INFORMATION -->
+          <div id="wiz-panel-step-1" class="wiz-step-panel">
+            <h4 style="margin: 0 0 16px 0; color: #0b2545; font-size: 15px; font-weight: 700;">
+              <i class="fa-solid fa-building" style="color: #0d9488; margin-right: 6px;"></i> Step 1: Provider Information
+            </h4>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px;">
+              <div class="form-group">
+                <label style="display: block; font-size: 13px; font-weight: 700; color: #334155; margin-bottom: 6px;">
+                  Provider Name <span style="color: #dc2626;">*</span>
+                </label>
+                <input type="text" id="wiz-provider-name" class="form-control" placeholder="e.g. OpenAI, Google Cloud, Groq, Ollama" required style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px;">
+              </div>
+              <div class="form-group">
+                <label style="display: block; font-size: 13px; font-weight: 700; color: #334155; margin-bottom: 6px;">
+                  Display Name <span style="color: #dc2626;">*</span>
+                </label>
+                <input type="text" id="wiz-display-name" class="form-control" placeholder="e.g. Gram Panchayat GPT-4o Relay" required style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px;">
+              </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; margin-top: 14px;">
+              <div class="form-group">
+                <label style="display: block; font-size: 13px; font-weight: 700; color: #334155; margin-bottom: 6px;">
+                  API Category <span style="color: #dc2626;">*</span>
+                </label>
+                <select id="wiz-api-category" class="form-control" onchange="window.JanasevaCustomApiManager.toggleAiFields(this.value)" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px;">
+                  <option value="ai">AI Assistant</option>
+                  <option value="multilingual_ai">Multilingual AI</option>
+                  <option value="rag_knowledge">RAG / Knowledge Centre</option>
+                  <option value="database">Database &amp; Telemetry</option>
+                  <option value="email">Email Delivery</option>
+                  <option value="whatsapp">WhatsApp Communications</option>
+                  <option value="push_notification">Push Notifications</option>
+                  <option value="maps_gis">GIS &amp; Boundary Maps</option>
+                  <option value="ocr">OCR / Document Verification</option>
+                  <option value="custom">Other Custom Services</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label style="display: block; font-size: 13px; font-weight: 700; color: #334155; margin-bottom: 6px;">
+                  Provider Type
+                </label>
+                <select id="wiz-provider-type" class="form-control" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px;">
+                  <option value="REST_JSON">REST JSON API</option>
+                  <option value="OPENAI_COMPATIBLE">OpenAI-Compatible (Chat / Completions)</option>
+                  <option value="GEMINI_COMPATIBLE">Google Gemini Compatible</option>
+                  <option value="ANTHROPIC_COMPATIBLE">Anthropic Claude Compatible</option>
+                  <option value="OLLAMA_COMPATIBLE">Ollama / Local LLM Compatible</option>
+                  <option value="GRAPHQL">GraphQL API</option>
+                  <option value="WEBHOOK">Webhook / Inward Receiver</option>
+                </select>
+              </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; margin-top: 14px;">
+              <div class="form-group">
+                <label style="display: block; font-size: 13px; font-weight: 700; color: #334155; margin-bottom: 6px;">
+                  Provider Website
+                </label>
+                <input type="url" id="wiz-provider-website" class="form-control" placeholder="https://provider.com" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px;">
+              </div>
+              <div class="form-group">
+                <label style="display: block; font-size: 13px; font-weight: 700; color: #334155; margin-bottom: 6px;">
+                  API Documentation URL
+                </label>
+                <input type="url" id="wiz-docs-url" class="form-control" placeholder="https://docs.provider.com/api" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px;">
+              </div>
+            </div>
+
+            <div class="form-group" style="margin-top: 14px;">
+              <label style="display: block; font-size: 13px; font-weight: 700; color: #334155; margin-bottom: 6px;">
+                Description &amp; Operational Notes
+              </label>
+              <textarea id="wiz-description" rows="2" class="form-control" placeholder="Operational purpose of this API integration..." style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px;"></textarea>
+            </div>
+          </div>
+
+          <!-- STEP 2: API CONNECTION -->
+          <div id="wiz-panel-step-2" class="wiz-step-panel" style="display: none;">
+            <h4 style="margin: 0 0 16px 0; color: #0b2545; font-size: 15px; font-weight: 700;">
+              <i class="fa-solid fa-network-wired" style="color: #0284c7; margin-right: 6px;"></i> Step 2: API Connection
+            </h4>
+            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 16px;">
+              <div class="form-group">
+                <label style="display: block; font-size: 13px; font-weight: 700; color: #334155; margin-bottom: 6px;">
+                  API Base URL <span style="color: #dc2626;">*</span>
+                </label>
+                <input type="text" id="wiz-base-url" class="form-control" placeholder="https://api.provider.com" required style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px;">
+                <span style="font-size: 11.5px; color: #64748b;">Must use HTTPS unless authorized local development mode.</span>
+              </div>
+              <div class="form-group">
+                <label style="display: block; font-size: 13px; font-weight: 700; color: #334155; margin-bottom: 6px;">
+                  HTTP Method <span style="color: #dc2626;">*</span>
+                </label>
+                <select id="wiz-http-method" class="form-control" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px;">
+                  <option value="POST">POST</option>
+                  <option value="GET">GET</option>
+                  <option value="PUT">PUT</option>
+                  <option value="PATCH">PATCH</option>
+                  <option value="DELETE">DELETE</option>
+                </select>
+              </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-top: 14px;">
+              <div class="form-group">
+                <label style="display: block; font-size: 13px; font-weight: 700; color: #334155; margin-bottom: 6px;">
+                  API Endpoint / Path
+                </label>
+                <input type="text" id="wiz-endpoint" class="form-control" placeholder="/v1/chat/completions" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px;">
+              </div>
+              <div class="form-group">
+                <label style="display: block; font-size: 13px; font-weight: 700; color: #334155; margin-bottom: 6px;">
+                  API Version
+                </label>
+                <input type="text" id="wiz-api-version" class="form-control" placeholder="v1" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px;">
+              </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 14px;">
+              <div class="form-group">
+                <label style="display: block; font-size: 13px; font-weight: 700; color: #334155; margin-bottom: 6px;">
+                  Request Content Type
+                </label>
+                <select id="wiz-content-type" class="form-control" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px;">
+                  <option value="application/json">application/json</option>
+                  <option value="application/x-www-form-urlencoded">application/x-www-form-urlencoded</option>
+                  <option value="multipart/form-data">multipart/form-data</option>
+                  <option value="text/plain">text/plain</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label style="display: block; font-size: 13px; font-weight: 700; color: #334155; margin-bottom: 6px;">
+                  Timeout (ms)
+                </label>
+                <input type="number" id="wiz-timeout" class="form-control" value="10000" min="1000" max="60000" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px;">
+              </div>
+              <div class="form-group">
+                <label style="display: block; font-size: 13px; font-weight: 700; color: #334155; margin-bottom: 6px;">
+                  Retry Limit
+                </label>
+                <input type="number" id="wiz-retry" class="form-control" value="2" min="0" max="5" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px;">
+              </div>
+            </div>
+          </div>
+
+          <!-- STEP 3: AUTHENTICATION AND API CREDENTIALS -->
+          <div id="wiz-panel-step-3" class="wiz-step-panel" style="display: none;">
+            <h4 style="margin: 0 0 16px 0; color: #0b2545; font-size: 15px; font-weight: 700;">
+              <i class="fa-solid fa-key" style="color: #f59e0b; margin-right: 6px;"></i> Step 3: Authentication and API Credentials (Vault)
+            </h4>
+
+            <div class="form-group" style="margin-bottom: 14px;">
+              <label style="display: block; font-size: 13px; font-weight: 700; color: #334155; margin-bottom: 6px;">
+                Authentication Method <span style="color: #dc2626;">*</span>
+              </label>
+              <select id="wiz-auth-type" class="form-control" onchange="window.JanasevaCustomApiManager.toggleAuthFields(this.value)" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px;">
+                <option value="BEARER_TOKEN">Bearer Token (Authorization: Bearer &lt;token&gt;)</option>
+                <option value="API_KEY_HEADER">API Key Header (Custom header, e.g. x-api-key, x-goog-api-key)</option>
+                <option value="QUERY_PARAM">API Key Query Parameter (?key=&lt;token&gt;)</option>
+                <option value="BASIC_AUTH">Basic Authentication (Username / Client ID + Password)</option>
+                <option value="OAUTH2">OAuth 2.0 (Client ID + Client Secret)</option>
+                <option value="CUSTOM_HEADERS">Custom Authentication Headers</option>
+                <option value="NO_AUTH">No Authentication (Public or Private Localhost/Ollama)</option>
+              </select>
+            </div>
+
+            <!-- Dynamic Fields -->
+            <div id="wiz-group-api-key" class="form-group" style="margin-bottom: 14px;">
+              <label style="display: block; font-size: 13px; font-weight: 700; color: #334155; margin-bottom: 6px;">
+                API Secret Key / Access Token <span style="color: #dc2626;">*</span>
+              </label>
+              <div style="position: relative;">
+                <input type="password" id="wiz-api-key" class="form-control" placeholder="Enter API Key (will be encrypted with AES-GCM-256)" style="width: 100%; padding: 8px 40px 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px;">
+                <button type="button" onclick="const f=document.getElementById('wiz-api-key'); f.type=f.type==='password'?'text':'password';" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); border: none; background: none; color: #94a3b8; cursor: pointer;">
+                  <i class="fa-solid fa-eye"></i>
+                </button>
+              </div>
+              <span style="font-size: 11.5px; color: #16a34a;"><i class="fa-solid fa-lock"></i> Secured in WebCrypto AES-GCM Vault. Key is masked and never exposed in plaintext.</span>
+            </div>
+
+            <div id="wiz-group-header-name" class="form-group" style="display: none; margin-bottom: 14px;">
+              <label style="display: block; font-size: 13px; font-weight: 700; color: #334155; margin-bottom: 6px;">
+                Header Name <span style="color: #dc2626;">*</span>
+              </label>
+              <input type="text" id="wiz-auth-header-name" class="form-control" placeholder="x-api-key or x-goog-api-key" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px;">
+            </div>
+
+            <div id="wiz-group-param-name" class="form-group" style="display: none; margin-bottom: 14px;">
+              <label style="display: block; font-size: 13px; font-weight: 700; color: #334155; margin-bottom: 6px;">
+                Query Parameter Name <span style="color: #dc2626;">*</span>
+              </label>
+              <input type="text" id="wiz-auth-param-name" class="form-control" placeholder="key or api_key" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px;">
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+              <div id="wiz-group-client-id" class="form-group" style="display: none; margin-bottom: 14px;">
+                <label style="display: block; font-size: 13px; font-weight: 700; color: #334155; margin-bottom: 6px;">
+                  Client ID / Username
+                </label>
+                <input type="text" id="wiz-client-id" class="form-control" placeholder="Client ID or Account SID" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px;">
+              </div>
+              <div id="wiz-group-client-secret" class="form-group" style="display: none; margin-bottom: 14px;">
+                <label style="display: block; font-size: 13px; font-weight: 700; color: #334155; margin-bottom: 6px;">
+                  Client Secret
+                </label>
+                <input type="password" id="wiz-client-secret" class="form-control" placeholder="Client Secret" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px;">
+              </div>
+            </div>
+
+            <div class="form-group" style="margin-top: 10px;">
+              <label style="display: block; font-size: 13px; font-weight: 700; color: #334155; margin-bottom: 6px;">
+                Custom Headers (Optional JSON)
+              </label>
+              <textarea id="wiz-custom-headers" rows="2" class="form-control" placeholder='{"anthropic-version": "2023-06-01"}' style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-family: monospace; font-size: 12px;"></textarea>
+            </div>
+
+            <!-- Passkey Distinction Notice -->
+            <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 6px; padding: 10px 14px; margin-top: 14px;">
+              <div style="font-size: 12px; color: #166534; line-height: 1.5;">
+                <i class="fa-solid fa-shield-halved" style="margin-right: 6px;"></i>
+                <strong>API Passphrase vs Passkey Distinction:</strong> Provider API keys authorize outbound requests. Passkeys (WebAuthn/FIDO2) authenticate administrators locally and are never transmitted to external providers.
+              </div>
+            </div>
+          </div>
+
+          <!-- STEP 4: AI MODEL CONFIGURATION (CONDITIONAL) -->
+          <div id="wiz-panel-step-4" class="wiz-step-panel" style="display: none;">
+            <h4 style="margin: 0 0 16px 0; color: #0b2545; font-size: 15px; font-weight: 700;">
+              <i class="fa-solid fa-brain" style="color: #7c3aed; margin-right: 6px;"></i> Step 4: AI Model Configuration
+            </h4>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+              <div class="form-group">
+                <label style="display: block; font-size: 13px; font-weight: 700; color: #334155; margin-bottom: 6px;">
+                  Model Display Name
+                </label>
+                <input type="text" id="wiz-ai-model-name" class="form-control" placeholder="e.g. Gemini 2.5 Flash / GPT-4o Mini" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px;">
+              </div>
+              <div class="form-group">
+                <label style="display: block; font-size: 13px; font-weight: 700; color: #334155; margin-bottom: 6px;">
+                  Model Identifier / ID <span style="color: #dc2626;">*</span>
+                </label>
+                <input type="text" id="wiz-ai-model-id" class="form-control" placeholder="e.g. gemini-2.5-flash or gpt-4o-mini" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px;">
+              </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 14px;">
+              <div class="form-group">
+                <label style="display: block; font-size: 13px; font-weight: 700; color: #334155; margin-bottom: 6px;">
+                  Maximum Token Configuration
+                </label>
+                <input type="number" id="wiz-ai-max-tokens" class="form-control" value="2048" min="256" max="32768" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px;">
+              </div>
+              <div class="form-group">
+                <label style="display: block; font-size: 13px; font-weight: 700; color: #334155; margin-bottom: 6px;">
+                  Temperature (0.0 to 1.0)
+                </label>
+                <input type="number" id="wiz-ai-temperature" class="form-control" value="0.3" min="0" max="1" step="0.1" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px;">
+              </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 14px;">
+              <div class="form-group">
+                <label style="display: block; font-size: 13px; font-weight: 700; color: #334155; margin-bottom: 6px;">
+                  Request Format / Schema
+                </label>
+                <select id="wiz-ai-req-format" class="form-control" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px;">
+                  <option value="openai_standard">OpenAI Standard (messages: [{role, content}])</option>
+                  <option value="gemini_standard">Google Gemini (contents: [{parts: [{text}]}])</option>
+                  <option value="anthropic_standard">Anthropic Messages (messages: [{role, content}])</option>
+                  <option value="custom">Custom Payload Format</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label style="display: block; font-size: 13px; font-weight: 700; color: #334155; margin-bottom: 6px;">
+                  Response JSON Path
+                </label>
+                <input type="text" id="wiz-ai-resp-path" class="form-control" placeholder="choices[0].message.content" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px;">
+              </div>
+            </div>
+          </div>
+
+          <!-- STEP 5: SERVICE ASSIGNMENT -->
+          <div id="wiz-panel-step-5" class="wiz-step-panel" style="display: none;">
+            <h4 style="margin: 0 0 16px 0; color: #0b2545; font-size: 15px; font-weight: 700;">
+              <i class="fa-solid fa-diagram-project" style="color: #0d9488; margin-right: 6px;"></i> Step 5: JANASEVA Service Assignment
+            </h4>
+
+            <div class="form-group" style="margin-bottom: 16px;">
+              <label style="display: block; font-size: 13px; font-weight: 700; color: #334155; margin-bottom: 6px;">
+                Choose JANASEVA Feature Pipeline <span style="color: #dc2626;">*</span>
+              </label>
+              <select id="wiz-service-assign" class="form-control" style="width: 100%; padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13.5px;">
+                <option value="ai_assistant">AI Assistant (Citizen Chatbot &amp; Grievance Drafting)</option>
+                <option value="multilingual_ai">Multilingual AI (Kannada, Hindi, English Translation)</option>
+                <option value="rag_knowledge">RAG / Knowledge Centre (Panchayat Rulebook Retrieval)</option>
+                <option value="database">Database &amp; Telemetry (Realtime Ingestion &amp; Logs)</option>
+                <option value="email">Email Service (Citizen Receipts &amp; Escalation Notices)</option>
+                <option value="whatsapp">WhatsApp Service (Citizen Grievance Confirmation Dispatch)</option>
+                <option value="push_notification">Push Notifications (Emergency Citizen Broadcasts)</option>
+                <option value="maps_gis">GIS &amp; Boundary Maps (Smart Village Geolocation)</option>
+                <option value="ocr">OCR / Document Verification (Citizen Identity &amp; Bills)</option>
+                <option value="custom_service">Other Custom Services</option>
+              </select>
+            </div>
+
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px 18px; margin-bottom: 14px;">
+              <label style="display: flex; align-items: flex-start; gap: 12px; cursor: pointer;">
+                <input type="checkbox" id="wiz-is-primary" style="margin-top: 3px; transform: scale(1.2);">
+                <div>
+                  <strong style="color: #0f172a; font-size: 13.5px;">Set as Primary Active Handler</strong>
+                  <p style="margin: 2px 0 0; font-size: 12px; color: #64748b;">
+                    Route all incoming JANASEVA traffic for this feature to this custom provider instead of the default integration.
+                  </p>
+                </div>
+              </label>
+            </div>
+
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px 18px;">
+              <label style="display: flex; align-items: flex-start; gap: 12px; cursor: pointer;">
+                <input type="checkbox" id="wiz-enable-fallback" checked style="margin-top: 3px; transform: scale(1.2);">
+                <div>
+                  <strong style="color: #0f172a; font-size: 13.5px;">Enable Automatic System Fallback</strong>
+                  <p style="margin: 2px 0 0; font-size: 12px; color: #64748b;">
+                    If this custom API encounters a network outage or rate-limit error, automatically failover to the built-in JANASEVA default provider to preserve 100% citizen uptime.
+                  </p>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <!-- STEP 6: TEST AND VERIFY (GENUINE PROBE) -->
+          <div id="wiz-panel-step-6" class="wiz-step-panel" style="display: none;">
+            <h4 style="margin: 0 0 16px 0; color: #0b2545; font-size: 15px; font-weight: 700;">
+              <i class="fa-solid fa-vial-circle-check" style="color: #0284c7; margin-right: 6px;"></i> Step 6: Test and Verify Connection
+            </h4>
+            <p style="font-size: 13px; color: #475569; margin: 0 0 16px 0;">
+              Execute a real, live HTTP probe with SSRF protection, measuring exact roundtrip latency and verifying provider status codes.
+            </p>
+
+            <div style="display: flex; gap: 12px; align-items: center; margin-bottom: 16px;">
+              <button type="button" id="wiz-btn-run-test" onclick="window.JanasevaCustomApiManager.runWizardProbeTest()" class="btn-cta-primary" style="background: #0284c7; border: none; padding: 10px 20px; font-size: 13.5px; border-radius: 6px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;">
+                <i class="fa-solid fa-bolt"></i> Run Genuine Connection Test
+              </button>
+              <span style="font-size: 12px; color: #64748b;">
+                <i class="fa-solid fa-shield-halved" style="color: #16a34a;"></i> SSRF Guard Active
+              </span>
+            </div>
+
+            <!-- Dynamic Result Box -->
+            <div id="wiz-test-results-box" style="display: none;">
+              <!-- Populated dynamically -->
+            </div>
+          </div>
+
+          <!-- STEP 7: SAVE AND ACTIVATE -->
+          <div id="wiz-panel-step-7" class="wiz-step-panel" style="display: none;">
+            <h4 style="margin: 0 0 16px 0; color: #0b2545; font-size: 15px; font-weight: 700;">
+              <i class="fa-solid fa-circle-check" style="color: #16a34a; margin-right: 6px;"></i> Step 7: Save &amp; Activate API
+            </h4>
+
+            <div id="wiz-step7-summary">
+              <!-- Summary populated by renderStep7Summary -->
+            </div>
+
+            <div style="background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; padding: 14px 18px; margin-bottom: 16px;">
+              <div style="font-size: 12.5px; color: #92400e; line-height: 1.5;">
+                <i class="fa-solid fa-triangle-exclamation" style="margin-right: 6px;"></i>
+                <strong>Administrator Authorization:</strong> An API configuration does not take over production citizen traffic until it has been explicitly activated by an administrator. You can save as Draft to test further or Activate immediately.
+              </div>
+            </div>
+          </div>
+
+        </form>
+      </div>
+
+      <!-- Modal Footer (Navigation & Actions) -->
+      <div class="modal-footer" style="background: #f8fafc; border-top: 1px solid #e2e8f0; padding: 14px 24px; display: flex; justify-content: space-between; align-items: center;">
+        <button type="button" class="btn-cta-secondary" onclick="window.JanasevaCustomApiManager.closeBuilderWizard()" style="padding: 8px 18px; font-size: 13px;">
+          Cancel
+        </button>
+
+        <div style="display: flex; gap: 10px; align-items: center;">
+          <button type="button" id="wiz-btn-prev" class="btn-cta-secondary" onclick="window.JanasevaCustomApiManager.goToStep(window.JanasevaCustomApiManager.currentStep - 1)" style="display: none; padding: 8px 16px; font-size: 13px;">
+            <i class="fa-solid fa-arrow-left"></i> Previous
+          </button>
+          <button type="button" id="wiz-btn-next" class="btn-cta-primary" onclick="window.JanasevaCustomApiManager.goToStep(window.JanasevaCustomApiManager.currentStep + 1)" style="padding: 8px 18px; font-size: 13px; background: #0d9488; border: none;">
+            Next <i class="fa-solid fa-arrow-right"></i>
+          </button>
+          <button type="button" id="wiz-btn-save-draft" class="btn-cta-secondary" onclick="window.JanasevaCustomApiManager.submitWizard(false)" style="display: none; padding: 8px 18px; font-size: 13px; background: #f1f5f9; color: #334155;">
+            <i class="fa-solid fa-file-pen"></i> Save as Draft
+          </button>
+          <button type="button" id="wiz-btn-activate" class="btn-cta-primary" onclick="window.JanasevaCustomApiManager.submitWizard(true)" style="display: none; padding: 8px 22px; font-size: 13px; background: #16a34a; border: none;">
+            <i class="fa-solid fa-play"></i> Save &amp; Activate API
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- API KEY VAULT ROTATION MODAL -->
+  <!-- ========================================================================= -->
+  <div class="modal-overlay" id="modal-api-vault-rotate" style="display: none; z-index: 1060;">
+    <div class="modal-window" style="max-width: 540px; border-top: 5px solid #e65100;">
+      <div class="modal-header" style="background: #fff; border-bottom: 1px solid #e2e8f0; padding: 18px 24px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div style="width: 38px; height: 38px; border-radius: 8px; background: #fff7ed; color: #ea580c; display: flex; align-items: center; justify-content: center; font-size: 17px;">
+              <i class="fa-solid fa-key"></i>
+            </div>
+            <div>
+              <h3 style="margin: 0; font-size: 16px; color: #0b2545; font-weight: 800;">Rotate API Key in Vault</h3>
+              <p style="margin: 2px 0 0; font-size: 12px; color: #64748b;">AES-GCM-256 Vault Rotation with Audit Trail</p>
+            </div>
+          </div>
+          <button type="button" class="modal-close-btn" onclick="window.JanasevaCustomApiManager.closeKeyRotationModal()">&times;</button>
+        </div>
+      </div>
+      <div class="modal-body" style="padding: 20px 24px;">
+        <form id="form-api-vault-rotate" onsubmit="window.JanasevaCustomApiManager.submitKeyRotation(event)">
+          <input type="hidden" id="rotate-api-id">
+          
+          <div style="margin-bottom: 14px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px 14px;">
+            <div style="font-size: 12px; color: #64748b;">Target Integration:</div>
+            <strong id="rotate-api-name-display" style="font-size: 13.5px; color: #0b2545;">Custom API</strong>
+            <div style="font-size: 12px; color: #64748b; margin-top: 4px;">Currently Active Key: <code id="rotate-current-masked">sk-••••••••</code></div>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 14px;">
+            <label style="display: block; font-size: 13px; font-weight: 700; color: #334155; margin-bottom: 6px;">
+              New Secret API Key <span style="color: #dc2626;">*</span>
+            </label>
+            <input type="password" id="rotate-new-key" class="form-control" required placeholder="Enter replacement API secret..." style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px;">
+          </div>
+
+          <div class="form-group" style="margin-bottom: 14px;">
+            <label style="display: block; font-size: 13px; font-weight: 700; color: #334155; margin-bottom: 6px;">
+              Reason for Rotation
+            </label>
+            <input type="text" id="rotate-reason" class="form-control" value="Scheduled security credential rotation" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px;">
+          </div>
+
+          <div class="form-group" style="margin-bottom: 14px;">
+            <label style="display: block; font-size: 13px; font-weight: 700; color: #334155; margin-bottom: 6px;">
+              Credential Expiration (Optional)
+            </label>
+            <input type="date" id="rotate-expiry" class="form-control" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px;">
+          </div>
+
+          <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 18px;">
+            <button type="button" class="btn-cta-secondary" onclick="window.JanasevaCustomApiManager.closeKeyRotationModal()" style="padding: 7px 16px; font-size: 13px;">Cancel</button>
+            <button type="submit" class="btn-cta-primary" style="background: #e65100; border: none; padding: 7px 18px; font-size: 13px; border-radius: 6px; font-weight: 700; cursor: pointer; color: #fff;">
+              <i class="fa-solid fa-arrows-rotate"></i> Rotate &amp; Encrypt Key
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

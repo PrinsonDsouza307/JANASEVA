@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <!-- Favicon & Brand Identity -->
+  <link rel="icon" type="image/x-icon" href="assets/branding/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/branding/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/branding/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/branding/apple-touch-icon.png">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0b2545">
+  <title>Submit a Complaint – JANASEVA Portal</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/responsive.css">
+  <!-- EmailJS SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+</head>
+<body>
+  <!-- Auth Guard Overlay (Prevents flash of protected content during session verification) -->
+  <div id="auth-guard-overlay" class="auth-guard-overlay">
+    <div class="auth-guard-box">
+      <img src="assets/branding/janaseva-icon.png" alt="JANASEVA" class="auth-guard-logo">
+      <div class="auth-guard-spinner"></div>
+      <div class="auth-guard-title">JANASEVA</div>
+      <div class="auth-guard-sub" id="auth-guard-sub">Verifying security session...</div>
+    </div>
+  </div>
+
+
+  <!-- Header -->
+  <header class="portal-header">
+    <div class="header-container">
+      <a href="index.html" class="brand-section">
+        <img src="assets/branding/janaseva-icon.png" alt="JANASEVA Official Logo" class="emblem-img brand-logo-img">
+        <div class="brand-text-block">
+          <span class="brand-main-title">JANASEVA</span>
+          <div class="brand-divider"></div>
+          <div class="brand-sub-titles">
+            <span class="brand-subtitle">Gram Panchayat Grievance Portal</span>
+            <span class="brand-tagline">Report • Submit • Track • Resolve</span>
+          </div>
+        </div>
+      </a>
+
+      <!-- Header Action Controls: Notification Bell (Always visible in Android toolbar & Desktop header) + Mobile Menu Toggle -->
+      <div class="header-action-controls" id="header-action-controls">
+        <button class="nav-notif-bell-btn" id="nav-notif-bell-btn" type="button" aria-label="View Notifications">
+          <i class="fa-regular fa-bell"></i>
+          <span class="nav-notif-badge" id="nav-notif-badge" style="display: none;">0</span>
+        </button>
+        <button class="nav-toggle-btn" id="mobile-nav-toggle" aria-label="Toggle Navigation">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+      </div>
+
+      <nav class="main-nav" id="main-navigation">
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="complaint.html" class="nav-link active">Submit Complaint</a>
+        <a href="track.html" class="nav-link">Track Status</a>
+        <a href="directory.html" class="nav-link">Panchayat Directory</a>
+        <a href="knowledge-centre.html" class="nav-link">Knowledge Centre</a>
+        <a href="https://ipchat.in/" class="nav-link nav-link-external" target="_blank" rel="noopener noreferrer"><i class="fa-solid fa-comments" aria-hidden="true"></i> <span>IP Chat</span> <i class="fa-solid fa-arrow-up-right-from-square nav-ext-icon" aria-hidden="true"></i></a>
+        <a href="about.html" class="nav-link">About</a>
+        <div class="lang-selector-wrapper">
+          <i class="fa-solid fa-globe lang-icon"></i>
+          <select class="janaseva-lang-select" aria-label="Select Language">
+            <option value="en">English</option>
+            <option value="kn">ಕನ್ನಡ (Kannada)</option>
+            <option value="hi">हिन्दी (Hindi)</option>
+          </select>
+        </div>
+        <div id="nav-auth-container" style="display: inline-flex; align-items: center; gap: 8px;">
+          <a href="login.html" class="nav-btn-primary">
+            <i class="fa-solid fa-arrow-right-to-bracket"></i>
+            <span>Sign In</span>
+          </a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Hero Banner -->
+  <section class="hero-banner">
+    <div class="hero-bg-overlay"></div>
+    <div class="hero-content-wrap">
+      <div class="hero-text-side">
+        <div class="hero-title-with-icon">
+          <div class="hero-page-icon">
+            <i class="fa-regular fa-clipboard"></i>
+          </div>
+          <h1 class="hero-main-heading">Submit a Complaint</h1>
+        </div>
+        <p class="hero-subheading">Report local issues in your village and help your Gram Panchayat take timely action.</p>
+      </div>
+    </div>
+
+    <div class="tricolour-wave-separator">
+      <svg viewBox="0 0 1440 24" fill="none" preserveAspectRatio="none">
+        <path d="M0,0 C360,18 1080,6 1440,16 L1440,24 L0,24 Z" fill="#ffffff" />
+        <path d="M0,4 C400,20 1100,10 1440,18" stroke="#ff9933" stroke-width="2.5" fill="none" />
+        <path d="M0,8 C420,22 1120,12 1440,20" stroke="#138808" stroke-width="2.5" fill="none" />
+      </svg>
+    </div>
+  </section>
+
+  <!-- Main Content -->
+  <main class="page-main-content">
+
+    <!-- Portal Emergency Maintenance Banner -->
+    <div id="emergency-maintenance-banner" style="display: none; background: #fee2e2; border: 2px solid #ef4444; border-radius: 8px; padding: 14px 16px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(220, 38, 38, 0.1);">
+      <div style="display: flex; align-items: center; gap: 14px;">
+        <div style="width: 44px; height: 44px; border-radius: 8px; background: #dc2626; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0;">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+        </div>
+        <div>
+          <h3 style="margin: 0 0 4px; font-size: 16px; color: #991b1b; font-weight: 800;">
+            Portal Maintenance Active &ndash; Submissions Paused
+          </h3>
+          <p id="emergency-maintenance-text" style="margin: 0; font-size: 13px; color: #7f1d1d; line-height: 1.4;">
+            The Grievance Submission System is temporarily paused for scheduled administrative maintenance. You may still track existing grievances.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="two-col-layout">
+      
+      <!-- Complaint Form Card -->
+      <section class="portal-card">
+        <div class="portal-card-header">
+          <div class="card-title-group">
+            <i class="fa-regular fa-pen-to-square card-header-icon"></i>
+            <div>
+              <h2 class="card-heading">Complaint Details</h2>
+              <p class="card-subheading">Fill in the details below and attach a photo of the issue.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="portal-card-body">
+          <form id="submit-complaint-form" novalidate>
+            
+            <!-- Row 1: Name, Email & Mobile Number -->
+            <div class="form-grid-two">
+              <div class="form-group">
+                <label class="form-label" for="complaint-name">
+                  <i class="fa-regular fa-user form-label-icon"></i>
+                  <span>Full Name<span class="req-star">*</span></span>
+                </label>
+                <input type="text" id="complaint-name" class="form-input" placeholder="e.g. " required>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="complaint-email">
+                  <i class="fa-regular fa-envelope form-label-icon"></i>
+                  <span>Your Email<span class="req-star">*</span></span>
+                </label>
+                <input type="email" id="complaint-email" class="form-input" placeholder="e.g. name@example.com" required>
+              </div>
+            </div>
+
+            <div class="form-grid-two">
+              <div class="form-group">
+                <label class="form-label" for="complaint-phone">
+                  <i class="fa-solid fa-phone form-label-icon"></i>
+                  <span>Mobile Phone Number<span class="req-star">*</span></span>
+                </label>
+                <input type="tel" id="complaint-phone" class="form-input" placeholder="e.g. " required>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="complaint-subject">
+                  <i class="fa-solid fa-heading form-label-icon"></i>
+                  <span>Grievance Subject / Title<span class="req-star">*</span></span>
+                </label>
+                <input type="text" id="complaint-subject" class="form-input" placeholder="e.g. Severe drinking water pipeline leakage near temple" required>
+              </div>
+            </div>
+
+            <!-- Row 2: Gram Panchayat & Category -->
+            <div class="form-grid-two">
+              <div class="form-group">
+                <label class="form-label" for="complaint-gp">
+                  <i class="fa-solid fa-landmark form-label-icon"></i>
+                  <span>Gram Panchayat<span class="req-star">*</span></span>
+                </label>
+                <input type="text" id="complaint-gp" class="form-input" list="gp-datalist" placeholder="Enter your Gram Panchayat name (e.g. Bellandur)" required autocomplete="off">
+                <datalist id="gp-datalist"></datalist>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="complaint-category">
+                  <i class="fa-solid fa-border-all form-label-icon"></i>
+                  <span>Complaint Category<span class="req-star">*</span></span>
+                </label>
+                <select id="complaint-category" class="form-select" required>
+                  <option value="">-- Select Category --</option>
+                  <option value="Road Damage">Road Damage</option>
+                  <option value="Water Supply">Water Supply</option>
+                  <option value="Garbage and Cleanliness">Garbage and Cleanliness</option>
+                  <option value="Streetlight Problems">Streetlight Problems</option>
+                  <option value="Drainage and Sanitation">Drainage and Sanitation</option>
+                  <option value="Public Facilities">Public Facilities</option>
+                  <option value="Other Civic Issues">Other Civic Issues</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Row 3: Description -->
+            <div class="form-group">
+              <label class="form-label" for="complaint-desc">
+                <i class="fa-regular fa-file-lines form-label-icon"></i>
+                <span>Describe the Problem<span class="req-star">*</span></span>
+              </label>
+              <textarea id="complaint-desc" class="form-textarea" placeholder="Provide accurate details: exact location, landmark, duration of the issue, and impact on villagers..." required></textarea>
+              <!-- AI Real-Time Prioritization & Emergency Alert Card -->
+              <div id="ai-prioritization-card" class="ai-smart-analysis-box" style="display: none; margin-top: 10px;"></div>
+            </div>
+
+            <!-- Row 4: Photo of the Issue (Dual-Action: File Upload or Live Camera) -->
+            <div class="form-group">
+              <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px; margin-bottom: 6px;">
+                <label class="form-label" style="margin-bottom: 0;">
+                  <i class="fa-regular fa-image form-label-icon"></i>
+                  <span>Photograph of the Issue<span class="req-star">*</span></span>
+                </label>
+                <span class="photo-hint-pill"><i class="fa-solid fa-camera"></i> Live Camera or Upload</span>
+              </div>
+
+              <div class="photo-upload-section">
+                <!-- Dual Action Selection Area (Visible when no photo is selected) -->
+                <div class="photo-selection-grid" id="photo-selection-grid">
+                  <!-- Option 1: File Upload / Drag & Drop -->
+                  <div class="photo-action-card photo-upload-card" id="drag-drop-area" role="button" tabindex="0" title="Click or drag and drop to choose an image from device">
+                    <div class="photo-action-icon-wrap upload-icon-theme">
+                      <i class="fa-solid fa-cloud-arrow-up"></i>
+                    </div>
+                    <div class="photo-action-title">Choose a Photo</div>
+                    <div class="photo-action-desc">Drag & drop an image here or click to browse</div>
+                    <div class="photo-action-meta">JPG, JPEG, PNG, WEBP &bull; Max 5 MB</div>
+                    <input type="file" id="complaint-file" accept="image/jpeg,image/png,image/webp" style="display: none;">
+                  </div>
+
+                  <!-- Option 2: Live Camera Capture -->
+                  <div class="photo-action-card photo-camera-card" id="btn-open-camera" role="button" tabindex="0" title="Open device camera to capture live photograph">
+                    <div class="photo-action-icon-wrap camera-icon-theme">
+                      <i class="fa-solid fa-camera"></i>
+                    </div>
+                    <div class="photo-action-title">Open Camera</div>
+                    <div class="photo-action-desc">Capture a live photograph using your device camera</div>
+                    <div class="photo-action-meta"><i class="fa-solid fa-mobile-screen"></i> Rear camera preferred on mobile</div>
+                  </div>
+                </div>
+
+                <!-- Preview Area (Visible after photo is selected or captured) -->
+                <div class="photo-preview-card" id="preview-box-wrap" style="display: none;">
+                  <div class="preview-media-container">
+                    <img id="preview-image" src="" alt="Selected Issue Preview">
+                    <div class="preview-source-badge" id="preview-source-badge">
+                      <i class="fa-solid fa-camera"></i> <span>Live Camera</span>
+                    </div>
+                  </div>
+                  <div class="preview-details-container">
+                    <div class="preview-file-header">
+                      <div class="preview-file-icon">
+                        <i class="fa-regular fa-image"></i>
+                      </div>
+                      <div class="preview-file-text">
+                        <div class="preview-filename" id="preview-filename">photo.jpg</div>
+                        <div class="preview-filesize" id="preview-filesize">0 KB &bull; Verified format</div>
+                      </div>
+                    </div>
+                    <div class="preview-action-buttons">
+                      <button type="button" class="btn-photo-action btn-retake-cam" id="btn-preview-retake" title="Retake photograph with camera">
+                        <i class="fa-solid fa-camera"></i> <span>Retake Photo</span>
+                      </button>
+                      <button type="button" class="btn-photo-action btn-change-file" id="btn-preview-change" title="Choose a different image file">
+                        <i class="fa-solid fa-folder-open"></i> <span>Change Photo</span>
+                      </button>
+                      <button type="button" class="btn-photo-action btn-remove-photo" id="remove-photo-btn" title="Remove photograph">
+                        <i class="fa-solid fa-trash-can"></i> <span>Remove</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            
+            <!-- Row 5: AI-Based Supporting Document Verification Section (Hybrid Dual-Mode OCR) -->
+            <div class="form-group" style="margin-top: 20px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+                <label class="form-label" style="margin-bottom: 0;">
+                  <i class="fa-solid fa-file-shield form-label-icon" style="color: #0f56b3;"></i>
+                  <span>AI Supporting Document Verification (Land Records / RTC, ID, Bills)</span>
+                </label>
+                <div style="display: flex; align-items: center; gap: 6px;">
+                  <span style="font-size: 11.5px; font-weight: 600; color: #475569;">OCR Language:</span>
+                  <select id="doc-ocr-language-select" class="form-input" style="padding: 4px 8px; font-size: 12px; width: auto; height: 32px; border-radius: 6px;">
+                    <option value="eng" selected>English</option>
+                    <option value="kan">ಕನ್ನಡ (Kannada)</option>
+                    <option value="hin">हिन्दी (Hindi)</option>
+                    <option value="kan+eng">Kannada + English</option>
+                    <option value="hin+eng">Hindi + English</option>
+                  </select>
+                </div>
+              </div>
+              <p style="font-size: 12.5px; color: #64748b; margin-top: 4px; margin-bottom: 10px;">
+                Upload RTC pahani, address proof, or petition documents. Dual-mode OCR works automatically online or offline using on-device Tesseract.js.
+              </p>
+
+              <div class="doc-upload-container" style="margin-bottom: 24px;">
+                <div class="doc-drag-drop-area" id="doc-drag-drop-area">
+                  <i class="fa-solid fa-file-arrow-up upload-icon-cloud" style="font-size: 28px; color: #0f56b3;"></i>
+                  <div style="font-size: 14px; font-weight: 700; color: #0b2545;">Upload PDF or Document Image</div>
+                  <div style="font-size: 12px; color: #64748b; margin-bottom: 10px;">Drag & drop PDF / JPG / PNG / WebP (up to 10 MB) or choose an option:</div>
+                  
+                  <div class="doc-action-buttons-group" style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;" onclick="event.stopPropagation();">
+                    <button type="button" class="btn-cta-secondary" id="btn-upload-doc-file" style="padding: 7px 14px; font-size: 12.5px; border-radius: 6px;">
+                      <i class="fa-solid fa-file-arrow-up"></i> Upload Document
+                    </button>
+                    <button type="button" class="btn-cta-secondary" id="btn-scan-doc-file" style="padding: 7px 14px; font-size: 12.5px; border-radius: 6px;">
+                      <i class="fa-solid fa-expand"></i> Scan Document
+                    </button>
+                    <button type="button" class="btn-cta-secondary" id="btn-capture-doc-camera" style="padding: 7px 14px; font-size: 12.5px; border-radius: 6px;">
+                      <i class="fa-solid fa-camera"></i> Capture from Camera
+                    </button>
+                  </div>
+
+                  <input type="file" id="supporting-doc-file" accept="application/pdf,image/jpeg,image/png,image/webp,image/jpg" style="display: none;">
+                  <input type="file" id="supporting-doc-camera" accept="image/*" capture="environment" style="display: none;">
+                </div>
+
+                <!-- AI Verification Analysis Card (Rendered on upload) -->
+                <div id="doc-analysis-container" style="display: none; margin-top: 12px;"></div>
+              </div>
+            </div>
+
+            <!-- Action Button -->
+            <button type="submit" class="btn-submit-full" id="submit-complaint-btn">
+              <i class="fa-solid fa-paper-plane"></i>
+              <span>Submit Complaint</span>
+            </button>
+
+          </form>
+        </div>
+      </section>
+
+      <!-- Right Column -->
+      <aside>
+        
+        <!-- How It Works Card -->
+        <div class="how-it-works-card">
+          <h2 class="how-it-works-title">How It Works?</h2>
+          
+          <div class="work-step-item">
+            <div class="step-num-bubble">1</div>
+            <div class="step-icon"><i class="fa-regular fa-user"></i></div>
+            <div class="step-content">
+              <div class="step-title">Register / Login</div>
+              <div class="step-desc">Create your account with mobile or email</div>
+            </div>
+          </div>
+
+          <div class="work-step-item">
+            <div class="step-num-bubble">2</div>
+            <div class="step-icon"><i class="fa-regular fa-file-lines"></i></div>
+            <div class="step-content">
+              <div class="step-title">Submit Complaint</div>
+              <div class="step-desc">Describe the issue and upload a photo</div>
+            </div>
+          </div>
+
+          <div class="work-step-item">
+            <div class="step-num-bubble">3</div>
+            <div class="step-icon"><i class="fa-regular fa-envelope"></i></div>
+            <div class="step-content">
+              <div class="step-title">Sent to Gram Panchayat</div>
+              <div class="step-desc">Your complaint is automatically emailed to the configured Panchayat office</div>
+            </div>
+          </div>
+
+          <div class="work-step-item">
+            <div class="step-num-bubble">4</div>
+            <div class="step-icon"><i class="fa-solid fa-check"></i></div>
+            <div class="step-content">
+              <div class="step-title">Track & Get Updates</div>
+              <div class="step-desc">Check the real-time status until it is resolved</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mission Card -->
+        <div class="mission-side-card">
+          <div class="mission-icon-wrap">
+            <i class="fa-solid fa-hand-holding-heart"></i>
+          </div>
+          <div class="mission-text-wrap">
+            <h3 class="mission-heading">Your Complaint Matters</h3>
+            <p class="mission-body">Report issues, stay informed, and help build a cleaner, safer, and better village.</p>
+          </div>
+        </div>
+
+      </aside>
+
+    </div>
+  </main>
+
+  <!-- Submission Success Modal -->
+  <div class="modal-overlay" id="submission-success-modal">
+    <div class="modal-window">
+      <div class="modal-header">
+        <div class="modal-title" style="color: #15803d; display: flex; align-items: center; gap: 8px;">
+          <i class="fa-solid fa-circle-check"></i> Complaint Submitted Successfully
+        </div>
+      </div>
+      <div class="modal-body" style="text-align: center; padding: 20px;">
+        <p style="font-size: 15px; color: #334155; margin-bottom: 16px;">
+          Your grievance has been registered with the Gram Panchayat. Please note down your unique Complaint ID:
+        </p>
+        <div style="background: #e0f2fe; border: 2px dashed #0284c7; padding: 14px; border-radius: 8px; font-size: 22px; font-weight: 800; color: #0b2545; display: inline-block; margin-bottom: 16px; letter-spacing: 1px;" id="success-complaint-id">
+          JAN-2026-0000
+        </div>
+        <p style="font-size: 13.5px; color: #64748b; line-height: 1.4;">
+          An official notification email has been dispatched to the concerned Panchayat receiver. You can track live progress at any time.
+        </p>
+      </div>
+      <div class="modal-footer" style="justify-content: center; gap: 12px; flex-wrap: wrap;">
+        <a href="track.html" class="btn-cta-primary" id="modal-track-link">
+          <i class="fa-solid fa-magnifying-glass"></i> Track Grievance
+        </a>
+        <button type="button" class="btn-cta-secondary" id="modal-download-receipt-btn" onclick="downloadCurrentReceipt()">
+          <i class="fa-solid fa-file-arrow-down"></i> Download Acknowledgement Slip
+        </button>
+        <button type="button" class="btn-cta-secondary" onclick="window.location.reload()">
+          <i class="fa-solid fa-plus"></i> Submit Another
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Live Camera Capture Modal -->
+  <div class="camera-modal-overlay" id="camera-modal" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="camera-modal-title">
+    <div class="camera-modal-container">
+      <!-- Camera Modal Header -->
+      <div class="camera-modal-header">
+        <div class="camera-modal-title" id="camera-modal-title">
+          <i class="fa-solid fa-camera"></i>
+          <span>Live Camera Capture</span>
+        </div>
+        <div class="camera-header-right">
+          <span class="camera-live-pill" id="camera-live-indicator">
+            <span class="live-dot"></span> LIVE
+          </span>
+          <button type="button" class="camera-modal-close-btn" id="btn-close-camera" title="Close Camera (Esc)">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Camera Viewport & Stream -->
+      <div class="camera-viewport-wrap" id="camera-viewport-wrap">
+        <!-- Live Video Element -->
+        <video id="camera-video" autoplay playsinline muted></video>
+
+        <!-- Rule of thirds alignment grid -->
+        <div class="camera-grid-overlay" id="camera-grid-overlay"></div>
+
+        <!-- Hidden canvas for capturing high-res still image -->
+        <canvas id="camera-canvas" style="display: none;"></canvas>
+
+        <!-- Still Frame Preview (Visible upon capture for user review) -->
+        <div class="camera-captured-wrap" id="camera-captured-wrap" style="display: none;">
+          <img id="camera-captured-img" alt="Captured Issue Photo">
+          <div class="captured-badge-overlay">
+            <i class="fa-solid fa-check"></i> Photo Captured
+          </div>
+        </div>
+
+        <!-- Camera Connecting / Permission Loader -->
+        <div class="camera-loading-overlay" id="camera-loading-overlay" style="display: none;">
+          <i class="fa-solid fa-circle-notch fa-spin"></i>
+          <span id="camera-loading-text">Requesting camera access...</span>
+        </div>
+
+        <!-- Camera Error State -->
+        <div class="camera-error-overlay" id="camera-error-overlay" style="display: none;">
+          <div class="camera-error-card">
+            <i class="fa-solid fa-triangle-exclamation camera-error-icon"></i>
+            <h4 id="camera-error-title">Camera Unavailable</h4>
+            <p id="camera-error-message">Unable to access your device camera.</p>
+            <div class="camera-error-actions">
+              <button type="button" class="btn-camera-error-retry" id="btn-camera-error-retry">
+                <i class="fa-solid fa-rotate-right"></i> Try Again
+              </button>
+              <button type="button" class="btn-camera-error-fallback" id="btn-camera-error-fallback">
+                <i class="fa-solid fa-folder-open"></i> Use File Upload Instead
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Camera Flash Overlay -->
+        <div class="camera-flash-overlay" id="camera-flash-overlay"></div>
+      </div>
+
+      <!-- Camera Controls Bar -->
+      <div class="camera-controls-bar">
+        <!-- Live State Controls -->
+        <div class="camera-control-group" id="camera-live-controls">
+          <button type="button" class="camera-btn camera-btn-switch" id="btn-switch-camera" title="Switch between front and rear cameras">
+            <i class="fa-solid fa-camera-rotate"></i>
+            <span>Switch Camera</span>
+          </button>
+          <button type="button" class="camera-btn camera-btn-capture" id="btn-capture-photo" title="Capture Photograph">
+            <span class="shutter-inner">
+              <i class="fa-solid fa-camera"></i>
+            </span>
+            <span class="shutter-label">Capture Photo</span>
+          </button>
+          <button type="button" class="camera-btn camera-btn-cancel" id="btn-cancel-camera" title="Cancel and Close">
+            <i class="fa-solid fa-xmark"></i>
+            <span>Cancel</span>
+          </button>
+        </div>
+
+        <!-- Review State Controls (Shown after frame capture) -->
+        <div class="camera-control-group" id="camera-review-controls" style="display: none;">
+          <button type="button" class="camera-btn camera-btn-retake" id="btn-retake-photo" title="Discard this capture and retake">
+            <i class="fa-solid fa-rotate-left"></i>
+            <span>Retake Photo</span>
+          </button>
+          <button type="button" class="camera-btn camera-btn-use" id="btn-use-photo" title="Accept and attach this photograph">
+            <i class="fa-solid fa-circle-check"></i>
+            <span>Use This Photo</span>
+          </button>
+          <button type="button" class="camera-btn camera-btn-cancel" id="btn-discard-photo" title="Discard and close">
+            <i class="fa-solid fa-xmark"></i>
+            <span>Cancel</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="portal-footer">
+    <div class="footer-wave-line"></div>
+    <div class="footer-content">
+      <div class="footer-disclaimer">
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px;">
+          <img src="assets/branding/janaseva-icon.png" alt="JANASEVA Logo" class="footer-emblem-img" width="26" height="26" style="width: 26px; height: 26px; object-fit: contain;">
+          <strong>JANASEVA – Gram Panchayat Grievance Portal</strong>
+        </div>
+        This portal is an academic student project created for civic grievance demonstration. Not an official Government of India website.
+      </div>
+      <div class="footer-links-group">
+        <a href="index.html">Home</a>
+        <a href="complaint.html">Submit Complaint</a>
+        <a href="track.html">Track Status</a>
+        <a href="directory.html">Directory</a>
+        <a href="knowledge-centre.html">Knowledge Centre</a>
+        <a href="about.html">About</a>
+        <a href="https://ipchat.in/" target="_blank" rel="noopener noreferrer">IP Chat – External Messaging Service</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- JANASEVA MongoDB Backend & Scripts -->
+  <script src="js/firebase-config.js"></script>
+  <script src="js/mongodb-adapter.js"></script>
+  <script src="js/translations.js"></script>
+  <script src="js/universal-settings.js"></script>
+  <script src="js/status-config.js"></script>
+  <script src="js/auth.js"></script>
+<script src="js/universal-notifications.js"></script>
+  <script src="js/email.js"></script>
+  <script src="js/complaint-storage-manager.js"></script>
+  <script src="js/complaints.js"></script>
+  <script src="js/offline-db.js"></script>
+  <script src="js/ai-prioritization.js"></script>
+  <script src="assets/ocr/tesseract.min.js"></script>
+  <script src="assets/ocr/pdf.min.js"></script>
+  <script src="js/ocr-document-store.js"></script>
+  <script src="js/hybrid-ocr-engine.js"></script>
+  <script src="js/document-verifier.js"></script>
+  <script src="js/knowledge-parsers.js"></script>
+  <script src="js/knowledge-security.js"></script>
+  <script src="js/knowledge-rag.js"></script>
+  <script src="js/knowledge-storage.js"></script>
+  <script src="js/ai-chat-services.js"></script>
+  <script src="js/ai-voice-assistant.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      if (window.authService) {
+        window.authService.protectPage('any');
+      }
+    });
+  </script>
+</body>
+</html>

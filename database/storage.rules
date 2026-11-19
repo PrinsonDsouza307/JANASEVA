@@ -1,0 +1,157 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Server-controlled custom claims only with verified authentication (no email exceptions)
+    function isAdmin() {
+      return isAuthenticated() && (
+        request.auth.token.email_verified == true && (
+          request.auth.token.role == 'admin' ||
+          ('admin' in request.auth.token && request.auth.token.admin == true)
+        )
+      );
+    }
+
+    function isReceiver() {
+      return isAuthenticated() && (
+        request.auth.token.role in ['admin', 'receiver'] ||
+        isAdmin()
+      );
+    }
+
+    function isReceiverForPanchayat(panchayatId) {
+      return isAuthenticated() && (
+        isAdmin() ||
+        (request.auth.token.role == 'receiver' && 
+         (('panchayatId' in request.auth.token && request.auth.token.panchayatId == panchayatId) ||
+          ('panchayat' in request.auth.token && request.auth.token.panchayat == panchayatId)))
+      );
+    }
+
+    // 1. Panchayat & Citizen Scoped Complaint Evidence: /complaints/{panchayatId}/{userId}/{fileName}
+    match /complaints/{panchayatId}/{userId}/{fileName} {
+      // Readable strictly by uploading citizen owner, assigned Panchayat receiver, or administrator
+      allow read: if isAuthenticated() && (
+        request.auth.uid == userId ||
+        isReceiverForPanchayat(panchayatId) ||
+        isAdmin()
+      );
+
+      // Uploadable by authenticated owner up to 5MB with strict image MIME validation
+      allow create, update: if isAuthenticated()
+        && request.auth.uid == userId
+        && request.resource.size <= 5 * 1024 * 1024
+        && request.resource.contentType.matches('image/(jpeg|png|webp|jpg)');
+
+      // Deletable strictly by citizen owner or administrator (separated delete permission)
+      allow delete: if isAuthenticated() && (
+        request.auth.uid == userId ||
+        isAdmin()
+      );
+    }
+
+    // 2. Citizen-Scoped Direct Complaint Photos: /complaints/{userId}/{fileName}
+    match /complaints/{userId}/{fileName} {
+      // Cross-Panchayat photo access prevented: only citizen owner or administrator
+      allow read: if isAuthenticated() && (
+        request.auth.uid == userId ||
+        isAdmin()
+      );
+
+      // Uploadable by authenticated owner up to 5MB with strict image MIME validation
+      allow create, update: if isAuthenticated()
+        && request.auth.uid == userId
+        && request.resource.size <= 5 * 1024 * 1024
+        && request.resource.contentType.matches('image/(jpeg|png|webp|jpg)');
+
+      // Deletable strictly by uploading citizen owner or administrator
+      allow delete: if isAuthenticated() && (
+        request.auth.uid == userId ||
+        isAdmin()
+      );
+    }
+
+    // 3. Supporting Documents & Land Records: /documents/{userId}/{allPaths=**}
+    match /documents/{userId}/{allPaths=**} {
+      // Cross-Panchayat access prevented: citizen owner or administrator only
+      allow read: if isAuthenticated() && (
+        request.auth.uid == userId ||
+        isAdmin()
+      );
+
+      allow create, update: if isAuthenticated()
+        && request.auth.uid == userId
+        && request.resource.size <= 10 * 1024 * 1024
+        && (
+          request.resource.contentType.matches('image/(jpeg|png|webp|jpg)') ||
+          request.resource.contentType == 'application/pdf'
+        );
+
+      allow delete: if isAuthenticated() && (
+        request.auth.uid == userId ||
+        isAdmin()
+      );
+    }
+
+    // 3b. AI Chat Supporting Attachments: /chatAttachments/{userId}/{sessionId}/{fileName}
+    match /chatAttachments/{userId}/{sessionId}/{fileName} {
+      allow read: if isAuthenticated() && (
+        request.auth.uid == userId ||
+        isAdmin()
+      );
+
+      allow create, update: if isAuthenticated()
+        && request.auth.uid == userId
+        && fileName.matches('^[A-Za-z0-9._-]{1,120}$')
+        && (
+          (request.resource.contentType.matches('image/(jpeg|png|webp|jpg)') && request.resource.size <= 5 * 1024 * 1024) ||
+          (request.resource.contentType == 'application/pdf' && request.resource.size <= 10 * 1024 * 1024)
+        );
+
+      allow delete: if isAuthenticated() && (
+        request.auth.uid == userId ||
+        isAdmin()
+      );
+    }
+
+    // 4. Scalable Disaster Recovery Snapshot Backups: /backups/{allPaths=**}
+    match /backups/{allPaths=**} {
+      allow read, write, delete: if isAdmin();
+    }
+    
+    // 5. Admin Banner Images: /banners/{allPaths=**}
+    // Publicly viewable, create/update strictly Administrator only with size/MIME check.
+    // Delete permission separated to avoid null request.resource evaluation on deletion.
+    match /banners/{allPaths=**} {
+      allow read: if true;
+      allow create, update: if isAdmin()
+        && request.resource.size <= 10 * 1024 * 1024
+        && request.resource.contentType.matches('image/(jpeg|png|webp|jpg)');
+      allow delete: if isAdmin();
+    }
+
+    // 6. AI Knowledge Centre Dedicated Storage: /AI_KNOWLEDGE_CENTRE/...
+    // Never expose private storage paths publicly. Cloud Functions (Admin SDK) manage
+    // extracted text, processed docs, embeddings, failed docs, quarantine, logs & backups.
+    match /AI_KNOWLEDGE_CENTRE/temporary_uploads/{allPaths=**} {
+      // Temporary ingestion objects are written/read/deleted by trusted Cloud Functions
+      // using the Admin SDK, which bypasses client Storage Rules. Never expose this
+      // staging area to unauthenticated or ordinary authenticated clients.
+      allow read, write: if false;
+    }
+
+    match /AI_KNOWLEDGE_CENTRE/{folder}/{allPaths=**} {
+      allow read: if isAdmin() && folder != 'temporary_uploads';
+      allow write: if false;
+    }
+
+    // Default deny for all other paths
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <!-- Favicon & Brand Identity -->
+  <link rel="icon" type="image/x-icon" href="assets/branding/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/branding/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/branding/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/branding/apple-touch-icon.png">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0b2545">
+  <title>Gram Panchayat Directory – JANASEVA Portal</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+  <!-- Auth Guard Overlay (Prevents flash of protected content during session verification) -->
+  <div id="auth-guard-overlay" class="auth-guard-overlay">
+    <div class="auth-guard-box">
+      <img src="assets/branding/janaseva-icon.png" alt="JANASEVA" class="auth-guard-logo">
+      <div class="auth-guard-spinner"></div>
+      <div class="auth-guard-title">JANASEVA</div>
+      <div class="auth-guard-sub" id="auth-guard-sub">Verifying security session...</div>
+    </div>
+  </div>
+
+
+  <!-- Header -->
+  <header class="portal-header">
+    <div class="header-container">
+      <a href="index.html" class="brand-section">
+        <img src="assets/branding/janaseva-icon.png" alt="JANASEVA Official Logo" class="emblem-img brand-logo-img">
+        <div class="brand-text-block">
+          <span class="brand-main-title">JANASEVA</span>
+          <div class="brand-divider"></div>
+          <div class="brand-sub-titles">
+            <span class="brand-subtitle">Gram Panchayat Grievance Portal</span>
+            <span class="brand-tagline">Report • Submit • Track • Resolve</span>
+          </div>
+        </div>
+      </a>
+
+      <!-- Header Action Controls: Notification Bell (Always visible in Android toolbar & Desktop header) + Mobile Menu Toggle -->
+      <div class="header-action-controls" id="header-action-controls">
+        <button class="nav-notif-bell-btn" id="nav-notif-bell-btn" type="button" aria-label="View Notifications">
+          <i class="fa-regular fa-bell"></i>
+          <span class="nav-notif-badge" id="nav-notif-badge" style="display: none;">0</span>
+        </button>
+        <button class="nav-toggle-btn" id="mobile-nav-toggle" aria-label="Toggle Navigation">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+      </div>
+
+      <nav class="main-nav" id="main-navigation">
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="complaint.html" class="nav-link">Submit Complaint</a>
+        <a href="track.html" class="nav-link">Track Status</a>
+        <a href="directory.html" class="nav-link active">Panchayat Directory</a>
+        <a href="knowledge-centre.html" class="nav-link">Knowledge Centre</a>
+        <a href="https://ipchat.in/" class="nav-link nav-link-external" target="_blank" rel="noopener noreferrer"><i class="fa-solid fa-comments" aria-hidden="true"></i> <span>IP Chat</span> <i class="fa-solid fa-arrow-up-right-from-square nav-ext-icon" aria-hidden="true"></i></a>
+        <a href="about.html" class="nav-link">About</a>
+        <div class="lang-selector-wrapper">
+          <i class="fa-solid fa-globe lang-icon"></i>
+          <select class="janaseva-lang-select" aria-label="Select Language">
+            <option value="en">English</option>
+            <option value="kn">ಕನ್ನಡ (Kannada)</option>
+            <option value="hi">हिन्दी (Hindi)</option>
+          </select>
+        </div>
+        <div id="nav-auth-container" style="display: inline-flex; align-items: center; gap: 8px;">
+          <a href="login.html" class="nav-btn-primary">
+            <i class="fa-solid fa-arrow-right-to-bracket"></i>
+            <span>Sign In</span>
+          </a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Hero Banner -->
+  <section class="hero-banner">
+    <div class="hero-bg-overlay"></div>
+    <div class="hero-content-wrap">
+      <div class="hero-text-side">
+        <div class="hero-title-with-icon">
+          <div class="hero-page-icon">
+            <i class="fa-solid fa-landmark"></i>
+          </div>
+          <h1 class="hero-main-heading">Panchayat Directory</h1>
+        </div>
+        <p class="hero-subheading">Find contact details and key information of all Gram Panchayats in your area.</p>
+      </div>
+    </div>
+
+    <div class="tricolour-wave-separator">
+      <svg viewBox="0 0 1440 24" fill="none" preserveAspectRatio="none">
+        <path d="M0,0 C360,18 1080,6 1440,16 L1440,24 L0,24 Z" fill="#ffffff" />
+        <path d="M0,4 C400,20 1100,10 1440,18" stroke="#ff9933" stroke-width="2.5" fill="none" />
+        <path d="M0,8 C420,22 1120,12 1440,20" stroke="#138808" stroke-width="2.5" fill="none" />
+      </svg>
+    </div>
+  </section>
+
+  <!-- Main Content -->
+  <main class="page-main-content">
+    <div class="two-col-layout-rev">
+      
+      <!-- Left Column: Search & Filters -->
+      <aside>
+        <div class="portal-card" style="margin-bottom: 20px;">
+          <div class="portal-card-header">
+            <div class="card-title-group">
+              <i class="fa-solid fa-magnifying-glass card-header-icon"></i>
+              <h2 class="card-heading">Find Panchayat</h2>
+            </div>
+          </div>
+
+          <div class="portal-card-body">
+            <div class="form-group">
+              <input type="text" id="dir-search-input" class="form-input" placeholder="Search Panchayat name, village or area...">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="dir-district-filter">
+                <i class="fa-solid fa-location-dot form-label-icon"></i>
+                <span>Filter by District</span>
+              </label>
+              <select id="dir-district-filter" class="form-select">
+                <option value="">All Districts</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="dir-block-filter">
+                <i class="fa-solid fa-landmark form-label-icon"></i>
+                <span>Filter by Block / Taluk</span>
+              </label>
+              <select id="dir-block-filter" class="form-select">
+                <option value="">All Blocks / Taluks</option>
+              </select>
+            </div>
+
+            <button type="button" class="btn-submit-full" id="dir-search-btn" style="padding: 10px;">
+              <i class="fa-solid fa-magnifying-glass"></i> Search Panchayats
+            </button>
+          </div>
+        </div>
+
+        <!-- Help Card -->
+        <div class="info-callout-box" style="align-items: flex-start;">
+          <i class="fa-solid fa-circle-info" style="font-size: 20px; margin-top: 2px;"></i>
+          <div>
+            <strong style="color: #14532d; font-size: 14px; display: block; margin-bottom: 2px;">Need Help?</strong>
+            <span>Contact your respective Gram Panchayat office for more details or citizen welfare services.</span>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Right Column: Panchayat Table & Actions -->
+      <section class="directory-table-card">
+        <div class="directory-card-top">
+          <div class="card-title-group">
+            <i class="fa-solid fa-landmark" style="color: #0f56b3; font-size: 20px;"></i>
+            <h2 class="card-heading">Gram Panchayat Directory</h2>
+          </div>
+
+          <!-- Directory Management Toolbar (Add, Export, Import, Total) -->
+          <div class="directory-toolbar-right">
+            <div class="total-panchayats-badge" id="total-panchayats-count">
+              <i class="fa-solid fa-users"></i> Total Panchayats: 12
+            </div>
+
+            <button type="button" class="btn-add-panchayat" id="open-add-panchayat-btn">
+              <i class="fa-solid fa-plus"></i> Add New Panchayat
+            </button>
+
+            <div class="directory-tools-group">
+              <button type="button" class="btn-dir-tool" id="export-csv-btn" title="Export all Panchayats to CSV file">
+                <i class="fa-solid fa-file-arrow-down"></i> Export CSV
+              </button>
+
+              <button type="button" class="btn-dir-tool" id="import-file-btn" title="Import new Panchayats from file (CSV/JSON)">
+                <i class="fa-solid fa-file-arrow-up"></i> Import File
+              </button>
+              <input type="file" id="import-file-input" accept=".csv,.json" style="display: none;">
+
+              <button type="button" class="btn-dir-tool usm-btn-refresh" id="refresh-directory-btn" title="Reload Panchayat directory from database" aria-label="Refresh directory">
+                <i class="fa-solid fa-arrows-rotate"></i> Refresh
+              </button>
+
+              <button type="button" class="btn-dir-tool usm-btn-reset" id="reset-panchayats-btn" title="Reset to original 12 verified Panchayats" aria-label="Reset to original 12 verified Panchayats">
+                <i class="fa-solid fa-rotate-left"></i> Reset
+              </button>
+            </div>
+          </div>
+        </div>
+        <div id="directory-usm-status" style="margin: 12px 18px 0;"></div>
+
+        <div class="directory-table-responsive">
+          <table class="directory-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Gram Panchayat</th>
+                <th>Block / Taluk</th>
+                <th>District</th>
+                <th>Contact Details</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="directory-table-body">
+              <!-- Dynamically populated via directory.js -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination-container" id="directory-pagination">
+          <!-- Populated via directory.js -->
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- ========================================================================
+       MODALS: VIEW DETAILS, ADD NEW PANCHAYAT, EDIT PANCHAYAT, DELETE CONFIRM
+       ======================================================================== -->
+
+  <!-- 1. View Details Modal -->
+  <div class="modal-overlay" id="panchayat-details-modal">
+    <div class="modal-window" style="max-width: 680px;">
+      <div class="modal-header">
+        <div class="modal-title" style="display: flex; align-items: center; gap: 10px;">
+          <i class="fa-solid fa-landmark" style="color: #0f56b3;"></i>
+          <span id="modal-gp-name">Panchayat Name</span>
+        </div>
+        <button type="button" class="modal-close-btn" onclick="closePanchayatModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <table class="detail-table" style="margin-bottom: 16px;">
+          <tr>
+            <td class="detail-label-cell">District</td>
+            <td class="detail-value-cell">: <strong id="modal-gp-district">Dakshina Kannada</strong></td>
+          </tr>
+          <tr>
+            <td class="detail-label-cell">Block / Taluk</td>
+            <td class="detail-value-cell">: <strong id="modal-gp-block">Bantwal</strong></td>
+          </tr>
+          <tr>
+            <td class="detail-label-cell">Office Address</td>
+            <td class="detail-value-cell">: <span id="modal-gp-address">Panchayat Bhavan Road</span></td>
+          </tr>
+          <tr>
+            <td class="detail-label-cell">President</td>
+            <td class="detail-value-cell">: <span id="modal-gp-president">Hon. President</span></td>
+          </tr>
+          <tr>
+            <td class="detail-label-cell">Secretary / PDO</td>
+            <td class="detail-value-cell">: <span id="modal-gp-secretary">Panchayat Development Officer</span></td>
+          </tr>
+          <tr>
+            <td class="detail-label-cell">Official Contact</td>
+            <td class="detail-value-cell">: <span id="modal-gp-phone">+91 82455 21234</span></td>
+          </tr>
+          <tr>
+            <td class="detail-label-cell">Receiver Email</td>
+            <td class="detail-value-cell">: <span id="modal-gp-email"></span></td>
+          </tr>
+        </table>
+
+        <!-- Notice / Announcement Text Display -->
+        <div id="modal-announcement-container" style="display: none; margin-bottom: 16px;">
+          <label style="font-size: 13px; font-weight: 700; color: #92400e; display: flex; align-items: center; gap: 6px;">
+            <i class="fa-solid fa-bullhorn"></i> Official Notice / Announcement:
+          </label>
+          <div class="notice-text-banner" id="modal-announcement-text">
+            Notice text...
+          </div>
+        </div>
+
+        <!-- Attached File / Circular Display -->
+        <div id="modal-file-container" style="display: none; margin-bottom: 16px;">
+          <label style="font-size: 13px; font-weight: 700; color: #0369a1; display: flex; align-items: center; gap: 6px;">
+            <i class="fa-solid fa-file-lines"></i> Attached Circular / Document:
+          </label>
+          <div style="margin-top: 6px;">
+            <a href="#" id="modal-download-file-btn" class="attached-file-pill" download>
+              <i class="fa-solid fa-download"></i> <span id="modal-file-name">Document.pdf</span>
+            </a>
+          </div>
+        </div>
+
+      </div>
+      <div class="modal-footer" style="justify-content: space-between;">
+        <div style="display: flex; gap: 8px;">
+          <button type="button" class="btn-edit-action" id="modal-trigger-edit-btn" style="padding: 8px 14px; font-size: 13px;">
+            <i class="fa-solid fa-pen-to-square"></i> Edit
+          </button>
+          <button type="button" class="btn-delete-action" id="modal-trigger-delete-btn" style="padding: 8px 14px; font-size: 13px;">
+            <i class="fa-solid fa-trash-can"></i> Delete
+          </button>
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <a href="complaint.html" class="btn-cta-primary" id="modal-lodge-complaint-btn" style="padding: 8px 16px; font-size: 13px;">
+            <i class="fa-solid fa-circle-plus"></i> Lodge Complaint
+          </a>
+          <button type="button" class="btn-cta-secondary" onclick="closePanchayatModal()" style="padding: 8px 16px; font-size: 13px;">
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Add New Panchayat Modal -->
+  <div class="modal-overlay" id="add-panchayat-modal">
+    <div class="modal-window" style="max-width: 680px;">
+      <div class="modal-header">
+        <div class="modal-title" style="display: flex; align-items: center; gap: 10px; color: #15803d;">
+          <i class="fa-solid fa-plus-circle"></i>
+          <span>Add New Gram Panchayat</span>
+        </div>
+        <button type="button" class="modal-close-btn" onclick="closeAddPanchayatModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="add-panchayat-form">
+          <div class="form-grid-two">
+            <div class="form-group">
+              <label class="form-label" for="add-gp-name">Panchayat Name<span class="req-star">*</span></label>
+              <input type="text" id="add-gp-name" class="form-input" placeholder="e.g. Haleyangadi Gram Panchayat" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="add-gp-block">Block / Taluk<span class="req-star">*</span></label>
+              <input type="text" id="add-gp-block" class="form-input" placeholder="e.g. Mangaluru" required>
+            </div>
+          </div>
+
+          <div class="form-grid-two">
+            <div class="form-group">
+              <label class="form-label" for="add-gp-district">District<span class="req-star">*</span></label>
+              <input type="text" id="add-gp-district" class="form-input" placeholder="e.g. Dakshina Kannada" value="Dakshina Kannada" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="add-gp-phone">Contact Number<span class="req-star">*</span></label>
+              <input type="text" id="add-gp-phone" class="form-input" placeholder="e.g. +91 82422 12345" required>
+            </div>
+          </div>
+
+          <div class="form-grid-two">
+            <div class="form-group">
+              <label class="form-label" for="add-gp-email">Receiver Email<span class="req-star">*</span></label>
+              <input type="email" id="add-gp-email" class="form-input" placeholder="e.g. officer@example.com" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="add-gp-president">President Name</label>
+              <input type="text" id="add-gp-president" class="form-input" placeholder="e.g. Rajesh Shetty">
+            </div>
+          </div>
+
+          <div class="form-grid-two">
+            <div class="form-group">
+              <label class="form-label" for="add-gp-secretary">Secretary / PDO Name</label>
+              <input type="text" id="add-gp-secretary" class="form-input" placeholder="e.g. Sunitha Rao">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="add-gp-address">Office Address</label>
+              <input type="text" id="add-gp-address" class="form-input" placeholder="e.g. Main Road, Haleyangadi - 574146">
+            </div>
+          </div>
+
+          <!-- Add Text / Announcement -->
+          <div class="form-group">
+            <label class="form-label" for="add-gp-notice">
+              <i class="fa-solid fa-bullhorn" style="color: #d97706;"></i>
+              <span>Official Notice / Announcement Text</span>
+            </label>
+            <textarea id="add-gp-notice" class="form-textarea" style="min-height: 70px;" placeholder="Add announcement, public meeting dates, or special village notices here..."></textarea>
+          </div>
+
+          <!-- Attach New File / Circular -->
+          <div class="form-group">
+            <label class="form-label" for="add-gp-file">
+              <i class="fa-solid fa-paperclip" style="color: #0f56b3;"></i>
+              <span>Attach Circular / Document File (PDF, Word, Image, Text)</span>
+            </label>
+            <input type="file" id="add-gp-file" class="form-input" accept=".pdf,.doc,.docx,.png,.jpg,.jpeg,.txt">
+          </div>
+
+          <div class="modal-footer" style="padding-left: 0; padding-right: 0; margin-top: 20px;">
+            <button type="submit" class="btn-cta-primary" style="background: #15803d; border-color: #15803d;">
+              <i class="fa-solid fa-plus"></i> Save & Add Panchayat
+            </button>
+            <button type="button" class="btn-cta-secondary" onclick="closeAddPanchayatModal()">
+              Cancel
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. Edit Panchayat Modal -->
+  <div class="modal-overlay" id="edit-panchayat-modal">
+    <div class="modal-window" style="max-width: 680px;">
+      <div class="modal-header">
+        <div class="modal-title" style="display: flex; align-items: center; gap: 10px; color: #0284c7;">
+          <i class="fa-solid fa-pen-to-square"></i>
+          <span>Edit Gram Panchayat Details</span>
+        </div>
+        <button type="button" class="modal-close-btn" onclick="closeEditPanchayatModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="edit-panchayat-form">
+          <input type="hidden" id="edit-gp-id">
+
+          <div class="form-grid-two">
+            <div class="form-group">
+              <label class="form-label" for="edit-gp-name">Panchayat Name<span class="req-star">*</span></label>
+              <input type="text" id="edit-gp-name" class="form-input" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="edit-gp-block">Block / Taluk<span class="req-star">*</span></label>
+              <input type="text" id="edit-gp-block" class="form-input" required>
+            </div>
+          </div>
+
+          <div class="form-grid-two">
+            <div class="form-group">
+              <label class="form-label" for="edit-gp-district">District<span class="req-star">*</span></label>
+              <input type="text" id="edit-gp-district" class="form-input" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="edit-gp-phone">Contact Number<span class="req-star">*</span></label>
+              <input type="text" id="edit-gp-phone" class="form-input" required>
+            </div>
+          </div>
+
+          <div class="form-grid-two">
+            <div class="form-group">
+              <label class="form-label" for="edit-gp-email">Receiver Email<span class="req-star">*</span></label>
+              <input type="email" id="edit-gp-email" class="form-input" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="edit-gp-president">President Name</label>
+              <input type="text" id="edit-gp-president" class="form-input">
+            </div>
+          </div>
+
+          <div class="form-grid-two">
+            <div class="form-group">
+              <label class="form-label" for="edit-gp-secretary">Secretary / PDO Name</label>
+              <input type="text" id="edit-gp-secretary" class="form-input">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="edit-gp-address">Office Address</label>
+              <input type="text" id="edit-gp-address" class="form-input">
+            </div>
+          </div>
+
+          <!-- Edit Announcement Text -->
+          <div class="form-group">
+            <label class="form-label" for="edit-gp-notice">
+              <i class="fa-solid fa-bullhorn" style="color: #d97706;"></i>
+              <span>Official Notice / Announcement Text</span>
+            </label>
+            <textarea id="edit-gp-notice" class="form-textarea" style="min-height: 70px;" placeholder="Edit notice or announcements for villagers..."></textarea>
+          </div>
+
+          <!-- Attached File / Upload New File -->
+          <div class="form-group">
+            <label class="form-label" for="edit-gp-file">
+              <i class="fa-solid fa-paperclip" style="color: #0f56b3;"></i>
+              <span>Upload / Replace Circular File</span>
+            </label>
+            <div id="edit-current-file-badge" style="display: none; margin-bottom: 6px;">
+              <span style="font-size: 12px; color: #64748b;">Current file: <strong id="edit-current-file-name">None</strong></span>
+            </div>
+            <input type="file" id="edit-gp-file" class="form-input" accept=".pdf,.doc,.docx,.png,.jpg,.jpeg,.txt">
+          </div>
+
+          <div class="modal-footer" style="padding-left: 0; padding-right: 0; margin-top: 20px;">
+            <button type="submit" class="btn-cta-primary" style="background: #0284c7; border-color: #0284c7;">
+              <i class="fa-solid fa-floppy-disk"></i> Save Changes
+            </button>
+            <button type="button" class="btn-cta-secondary" onclick="closeEditPanchayatModal()">
+              Cancel
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. Delete Confirmation Modal -->
+  <div class="modal-overlay" id="delete-panchayat-modal">
+    <div class="modal-window" style="max-width: 480px;">
+      <div class="modal-header">
+        <div class="modal-title" style="display: flex; align-items: center; gap: 8px; color: #dc2626;">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+          <span>Confirm Deletion</span>
+        </div>
+        <button type="button" class="modal-close-btn" onclick="closeDeleteModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size: 14.5px; color: #334155; line-height: 1.5;">
+          Are you sure you want to delete <strong id="delete-gp-name-display" style="color: #0b2545;">this Gram Panchayat</strong> from the directory?
+        </p>
+        <p style="font-size: 12.5px; color: #64748b; margin-top: 8px;">
+          This record will be permanently removed from the portal and database.
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-cta-primary" id="confirm-delete-gp-btn" style="background: #dc2626; border-color: #dc2626;">
+          <i class="fa-solid fa-trash-can"></i> Yes, Delete
+        </button>
+        <button type="button" class="btn-cta-secondary" onclick="closeDeleteModal()">
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="portal-footer">
+    <div class="footer-wave-line"></div>
+    <div class="footer-content">
+      <div class="footer-disclaimer">
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px;">
+          <img src="assets/branding/janaseva-icon.png" alt="JANASEVA Logo" class="footer-emblem-img" width="26" height="26" style="width: 26px; height: 26px; object-fit: contain;">
+          <strong>JANASEVA – Gram Panchayat Grievance Portal</strong>
+        </div>
+        This portal is an academic student project created for civic grievance demonstration. Not an official Government of India website.
+      </div>
+      <div class="footer-links-group">
+        <a href="index.html">Home</a>
+        <a href="complaint.html">Submit Complaint</a>
+        <a href="track.html">Track Status</a>
+        <a href="directory.html">Directory</a>
+        <a href="knowledge-centre.html">Knowledge Centre</a>
+        <a href="about.html">About</a>
+        <a href="https://ipchat.in/" target="_blank" rel="noopener noreferrer">IP Chat – External Messaging Service</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- JANASEVA MongoDB Backend & Scripts -->
+  <script src="js/firebase-config.js"></script>
+  <script src="js/mongodb-adapter.js"></script>
+  <script src="js/translations.js"></script>
+  <script src="js/universal-settings.js"></script>
+  <script src="js/status-config.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/universal-notifications.js"></script>
+<script src="js/directory.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      if (window.authService) {
+        window.authService.protectPage('any');
+      }
+    });
+  </script>
+  <script src="js/offline-db.js"></script>
+  <script src="js/ai-prioritization.js"></script>
+  <script src="js/document-verifier.js"></script>
+  <script src="js/knowledge-parsers.js"></script>
+  <script src="js/knowledge-security.js"></script>
+  <script src="js/knowledge-rag.js"></script>
+  <script src="js/knowledge-storage.js"></script>
+  <script src="js/ai-chat-services.js"></script>
+  <script src="js/ai-voice-assistant.js"></script>
+</body>
+</html>

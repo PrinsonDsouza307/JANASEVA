@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <!-- Favicon & Brand Identity -->
+  <link rel="icon" type="image/x-icon" href="assets/branding/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/branding/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/branding/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/branding/apple-touch-icon.png">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#dc2626">
+  <title>Emergency Control Centre – Master Emergency Data Reset – JANASEVA</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+  <!-- Auth Guard Overlay (Strictly Administrator Protected) -->
+  <div id="auth-guard-overlay" class="auth-guard-overlay">
+    <div class="auth-guard-box">
+      <img src="assets/branding/janaseva-icon.png" alt="JANASEVA" class="auth-guard-logo">
+      <div class="auth-guard-spinner"></div>
+      <div class="auth-guard-title">JANASEVA</div>
+      <div class="auth-guard-sub" id="auth-guard-sub">Verifying administrator security session...</div>
+    </div>
+  </div>
+
+  <!-- Header -->
+  <header class="portal-header">
+    <div class="header-container">
+      <a href="index.html" class="brand-section">
+        <img src="assets/branding/janaseva-icon.png" alt="JANASEVA Official Logo" class="emblem-img brand-logo-img">
+        <div class="brand-text-block">
+          <span class="brand-main-title">JANASEVA</span>
+          <div class="brand-divider"></div>
+          <div class="brand-sub-titles">
+            <span class="brand-subtitle">Gram Panchayat Grievance Portal</span>
+            <span class="brand-tagline">Report • Submit • Track • Resolve</span>
+          </div>
+        </div>
+      </a>
+
+      <!-- Header Action Controls: Notification Bell (Always visible in Android toolbar & Desktop header) + Mobile Menu Toggle -->
+      <div class="header-action-controls" id="header-action-controls">
+        <button class="nav-notif-bell-btn" id="nav-notif-bell-btn" type="button" aria-label="View Notifications">
+          <i class="fa-regular fa-bell"></i>
+          <span class="nav-notif-badge" id="nav-notif-badge" style="display: none;">0</span>
+        </button>
+        <button class="nav-toggle-btn" id="mobile-nav-toggle" aria-label="Toggle Navigation">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+      </div>
+
+      <nav class="main-nav" id="main-navigation">
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="complaint.html" class="nav-link">Submit Complaint</a>
+        <a href="track.html" class="nav-link">Track Status</a>
+        <a href="directory.html" class="nav-link">Panchayat Directory</a>
+        <a href="knowledge-centre.html" class="nav-link">Knowledge Centre</a>
+        <a href="https://ipchat.in/" class="nav-link nav-link-external" target="_blank" rel="noopener noreferrer"><i class="fa-solid fa-comments" aria-hidden="true"></i> <span>IP Chat</span> <i class="fa-solid fa-arrow-up-right-from-square nav-ext-icon" aria-hidden="true"></i></a>
+        <a href="about.html" class="nav-link">About</a>
+        <div class="lang-selector-wrapper">
+          <i class="fa-solid fa-globe lang-icon"></i>
+          <select class="janaseva-lang-select" aria-label="Select Language">
+            <option value="en">English</option>
+            <option value="kn">ಕನ್ನಡ (Kannada)</option>
+            <option value="hi">हिन्दी (Hindi)</option>
+          </select>
+        </div>
+        <div id="nav-auth-container" style="display: inline-flex; align-items: center; gap: 8px;">
+          <!-- Populated dynamically by auth.js -->
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Hero Banner -->
+  <section class="hero-banner" style="background: linear-gradient(135deg, #0b2545 0%, #7f1d1d 100%);">
+    <div class="hero-bg-overlay"></div>
+    <div class="hero-content-wrap">
+      <div class="hero-text-side">
+        <!-- Breadcrumb Navigation -->
+        <div style="font-size: 12px; font-weight: 700; color: #fca5a5; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;">
+          <a href="receiver-dashboard.html" style="color: #fecaca; text-decoration: none;">Admin Dashboard</a>
+          <span style="margin: 0 6px;">&rarr;</span>
+          <span>System Settings</span>
+          <span style="margin: 0 6px;">&rarr;</span>
+          <span>Emergency Control Centre</span>
+          <span style="margin: 0 6px;">&rarr;</span>
+          <span style="color: #fff;">Emergency Data Reset</span>
+        </div>
+        <div class="hero-title-with-icon">
+          <div class="hero-page-icon" style="background: #dc2626;">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+          </div>
+          <h1 class="hero-main-heading">Emergency Control Centre</h1>
+        </div>
+        <p class="hero-subheading">Privileged municipal administrative console for operational data purge, factory reset, cryptographic snapshots, and portal maintenance controls.</p>
+      </div>
+    </div>
+
+    <div class="tricolour-wave-separator">
+      <svg viewBox="0 0 1440 24" fill="none" preserveAspectRatio="none">
+        <path d="M0,0 C360,18 1080,6 1440,16 L1440,24 L0,24 Z" fill="#ffffff" />
+        <path d="M0,4 C400,20 1100,10 1440,18" stroke="#ff9933" stroke-width="2.5" fill="none" />
+        <path d="M0,8 C420,22 1120,12 1440,20" stroke="#138808" stroke-width="2.5" fill="none" />
+      </svg>
+    </div>
+  </section>
+
+  <!-- Main Content -->
+  <main class="page-main-content">
+    <div class="page-container" style="max-width: 1200px; margin: 0 auto; padding: 8px 0;">
+
+      <!-- Top Overview Banner -->
+      <div class="portal-card" style="margin-bottom: 16px; border-left: 5px solid #dc2626;">
+        <div class="portal-card-header" style="flex-wrap: wrap; gap: 12px; justify-content: space-between; align-items: center;">
+          <div class="card-title-group">
+            <i class="fa-solid fa-shield-halved card-header-icon" style="color: #dc2626; font-size: 24px;"></i>
+            <div>
+              <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                <h2 class="card-heading" style="color: #991b1b;">Master Emergency Data Reset System</h2>
+                <span class="admin-tab-badge" style="background: linear-gradient(135deg, #dc2626, #991b1b); color: #fff; font-size: 11px; padding: 3px 8px; border-radius: 12px; font-weight: 800;">ADMIN PRIVILEGED ONLY</span>
+                <span class="admin-tab-badge" style="background: #1e293b; color: #f8fafc; font-size: 11px; padding: 3px 8px; border-radius: 12px; font-weight: 700;"><i class="fa-solid fa-lock"></i> 7-CHECKPOINT PROTOCOL</span>
+                <span class="admin-tab-badge" style="background: #0284c7; color: #fff; font-size: 11px; padding: 3px 8px; border-radius: 12px; font-weight: 700;"><i class="fa-solid fa-code-branch"></i> v1.0.0</span>
+              </div>
+              <p class="card-subheading">Authoritative administrative centre for operational grievance purge, complete factory reset, cryptographic snapshot creation, disaster recovery, and portal maintenance mode.</p>
+            </div>
+          </div>
+          <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+            <button type="button" class="btn-refresh" onclick="refreshEmergencyMetrics()">
+              <i class="fa-solid fa-arrows-rotate"></i>
+              <span>Refresh Metrics</span>
+            </button>
+            <a href="receiver-dashboard.html" style="display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; font-size: 12.5px; border-radius: 6px; background: #0b2545; color: #fff; text-decoration: none; font-weight: 700;">
+              <i class="fa-solid fa-arrow-left"></i>
+              <span>Back to Admin Dashboard</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Emergency Maintenance Mode Settings Card (USM) -->
+      <div class="portal-card" id="maintenance-settings-card" style="margin-bottom: 16px; background: #f8fafc; border: 1px solid #e2e8f0;">
+        <div style="padding: 16px 18px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 12px;">
+            <div style="display: flex; align-items: center; gap: 14px;">
+              <div style="width: 44px; height: 44px; border-radius: 10px; background: #fee2e2; display: flex; align-items: center; justify-content: center; color: #dc2626; font-size: 20px;">
+                <i class="fa-solid fa-tower-broadcast"></i>
+              </div>
+              <div>
+                <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                  <strong style="font-size: 15px; color: #0b2545;">Portal Maintenance Mode Settings:</strong>
+                  <span id="maintenance-status-badge" class="admin-tab-badge" style="background: #16a34a; color: #fff; font-size: 11px; padding: 3px 8px; border-radius: 12px; font-weight: 800;" data-no-translate="true">NORMAL OPERATIONAL</span>
+                </div>
+                <p style="margin: 3px 0 0; font-size: 12.5px; color: #64748b;">When activated, new grievance submissions are halted and an official maintenance notice is displayed across the public portal.</p>
+              </div>
+            </div>
+            <button type="button" id="btn-toggle-maintenance" onclick="toggleMaintenanceMode()" style="display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px; font-size: 13px; border-radius: 6px; background: #ea580c; color: #fff; border: none; font-weight: 700; cursor: pointer;">
+              <i class="fa-solid fa-pause"></i>
+              <span>Quick Toggle</span>
+            </button>
+          </div>
+
+          <div id="maintenance-usm-status"></div>
+
+          <form id="maintenance-settings-form" style="background: #ffffff; border: 1px solid #d4e2f0; border-radius: 10px; padding: 14px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 12px;">
+              <label for="maintenance-active-toggle" style="display: inline-flex; align-items: center; gap: 10px; font-weight: 700; color: #0b2545; font-size: 13.5px; cursor: pointer;">
+                <input type="checkbox" id="maintenance-active-toggle" style="width: 18px; height: 18px; cursor: pointer;">
+                <span>Enable Portal Maintenance Mode (Pause Citizen Submissions)</span>
+              </label>
+            </div>
+            <div class="form-group" style="margin-bottom: 10px;">
+              <label for="maintenance-notice-input" class="form-label" style="font-size: 12.5px; margin-bottom: 4px;">Public Citizen Maintenance Notice</label>
+              <input type="text" id="maintenance-notice-input" class="form-input" maxlength="500" placeholder="e.g. Scheduled Gram Panchayat portal maintenance. Grievance submission resumes shortly.">
+            </div>
+            <div class="usm-actions-bar">
+              <button type="submit" id="save-maintenance-btn" class="btn-cta-primary" style="width: auto; padding: 9px 18px;">
+                <i class="fa-solid fa-floppy-disk"></i> <span>Save Maintenance Settings</span>
+              </button>
+              <button type="button" id="reset-maintenance-btn" class="btn-secondary-action usm-btn-reset" style="padding: 9px 15px;">
+                <i class="fa-solid fa-rotate-left"></i> <span>Reset to Normal Operational</span>
+              </button>
+              <button type="button" id="refresh-maintenance-btn" class="btn-secondary-action usm-btn-refresh" style="padding: 9px 15px;">
+                <i class="fa-solid fa-arrows-rotate"></i> <span>Refresh Status</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Real-Time Impact Assessment Metrics Grid -->
+      <div class="portal-card" style="margin-bottom: 16px;">
+        <div class="portal-card-header" style="padding: 14px 18px;">
+          <div class="card-title-group">
+            <i class="fa-solid fa-chart-pie card-header-icon" style="color: #0b2545;"></i>
+            <div>
+              <h3 class="card-heading" style="font-size: 15px;">Live System Impact Assessment</h3>
+              <p class="card-subheading" style="font-size: 12px;">Real-time inventory of operational records, audit chains, citizen profiles, and storage footprints.</p>
+            </div>
+          </div>
+        </div>
+        <div style="padding: 16px 20px;">
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 170px), 1fr)); gap: 14px;">
+            <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px; text-align: center;">
+              <div style="font-size: 11.5px; font-weight: 700; color: #64748b; text-transform: uppercase;">Active Complaints</div>
+              <div id="impact-complaints-count" style="font-size: 26px; font-weight: 800; color: #dc2626; margin: 4px 0;">0</div>
+              <div style="font-size: 11px; color: #94a3b8;">Grievance Documents</div>
+            </div>
+            <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px; text-align: center;">
+              <div style="font-size: 11.5px; font-weight: 700; color: #64748b; text-transform: uppercase;">Subcollection Records</div>
+              <div id="impact-subcollections-count" style="font-size: 26px; font-weight: 800; color: #ea580c; margin: 4px 0;">0</div>
+              <div style="font-size: 11px; color: #94a3b8;">Status History &amp; Messages</div>
+            </div>
+            <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px; text-align: center;">
+              <div style="font-size: 11.5px; font-weight: 700; color: #64748b; text-transform: uppercase;">Notification Logs</div>
+              <div id="impact-logs-count" style="font-size: 26px; font-weight: 800; color: #0284c7; margin: 4px 0;">0</div>
+              <div style="font-size: 11px; color: #94a3b8;">Email &amp; WhatsApp Logs</div>
+            </div>
+            <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px; text-align: center;">
+              <div style="font-size: 11.5px; font-weight: 700; color: #64748b; text-transform: uppercase;">Citizen Accounts</div>
+              <div id="impact-citizens-count" style="font-size: 26px; font-weight: 800; color: #475569; margin: 4px 0;">0</div>
+              <div style="font-size: 11px; color: #94a3b8;">Registered Users</div>
+            </div>
+            <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px; text-align: center;">
+              <div style="font-size: 11.5px; font-weight: 700; color: #64748b; text-transform: uppercase;">Offline Queue</div>
+              <div id="impact-offline-count" style="font-size: 26px; font-weight: 800; color: #7c3aed; margin: 4px 0;">0</div>
+              <div style="font-size: 11px; color: #94a3b8;">Pending Submissions</div>
+            </div>
+            <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px; text-align: center;">
+              <div style="font-size: 11.5px; font-weight: 700; color: #64748b; text-transform: uppercase;">Storage Estimate</div>
+              <div id="impact-storage-kb" style="font-size: 26px; font-weight: 800; color: #16a34a; margin: 4px 0;">0 KB</div>
+              <div style="font-size: 11px; color: #94a3b8;">Estimated Volume</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+            <!-- Master Six Reset Categories (Categories A through F) -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: 14px; margin-bottom: 16px;">
+
+        <!-- Category A Card -->
+        <div class="portal-card" style="border: 2px solid #bae6fd; display: flex; flex-direction: column; justify-content: space-between;">
+          <div>
+            <div style="background: #f0f9ff; padding: 14px 18px; border-bottom: 1px solid #e0f2fe;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                <span class="admin-tab-badge" style="background: #0284c7; color: #fff; font-weight: 800; font-size: 11px;">CATEGORY A</span>
+                <span style="font-size: 12px; font-weight: 700; color: #0369a1;"><i class="fa-solid fa-broom"></i> TEMP DATA</span>
+              </div>
+              <h3 style="margin: 0; font-size: 17px; color: #0c4a6e;">Clear Temporary Data</h3>
+              <p style="margin: 4px 0 0; font-size: 12px; color: #0284c7;">Flushes transient offline drafts, IndexedDB queues, and transmission logs without affecting core data.</p>
+            </div>
+            <div style="padding: 16px 18px;">
+              <h4 style="margin: 0 0 8px; font-size: 12px; color: #475569; text-transform: uppercase;">Purged:</h4>
+              <ul style="margin: 0 0 12px; padding-left: 18px; font-size: 12px; color: #334155; line-height: 1.5;">
+                <li>IndexedDB offline submission queue & drafts</li>
+                <li>Session storage and browser cached complaints</li>
+                <li>Email transmission audit logs & WhatsApp logs</li>
+              </ul>
+              <h4 style="margin: 0 0 8px; font-size: 12px; color: #166534; text-transform: uppercase;">Preserved:</h4>
+              <ul style="margin: 0; padding-left: 18px; font-size: 12px; color: #166534; line-height: 1.5;">
+                <li>All citizen complaints and tracking IDs</li>
+                <li>All citizen, receiver, and admin profiles</li>
+              </ul>
+            </div>
+          </div>
+          <div style="padding: 14px 18px; background: #f8fafc; border-top: 1px solid #e2e8f0;">
+            <button type="button" onclick="openResetWizard('CATEGORY_A_TEMP_DATA')" style="width: 100%; padding: 9px 14px; background: #0284c7; color: #fff; border: none; border-radius: 6px; font-size: 13px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
+              <i class="fa-solid fa-broom"></i>
+              <span>Clear Temporary Data (Cat A)</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Category B Card -->
+        <div class="portal-card" style="border: 2px solid #fed7aa; display: flex; flex-direction: column; justify-content: space-between;">
+          <div>
+            <div style="background: #fff7ed; padding: 14px 18px; border-bottom: 1px solid #ffedd5;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                <span class="admin-tab-badge" style="background: #ea580c; color: #fff; font-weight: 800; font-size: 11px;">CATEGORY B</span>
+                <span style="font-size: 12px; font-weight: 700; color: #c2410c;"><i class="fa-solid fa-file-circle-xmark"></i> COMPLAINTS</span>
+              </div>
+              <h3 style="margin: 0; font-size: 17px; color: #7c2d12;">Clear Grievance Records</h3>
+              <p style="margin: 4px 0 0; font-size: 12px; color: #c2410c;">Operational lifecycle cleanse. Purges grievance transactions and messages while keeping all user accounts intact.</p>
+            </div>
+            <div style="padding: 16px 18px;">
+              <h4 style="margin: 0 0 8px; font-size: 12px; color: #475569; text-transform: uppercase;">Purged:</h4>
+              <ul style="margin: 0 0 12px; padding-left: 18px; font-size: 12px; color: #334155; line-height: 1.5;">
+                <li>All citizen complaints and tracking IDs</li>
+                <li>Status progression histories and official responses</li>
+                <li>Email and WhatsApp delivery logs</li>
+              </ul>
+              <h4 style="margin: 0 0 8px; font-size: 12px; color: #166534; text-transform: uppercase;">Preserved:</h4>
+              <ul style="margin: 0; padding-left: 18px; font-size: 12px; color: #166534; line-height: 1.5;">
+                <li>Citizen, Receiver, and Administrator accounts</li>
+                <li>Panchayat directory and system settings</li>
+              </ul>
+            </div>
+          </div>
+          <div style="padding: 14px 18px; background: #f8fafc; border-top: 1px solid #e2e8f0;">
+            <button type="button" onclick="openResetWizard('CATEGORY_B_SELECTED_COMPLAINTS')" style="width: 100%; padding: 9px 14px; background: #ea580c; color: #fff; border: none; border-radius: 6px; font-size: 13px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
+              <i class="fa-solid fa-rotate-left"></i>
+              <span>Clear Grievances (Cat B)</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Category C Card -->
+        <div class="portal-card" style="border: 2px solid #e9d5ff; display: flex; flex-direction: column; justify-content: space-between;">
+          <div>
+            <div style="background: #faf5ff; padding: 14px 18px; border-bottom: 1px solid #f3e8ff;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                <span class="admin-tab-badge" style="background: #9333ea; color: #fff; font-weight: 800; font-size: 11px;">CATEGORY C</span>
+                <span style="font-size: 12px; font-weight: 700; color: #7e22ce;"><i class="fa-solid fa-users-slash"></i> CITIZENS</span>
+              </div>
+              <h3 style="margin: 0; font-size: 17px; color: #581c87;">Reset Citizen Data</h3>
+              <p style="margin: 4px 0 0; font-size: 12px; color: #7e22ce;">Purges registered citizen user accounts and citizen-filed grievances. Official Panchayat receivers remain active.</p>
+            </div>
+            <div style="padding: 16px 18px;">
+              <h4 style="margin: 0 0 8px; font-size: 12px; color: #475569; text-transform: uppercase;">Purged:</h4>
+              <ul style="margin: 0 0 12px; padding-left: 18px; font-size: 12px; color: #334155; line-height: 1.5;">
+                <li>Registered citizen accounts (role: citizen)</li>
+                <li>Grievance records submitted by citizens</li>
+              </ul>
+              <h4 style="margin: 0 0 8px; font-size: 12px; color: #166534; text-transform: uppercase;">Preserved:</h4>
+              <ul style="margin: 0; padding-left: 18px; font-size: 12px; color: #166534; line-height: 1.5;">
+                <li>Official Gram Panchayat Receiver logins</li>
+                <li>Administrator account</li>
+              </ul>
+            </div>
+          </div>
+          <div style="padding: 14px 18px; background: #f8fafc; border-top: 1px solid #e2e8f0;">
+            <button type="button" onclick="openResetWizard('CATEGORY_C_CITIZEN_DATA')" style="width: 100%; padding: 9px 14px; background: #9333ea; color: #fff; border: none; border-radius: 6px; font-size: 13px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
+              <i class="fa-solid fa-users-slash"></i>
+              <span>Reset Citizen Data (Cat C)</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Category D Card -->
+        <div class="portal-card" style="border: 2px solid #cbd5e1; display: flex; flex-direction: column; justify-content: space-between;">
+          <div>
+            <div style="background: #f8fafc; padding: 14px 18px; border-bottom: 1px solid #e2e8f0;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                <span class="admin-tab-badge" style="background: #475569; color: #fff; font-weight: 800; font-size: 11px;">CATEGORY D</span>
+                <span style="font-size: 12px; font-weight: 700; color: #334155;"><i class="fa-solid fa-user-shield"></i> RECEIVERS</span>
+              </div>
+              <h3 style="margin: 0; font-size: 17px; color: #0f172a;">Reset Receiver Data</h3>
+              <p style="margin: 4px 0 0; font-size: 12px; color: #334155;">Restores receiver profiles and email configurations to standard directory defaults.</p>
+            </div>
+            <div style="padding: 16px 18px;">
+              <h4 style="margin: 0 0 8px; font-size: 12px; color: #475569; text-transform: uppercase;">Purged:</h4>
+              <ul style="margin: 0 0 12px; padding-left: 18px; font-size: 12px; color: #334155; line-height: 1.5;">
+                <li>Custom receiver settings and notification preferences</li>
+                <li>Receiver email override configurations</li>
+              </ul>
+              <h4 style="margin: 0 0 8px; font-size: 12px; color: #166534; text-transform: uppercase;">Preserved:</h4>
+              <ul style="margin: 0; padding-left: 18px; font-size: 12px; color: #166534; line-height: 1.5;">
+                <li>Citizen accounts and citizen grievances</li>
+                <li>Super Administrator account</li>
+              </ul>
+            </div>
+          </div>
+          <div style="padding: 14px 18px; background: #f8fafc; border-top: 1px solid #e2e8f0;">
+            <button type="button" onclick="openResetWizard('CATEGORY_D_RECEIVER_DATA')" style="width: 100%; padding: 9px 14px; background: #475569; color: #fff; border: none; border-radius: 6px; font-size: 13px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
+              <i class="fa-solid fa-user-gear"></i>
+              <span>Reset Receivers (Cat D)</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Category E Card -->
+        <div class="portal-card" style="border: 2px solid #fecaca; display: flex; flex-direction: column; justify-content: space-between;">
+          <div>
+            <div style="background: #fff1f2; padding: 14px 18px; border-bottom: 1px solid #ffe4e6;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                <span class="admin-tab-badge" style="background: #dc2626; color: #fff; font-weight: 800; font-size: 11px;">CATEGORY E</span>
+                <span style="font-size: 12px; font-weight: 700; color: #be123c;"><i class="fa-solid fa-triangle-exclamation"></i> FULL RESET</span>
+              </div>
+              <h3 style="margin: 0; font-size: 17px; color: #881337;">Full Application Data Reset</h3>
+              <p style="margin: 4px 0 0; font-size: 12px; color: #be123c;">Complete factory reset baseline. Purges all operational data & citizen registrations. Super Admin is strictly preserved.</p>
+            </div>
+            <div style="padding: 16px 18px;">
+              <h4 style="margin: 0 0 8px; font-size: 12px; color: #991b1b; text-transform: uppercase;">Purged:</h4>
+              <ul style="margin: 0 0 12px; padding-left: 18px; font-size: 12px; color: #991b1b; line-height: 1.5;">
+                <li>All complaints, subcollections & review notes</li>
+                <li>All citizen accounts and delivery logs</li>
+              </ul>
+              <h4 style="margin: 0 0 8px; font-size: 12px; color: #166534; text-transform: uppercase;">Strictly Preserved:</h4>
+              <ul style="margin: 0; padding-left: 18px; font-size: 12px; color: #166534; line-height: 1.5;">
+                <li><strong>Super Admin — protected</strong></li>
+                <li>Verified cryptographic backup snapshots & audit ledger</li>
+              </ul>
+            </div>
+          </div>
+          <div style="padding: 14px 18px; background: #fff1f2; border-top: 1px solid #ffe4e6;">
+            <button type="button" onclick="openResetWizard('CATEGORY_E_FULL_RESET')" style="width: 100%; padding: 9px 14px; background: #dc2626; color: #fff; border: none; border-radius: 6px; font-size: 13px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
+              <i class="fa-solid fa-triangle-exclamation"></i>
+              <span>Full System Reset (Cat E)</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Category F Card -->
+        <div class="portal-card" style="border: 2px solid #bbf7d0; display: flex; flex-direction: column; justify-content: space-between;">
+          <div>
+            <div style="background: #f0fdf4; padding: 14px 18px; border-bottom: 1px solid #dcfce7;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                <span class="admin-tab-badge" style="background: #16a34a; color: #fff; font-weight: 800; font-size: 11px;">CATEGORY F</span>
+                <span style="font-size: 12px; font-weight: 700; color: #15803d;"><i class="fa-solid fa-cloud-arrow-up"></i> RESTORE</span>
+              </div>
+              <h3 style="margin: 0; font-size: 17px; color: #14532d;">Restore from Backup</h3>
+              <p style="margin: 4px 0 0; font-size: 12px; color: #15803d;">Disaster recovery restoration. Reinstates system state from a verified pre-reset snapshot with SHA-256 validation.</p>
+            </div>
+            <div style="padding: 16px 18px;">
+              <h4 style="margin: 0 0 8px; font-size: 12px; color: #15803d; text-transform: uppercase;">Recovery Workflow:</h4>
+              <ul style="margin: 0 0 12px; padding-left: 18px; font-size: 12px; color: #334155; line-height: 1.5;">
+                <li>Select cryptographic pre-reset snapshot from table</li>
+                <li>Recomputes & validates SHA-256 hash integrity</li>
+                <li>Atomically restores grievances, users, and audit records</li>
+              </ul>
+              <p style="margin: 0; font-size: 12px; color: #15803d; font-weight: 600;">Full data integrity protection with automatic rollback on error.</p>
+            </div>
+          </div>
+          <div style="padding: 14px 18px; background: #f0fdf4; border-top: 1px solid #dcfce7;">
+            <button type="button" onclick="document.getElementById('backups-table-card')?.scrollIntoView({ behavior: 'smooth' })" style="width: 100%; padding: 9px 14px; background: #16a34a; color: #fff; border: none; border-radius: 6px; font-size: 13px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
+              <i class="fa-solid fa-database"></i>
+              <span>Select Snapshot to Restore (Cat F)</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Section: Disaster Recovery & Snapshot Backups -->
+      <div class="portal-card" style="margin-bottom: 16px;">
+        <div class="portal-card-header" style="padding: 14px 18px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+          <div class="card-title-group">
+            <i class="fa-solid fa-database card-header-icon" style="color: #0b2545;"></i>
+            <div>
+              <h3 class="card-heading" style="font-size: 15px;">Cryptographic Pre-Reset Snapshots &amp; Disaster Recovery</h3>
+              <p class="card-subheading" style="font-size: 12px;">Verified backups created automatically prior to any data purge. Inspect integrity hashes, download JSON dumps, or restore system state.</p>
+            </div>
+          </div>
+          <button type="button" class="btn-refresh btn-refresh-sm" onclick="renderEmergencyBackupsTable()">
+            <i class="fa-solid fa-arrows-rotate"></i>
+            <span>Refresh Backups</span>
+          </button>
+        </div>
+        <div style="padding: 0;">
+          <div class="table-responsive" style="max-height: 300px; overflow-y: auto;">
+            <table class="portal-table">
+              <thead>
+                <tr>
+                  <th>Backup ID</th>
+                  <th>Created At</th>
+                  <th>Mode</th>
+                  <th>SHA-256 Checksum</th>
+                  <th>Records Captured</th>
+                  <th>Integrity</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="emergency-backups-tbody">
+                <tr>
+                  <td colspan="7" style="text-align: center; padding: 18px; color: #64748b;">Loading emergency backups...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section: Immutable Emergency Reset Audit History -->
+      <div class="portal-card" style="margin-bottom: 16px;">
+        <div class="portal-card-header" style="padding: 14px 18px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+          <div class="card-title-group">
+            <i class="fa-solid fa-file-shield card-header-icon" style="color: #0b2545;"></i>
+            <div>
+              <h3 class="card-heading" style="font-size: 15px;">Immutable Reset Audit History Ledger</h3>
+              <p class="card-subheading" style="font-size: 12px;">Auditable log history of all municipal emergency data reset and recovery operations stored in <code>emergencyResetAuditLogs</code>.</p>
+            </div>
+          </div>
+          <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+            <button type="button" class="btn-refresh btn-refresh-sm" onclick="renderEmergencyAuditTable()">
+              <i class="fa-solid fa-arrows-rotate"></i>
+              <span>Refresh Ledger</span>
+            </button>
+            <button type="button" class="btn-clear-audit" onclick="clearAllEmergencyAuditLogsUI()">
+              <i class="fa-solid fa-trash-can"></i>
+              <span>Clear Ledger</span>
+            </button>
+          </div>
+        </div>
+        <div style="padding: 0;">
+          <div class="table-responsive" style="max-height: 300px; overflow-y: auto;">
+            <table class="portal-table">
+              <thead>
+                <tr>
+                  <th>Log ID</th>
+                  <th>Timestamp</th>
+                  <th>Administrator</th>
+                  <th>Operation Mode</th>
+                  <th>Records Purged</th>
+                  <th>Status</th>
+                  <th>Backup Hash</th>
+                  <th style="text-align: right;">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="emergency-audit-tbody">
+                <tr>
+                  <td colspan="8" style="text-align: center; padding: 18px; color: #64748b;">Loading audit ledger...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- MODAL: 7 EMERGENCY SECURITY CHECKPOINTS WIZARD -->
+  <div class="modal-overlay" id="modal-emergency-reset-wizard">
+    <div class="modal-window" style="max-width: 820px; border-top: 5px solid #dc2626;">
+      <div class="modal-header" style="background: #fff; border-bottom: 1px solid #e2e8f0; padding: 18px 24px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div style="width: 40px; height: 40px; border-radius: 8px; background: #fee2e2; color: #dc2626; display: flex; align-items: center; justify-content: center; font-size: 18px;">
+              <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <div>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <h3 class="modal-title" id="wizard-mode-title" style="margin: 0; font-size: 17px; color: #0b2545;">Operational Grievance Data Cleanse</h3>
+                <span class="admin-tab-badge" id="wizard-mode-badge" style="background: #0284c7; color: #fff; font-size: 11px; padding: 2px 8px; border-radius: 10px; font-weight: 800;">MODE A</span>
+              </div>
+              <p id="wizard-mode-desc" style="margin: 4px 0 0; font-size: 12.5px; color: #64748b;">7 Emergency Security Checkpoints Verification Protocol</p>
+            </div>
+          </div>
+          <button type="button" class="btn-close" onclick="closeResetWizard()" style="background: transparent; border: none; font-size: 20px; color: #94a3b8; cursor: pointer;">&times;</button>
+        </div>
+      </div>
+
+      <!-- 7-Checkpoint Visual Progress Bar -->
+      <div style="background: #f8fafc; padding: 14px 20px; border-bottom: 1px solid #e2e8f0;">
+        <div style="display: flex; justify-content: space-between; align-items: center; position: relative;">
+          <div class="wizard-node active" id="wizard-step-node-1" style="text-align: center; flex: 1; z-index: 2;">
+            <div class="node-circle" style="width: 28px; height: 28px; border-radius: 50%; background: #0284c7; color: #fff; margin: 0 auto; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700;">1</div>
+            <div style="font-size: 11px; font-weight: 700; color: #0f172a; margin-top: 4px;">Mode</div>
+          </div>
+          <div class="wizard-node" id="wizard-step-node-2" style="text-align: center; flex: 1; z-index: 2;">
+            <div class="node-circle" style="width: 28px; height: 28px; border-radius: 50%; background: #e2e8f0; color: #64748b; margin: 0 auto; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700;">2</div>
+            <div style="font-size: 11px; font-weight: 700; color: #64748b; margin-top: 4px;">Impact</div>
+          </div>
+          <div class="wizard-node" id="wizard-step-node-3" style="text-align: center; flex: 1; z-index: 2;">
+            <div class="node-circle" style="width: 28px; height: 28px; border-radius: 50%; background: #e2e8f0; color: #64748b; margin: 0 auto; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700;">3</div>
+            <div style="font-size: 11px; font-weight: 700; color: #64748b; margin-top: 4px;">Backup</div>
+          </div>
+          <div class="wizard-node" id="wizard-step-node-4" style="text-align: center; flex: 1; z-index: 2;">
+            <div class="node-circle" style="width: 28px; height: 28px; border-radius: 50%; background: #e2e8f0; color: #64748b; margin: 0 auto; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700;">4</div>
+            <div style="font-size: 11px; font-weight: 700; color: #64748b; margin-top: 4px;">Re-Auth</div>
+          </div>
+          <div class="wizard-node" id="wizard-step-node-5" style="text-align: center; flex: 1; z-index: 2;">
+            <div class="node-circle" style="width: 28px; height: 28px; border-radius: 50%; background: #e2e8f0; color: #64748b; margin: 0 auto; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700;">5</div>
+            <div style="font-size: 11px; font-weight: 700; color: #64748b; margin-top: 4px;">Phrase</div>
+          </div>
+          <div class="wizard-node" id="wizard-step-node-6" style="text-align: center; flex: 1; z-index: 2;">
+            <div class="node-circle" style="width: 28px; height: 28px; border-radius: 50%; background: #e2e8f0; color: #64748b; margin: 0 auto; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700;">6</div>
+            <div style="font-size: 11px; font-weight: 700; color: #64748b; margin-top: 4px;">Scope</div>
+          </div>
+          <div class="wizard-node" id="wizard-step-node-7" style="text-align: center; flex: 1; z-index: 2;">
+            <div class="node-circle" style="width: 28px; height: 28px; border-radius: 50%; background: #e2e8f0; color: #64748b; margin: 0 auto; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700;">7</div>
+            <div style="font-size: 11px; font-weight: 700; color: #64748b; margin-top: 4px;">Execute</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal Body Panes Scrollable -->
+      <div class="modal-body modal-body-scroll" style="padding: 18px 20px; max-height: 480px; overflow-y: auto;">
+
+        <!-- CHECKPOINT 1: MODE SELECTION & SCOPE OVERVIEW -->
+        <div id="wizard-pane-1">
+          <div style="display: flex; gap: 14px; margin-bottom: 14px; align-items: flex-start;">
+            <div style="font-size: 24px; color: #0284c7;"><i class="fa-solid fa-circle-info"></i></div>
+            <div>
+              <h4 style="margin: 0 0 6px; font-size: 16px; color: #0b2545;">Checkpoint 1: Verify Reset Scope</h4>
+              <p style="margin: 0; font-size: 13px; color: #475569; line-height: 1.5;">You are initiating an emergency database reset operation. Review the intended scope below before proceeding to impact preview.</p>
+            </div>
+          </div>
+          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px; margin-bottom: 14px;">
+            <div style="font-weight: 700; font-size: 13.5px; color: #1e293b; margin-bottom: 8px;">System Integrity Safeguards:</div>
+            <ul style="margin: 0; padding-left: 20px; font-size: 12.5px; color: #475569; line-height: 1.7;">
+              <li>Automatic Cryptographic Pre-Reset Snapshot created in Checkpoint 3.</li>
+              <li>Super Admin (<code></code>) is strictly preserved across all modes.</li>
+              <li>Portal is placed into Emergency Maintenance Mode during the purge.</li>
+              <li>Permanent audit certificate logged to <code>emergencyResetAuditLogs</code>.</li>
+            </ul>
+          </div>
+          <div style="text-align: right;">
+            <button type="button" onclick="goToNextCheckpoint()" style="padding: 9px 22px; background: #0284c7; color: #fff; border: none; border-radius: 6px; font-size: 13px; font-weight: 700; cursor: pointer;">
+              <span>Confirm Mode &amp; View Impact &rarr;</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- CHECKPOINT 2: DATA IMPACT ASSESSMENT -->
+        <div id="wizard-pane-2" style="display: none;">
+          <div style="display: flex; gap: 14px; margin-bottom: 16px; align-items: flex-start;">
+            <div style="font-size: 24px; color: #ea580c;"><i class="fa-solid fa-chart-column"></i></div>
+            <div>
+              <h4 style="margin: 0 0 6px; font-size: 16px; color: #0b2545;">Checkpoint 2: Live Impact Assessment</h4>
+              <p style="margin: 0; font-size: 13px; color: #475569; line-height: 1.5;">Review the precise inventory of database collections and records that will be purged.</p>
+            </div>
+          </div>
+          <div class="table-responsive" style="margin-bottom: 20px;">
+            <table class="portal-table" style="font-size: 12.5px;">
+              <thead>
+                <tr>
+                  <th>Target Record Category</th>
+                  <th>Firestore Collection / Store</th>
+                  <th>Current Count</th>
+                  <th>Operation Impact</th>
+                </tr>
+              </thead>
+              <tbody id="wizard-impact-tbody">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <button type="button" onclick="goToPrevCheckpoint()" style="padding: 8px 18px; background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; font-weight: 700; cursor: pointer;">
+              &larr; Back
+            </button>
+            <button type="button" onclick="goToNextCheckpoint()" style="padding: 9px 22px; background: #0284c7; color: #fff; border: none; border-radius: 6px; font-size: 13px; font-weight: 700; cursor: pointer;">
+              <span>Acknowledge Impact &amp; Create Backup &rarr;</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- CHECKPOINT 3: CRYPTOGRAPHIC PRE-RESET BACKUP -->
+        <div id="wizard-pane-3" style="display: none;">
+          <div style="display: flex; gap: 14px; margin-bottom: 16px; align-items: flex-start;">
+            <div style="font-size: 24px; color: #16a34a;"><i class="fa-solid fa-lock"></i></div>
+            <div>
+              <h4 style="margin: 0 0 6px; font-size: 16px; color: #0b2545;">Checkpoint 3: Cryptographic Pre-Reset Backup</h4>
+              <p style="margin: 0; font-size: 13px; color: #475569; line-height: 1.5;">A complete snapshot backup is mandatory prior to deleting any record. Verifying SHA-256 cryptographic checksum.</p>
+            </div>
+          </div>
+          <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 18px; margin-bottom: 18px;">
+            <div id="wizard-backup-status-box" style="font-size: 13.5px; font-weight: 700; color: #166534; margin-bottom: 10px;">
+              <i class="fa-solid fa-circle-check" style="color: #16a34a;"></i> <strong>Pre-Reset Cryptographic Snapshot Verified &amp; Ready</strong>
+            </div>
+            <div style="font-size: 12.5px; color: #334155; margin-bottom: 6px;">
+              <strong>Backup Identifier:</strong> <code id="wizard-backup-id-val" style="background: #fff; padding: 2px 6px; border-radius: 4px; border: 1px solid #cbd5e1;">Generating...</code>
+            </div>
+            <div style="font-size: 12px; color: #334155; word-break: break-all; margin-bottom: 12px;">
+              <strong>SHA-256 Hash:</strong> <code id="wizard-backup-checksum-val" style="background: #fff; padding: 2px 6px; border-radius: 4px; border: 1px solid #cbd5e1;">Computing...</code>
+            </div>
+            <button type="button" onclick="downloadWizardBackup()" style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; font-size: 12px; border-radius: 6px; background: #fff; border: 1px solid #86efac; color: #166534; font-weight: 700; cursor: pointer;">
+              <i class="fa-solid fa-download"></i> Download Local JSON Backup
+            </button>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <button type="button" onclick="goToPrevCheckpoint()" style="padding: 8px 18px; background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; font-weight: 700; cursor: pointer;">
+              &larr; Back
+            </button>
+            <button type="button" id="btn-wizard-step-3-next" onclick="goToNextCheckpoint()" style="padding: 9px 22px; background: #0284c7; color: #fff; border: none; border-radius: 6px; font-size: 13px; font-weight: 700; cursor: pointer;">
+              <span>Backup Verified &bull; Proceed to Re-Auth &rarr;</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- CHECKPOINT 4: FRESH ADMIN RE-AUTHENTICATION -->
+        <div id="wizard-pane-4" style="display: none;">
+          <div style="display: flex; gap: 14px; margin-bottom: 16px; align-items: flex-start;">
+            <div style="font-size: 24px; color: #dc2626;"><i class="fa-solid fa-key"></i></div>
+            <div>
+              <h4 style="margin: 0 0 6px; font-size: 16px; color: #0b2545;">Checkpoint 4: Fresh Administrator Re-Authentication</h4>
+              <p style="margin: 0; font-size: 13px; color: #475569; line-height: 1.5;">To prevent unauthorized resets or session hijacking, enter your administrator password to authenticate this destructive action.</p>
+            </div>
+          </div>
+          <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; margin-bottom: 14px;">
+            <div class="form-group" style="margin-bottom: 14px;">
+              <label style="display: block; font-weight: 700; font-size: 13px; color: #1e293b; margin-bottom: 6px;">Administrator Account:</label>
+              <input type="text" readonly value="Protected administrator account" style="width: 100%; padding: 9px 12px; font-size: 13px; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 6px; color: #64748b;">
+            </div>
+            <div class="form-group">
+              <label for="wizard-admin-password" style="display: block; font-weight: 700; font-size: 13px; color: #1e293b; margin-bottom: 6px;">Current Administrator Password <span style="color: #dc2626;">*</span></label>
+              <input type="password" id="wizard-admin-password" placeholder="Enter administrator password (e.g. )" style="width: 100%; padding: 9px 12px; font-size: 13.5px; border: 1.5px solid #cbd5e1; border-radius: 6px;">
+              <small style="color: #64748b; font-size: 11.5px; display: block; margin-top: 4px;">Verified against Firebase Authentication session credentials.</small>
+            </div>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <button type="button" onclick="goToPrevCheckpoint()" style="padding: 8px 18px; background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; font-weight: 700; cursor: pointer;">
+              &larr; Back
+            </button>
+            <button type="button" id="btn-wizard-step-4-next" onclick="goToNextCheckpoint()" style="padding: 9px 22px; background: #0284c7; color: #fff; border: none; border-radius: 6px; font-size: 13px; font-weight: 700; cursor: pointer;">
+              <span>Authenticate Password &rarr;</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- CHECKPOINT 5: SECURITY PHRASE VALIDATION -->
+        <div id="wizard-pane-5" style="display: none;">
+          <div style="display: flex; gap: 14px; margin-bottom: 16px; align-items: flex-start;">
+            <div style="font-size: 24px; color: #7c3aed;"><i class="fa-solid fa-fingerprint"></i></div>
+            <div>
+              <h4 style="margin: 0 0 6px; font-size: 16px; color: #0b2545;">Checkpoint 5: Security Phrase Confirmation</h4>
+              <p style="margin: 0; font-size: 13px; color: #475569; line-height: 1.5;">Prevent accidental automated or single-click destruction. Please type the exact confirmation security phrase.</p>
+            </div>
+          </div>
+          <div style="background: #faf5ff; border: 1px solid #e9d5ff; border-radius: 8px; padding: 16px; margin-bottom: 14px;">
+            <p style="margin: 0 0 10px; font-size: 13px; color: #581c87;">
+              To confirm authorization, type: <strong style="font-family: monospace; font-size: 15px; color: #7c3aed; background: #fff; padding: 2px 8px; border-radius: 4px; border: 1px solid #d8b4fe;">RESET JANASEVA</strong>
+            </p>
+            <input type="text" id="wizard-security-phrase" oninput="checkSecurityPhraseInput(this)" placeholder="Type RESET JANASEVA exactly" autocomplete="off" style="width: 100%; padding: 10px 14px; font-size: 14px; font-family: monospace; letter-spacing: 1px; border: 2px solid #cbd5e1; border-radius: 6px;">
+            <div id="phrase-match-indicator" style="margin-top: 8px; font-size: 12px; font-weight: 700; color: #dc2626;">
+              <i class="fa-solid fa-circle-xmark"></i> Confirmation phrase required.
+            </div>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <button type="button" onclick="goToPrevCheckpoint()" style="padding: 8px 18px; background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; font-weight: 700; cursor: pointer;">
+              &larr; Back
+            </button>
+            <button type="button" onclick="goToNextCheckpoint()" style="padding: 9px 22px; background: #0284c7; color: #fff; border: none; border-radius: 6px; font-size: 13px; font-weight: 700; cursor: pointer;">
+              <span>Verify Phrase &amp; Continue &rarr;</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- CHECKPOINT 6: SCOPE & CONSEQUENCE ACKNOWLEDGMENTS -->
+        <div id="wizard-pane-6" style="display: none;">
+          <div style="display: flex; gap: 14px; margin-bottom: 16px; align-items: flex-start;">
+            <div style="font-size: 24px; color: #ea580c;"><i class="fa-solid fa-clipboard-check"></i></div>
+            <div>
+              <h4 style="margin: 0 0 6px; font-size: 16px; color: #0b2545;">Checkpoint 6: Scope &amp; Consequences Acknowledgment</h4>
+              <p style="margin: 0; font-size: 13px; color: #475569; line-height: 1.5;">You must explicitly check each consequence box to enable execution authorization.</p>
+            </div>
+          </div>
+          <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px; margin-bottom: 14px;">
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+              <label style="display: flex; align-items: flex-start; gap: 10px; font-size: 13px; color: #1e293b; cursor: pointer;">
+                <input type="checkbox" id="chk-consequence-1" style="margin-top: 3px; transform: scale(1.15);">
+                <span>I understand that initiating this reset will permanently erase selected operational grievance records, review histories, and delivery logs.</span>
+              </label>
+              <label style="display: flex; align-items: flex-start; gap: 10px; font-size: 13px; color: #1e293b; cursor: pointer;">
+                <input type="checkbox" id="chk-consequence-2" style="margin-top: 3px; transform: scale(1.15);">
+                <span>I confirm that a verified cryptographic pre-reset snapshot backup has been generated with SHA-256 integrity hash.</span>
+              </label>
+              <label style="display: flex; align-items: flex-start; gap: 10px; font-size: 13px; color: #1e293b; cursor: pointer;">
+                <input type="checkbox" id="chk-consequence-3" style="margin-top: 3px; transform: scale(1.15);">
+                <span>I am an authorized Administrator executing this emergency operation under municipal governance guidelines.</span>
+              </label>
+            </div>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <button type="button" onclick="goToPrevCheckpoint()" style="padding: 8px 18px; background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; font-weight: 700; cursor: pointer;">
+              &larr; Back
+            </button>
+            <button type="button" onclick="goToNextCheckpoint()" style="padding: 9px 22px; background: #dc2626; color: #fff; border: none; border-radius: 6px; font-size: 13px; font-weight: 700; cursor: pointer;">
+              <span>Arm Execution Trigger &rarr;</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- CHECKPOINT 7: ARMED EXECUTION TRIGGER -->
+        <div id="wizard-pane-7" style="display: none;">
+          <div style="text-align: center; padding: 20px 10px;">
+            <div style="width: 60px; height: 60px; border-radius: 50%; background: #fee2e2; color: #dc2626; margin: 0 auto 16px; display: flex; align-items: center; justify-content: center; font-size: 28px;">
+              <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <h3 style="margin: 0 0 8px; font-size: 20px; color: #991b1b;">Checkpoint 7: Final Armed Confirmation</h3>
+            <p style="margin: 0 auto 24px; max-width: 520px; font-size: 13.5px; color: #475569; line-height: 1.5;">
+              All 6 preliminary security checkpoints have been satisfied. When you click below, the system will enter maintenance mode, batch purge operational documents in 500-item chunks, and issue an immutable audit record.
+            </p>
+            <button type="button" id="btn-arm-execute" onclick="triggerEmergencyResetExecution()" disabled style="padding: 14px 32px; font-size: 15px; font-weight: 800; border-radius: 8px; background: #94a3b8; color: #fff; border: none; cursor: pointer; transition: all 0.3s; box-shadow: 0 4px 14px rgba(220, 38, 38, 0.3);">
+              <i class="fa-solid fa-clock"></i> Safety Lock Arming in 3s...
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: LIVE RESET PROGRESS CONSOLE -->
+  <div class="modal-overlay" id="modal-reset-progress">
+    <div class="modal-window" style="max-width: 650px; border-top: 5px solid #dc2626;">
+      <div class="modal-header" style="background: #fff; border-bottom: 1px solid #e2e8f0; padding: 18px 24px;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div style="width: 38px; height: 38px; border-radius: 8px; background: #fee2e2; color: #dc2626; display: flex; align-items: center; justify-content: center; font-size: 18px;">
+            <i class="fa-solid fa-microchip"></i>
+          </div>
+          <div>
+            <h3 class="modal-title" id="reset-progress-step-title" style="margin: 0; font-size: 16px; color: #0b2545;">Executing Master Emergency Reset</h3>
+            <p id="reset-progress-step-detail" style="margin: 2px 0 0; font-size: 12px; color: #64748b;">Processing step 1 of 8...</p>
+          </div>
+        </div>
+      </div>
+      <div class="modal-body" style="padding: 18px 20px;">
+
+        <!-- Animated Progress Bar -->
+        <div style="margin-bottom: 18px;">
+          <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; color: #475569; margin-bottom: 6px;">
+            <span>Operation Progress</span>
+            <span id="reset-progress-percent">0%</span>
+          </div>
+          <div style="height: 10px; background: #e2e8f0; border-radius: 5px; overflow: hidden;">
+            <div id="reset-progress-bar-fill" style="height: 100%; width: 0%; background: linear-gradient(90deg, #0284c7, #dc2626); transition: width 0.3s ease;"></div>
+          </div>
+        </div>
+
+        <!-- 8 Execution Steps Checklist -->
+        <div class="reset-steps-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 18px; font-size: 12px;">
+          <div class="exec-step-item" id="exec-step-1" style="display: flex; align-items: center; gap: 8px;">
+            <span class="step-status-icon"><i class="fa-regular fa-circle" style="color: #94a3b8;"></i></span>
+            <span>1. Security Validation</span>
+          </div>
+          <div class="exec-step-item" id="exec-step-2" style="display: flex; align-items: center; gap: 8px;">
+            <span class="step-status-icon"><i class="fa-regular fa-circle" style="color: #94a3b8;"></i></span>
+            <span>2. Maintenance Active</span>
+          </div>
+          <div class="exec-step-item" id="exec-step-3" style="display: flex; align-items: center; gap: 8px;">
+            <span class="step-status-icon"><i class="fa-regular fa-circle" style="color: #94a3b8;"></i></span>
+            <span>3. Cryptographic Backup</span>
+          </div>
+          <div class="exec-step-item" id="exec-step-4" style="display: flex; align-items: center; gap: 8px;">
+            <span class="step-status-icon"><i class="fa-regular fa-circle" style="color: #94a3b8;"></i></span>
+            <span>4. Complaints Purge</span>
+          </div>
+          <div class="exec-step-item" id="exec-step-5" style="display: flex; align-items: center; gap: 8px;">
+            <span class="step-status-icon"><i class="fa-regular fa-circle" style="color: #94a3b8;"></i></span>
+            <span>5. Delivery Logs Flush</span>
+          </div>
+          <div class="exec-step-item" id="exec-step-6" style="display: flex; align-items: center; gap: 8px;">
+            <span class="step-status-icon"><i class="fa-regular fa-circle" style="color: #94a3b8;"></i></span>
+            <span>6. Account Registry</span>
+          </div>
+          <div class="exec-step-item" id="exec-step-7" style="display: flex; align-items: center; gap: 8px;">
+            <span class="step-status-icon"><i class="fa-regular fa-circle" style="color: #94a3b8;"></i></span>
+            <span>7. Local &amp; IndexedDB</span>
+          </div>
+          <div class="exec-step-item" id="exec-step-8" style="display: flex; align-items: center; gap: 8px;">
+            <span class="step-status-icon"><i class="fa-regular fa-circle" style="color: #94a3b8;"></i></span>
+            <span>8. Verification &amp; Resume</span>
+          </div>
+        </div>
+
+        <!-- Terminal Log Console -->
+        <div id="reset-progress-log-console" style="background: #0f172a; color: #f8fafc; font-family: monospace; font-size: 11.5px; padding: 12px; border-radius: 6px; height: 130px; overflow-y: auto; line-height: 1.5; margin-bottom: 16px;">
+          <div style="color: #64748b;">[JANASEVA RESET ENGINE INITIALIZED]</div>
+        </div>
+
+        <div style="text-align: right;">
+          <button type="button" id="btn-reset-done" onclick="closeResetProgressModal()" style="display: none; padding: 9px 24px; background: #16a34a; color: #fff; border: none; border-radius: 6px; font-size: 13px; font-weight: 700; cursor: pointer;">
+            <i class="fa-solid fa-check"></i> Complete &amp; View Dashboard
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="portal-footer">
+    <div class="footer-container">
+      <div class="footer-brand">
+        <span class="footer-title">JANASEVA</span>
+        <span class="footer-sub">Digital Grievance Redressal Platform</span>
+      </div>
+      <div class="footer-copy">
+        &copy; 2026 Government of Karnataka. Department of Rural Development and Panchayat Raj.
+      </div>
+      <div class="footer-links">
+        <a href="index.html">Home</a>
+        <a href="complaint.html">Submit</a>
+        <a href="track.html">Track</a>
+        <a href="directory.html">Directory</a>
+        <a href="knowledge-centre.html">Knowledge Centre</a>
+        <a href="about.html">About</a>
+        <a href="https://ipchat.in/" target="_blank" rel="noopener noreferrer">IP Chat – External Messaging Service</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- JANASEVA MongoDB Backend & Scripts -->
+  <script src="js/firebase-config.js"></script>
+  <script src="js/mongodb-adapter.js"></script>
+  <script src="js/translations.js"></script>
+  <script src="js/universal-settings.js"></script>
+  <script src="js/status-config.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/universal-notifications.js"></script>
+<script src="js/offline-db.js"></script>
+  <script src="js/emergency-reset-engine.js"></script>
+  <script src="js/emergency-reset-controller.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      if (window.authService) {
+        const authorized = await window.authService.protectPage('admin');
+        if (authorized) {
+          window.initEmergencyResetTab();
+        }
+      }
+    });
+  </script>
+</body>
+</html>

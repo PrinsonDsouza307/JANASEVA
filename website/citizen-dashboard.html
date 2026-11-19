@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <!-- Favicon & Brand Identity -->
+  <link rel="icon" type="image/x-icon" href="assets/branding/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/branding/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/branding/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/branding/apple-touch-icon.png">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0b2545">
+  <title>Citizen Grievance Dashboard – JANASEVA Portal</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body class="citizen-dashboard-page">
+  <!-- Auth Guard Overlay -->
+  <div id="auth-guard-overlay" class="auth-guard-overlay">
+    <div class="auth-guard-box">
+      <img src="assets/branding/janaseva-icon.png" alt="JANASEVA" class="auth-guard-logo">
+      <div class="auth-guard-spinner"></div>
+      <div class="auth-guard-title">JANASEVA</div>
+      <div class="auth-guard-sub" id="auth-guard-sub">Verifying citizen session...</div>
+    </div>
+  </div>
+
+  <!-- Header -->
+  <header class="portal-header">
+    <div class="header-container">
+      <a href="index.html" class="brand-section">
+        <img src="assets/branding/janaseva-icon.png" alt="JANASEVA Official Logo" class="emblem-img brand-logo-img">
+        <div class="brand-text-block">
+          <span class="brand-main-title">JANASEVA</span>
+          <div class="brand-divider"></div>
+          <div class="brand-sub-titles">
+            <span class="brand-subtitle">Gram Panchayat Grievance Portal</span>
+            <span class="brand-tagline">Report • Submit • Track • Resolve</span>
+          </div>
+        </div>
+      </a>
+
+      <!-- Header Action Controls: Notification Bell (Always visible in Android toolbar & Desktop header) + Mobile Menu Toggle -->
+      <div class="header-action-controls" id="header-action-controls">
+        <button class="nav-notif-bell-btn" id="nav-notif-bell-btn" type="button" aria-label="View Notifications">
+          <i class="fa-regular fa-bell"></i>
+          <span class="nav-notif-badge" id="nav-notif-badge" style="display: none;">0</span>
+        </button>
+        <button class="nav-toggle-btn" id="mobile-nav-toggle" aria-label="Toggle Navigation">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+      </div>
+
+      <nav class="main-nav" id="main-navigation">
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="citizen-dashboard.html" class="nav-link active">My Dashboard</a>
+        <a href="complaint.html" class="nav-link">Submit Complaint</a>
+        <a href="track.html" class="nav-link">Track Status</a>
+        <a href="directory.html" class="nav-link">Panchayat Directory</a>
+        <a href="knowledge-centre.html" class="nav-link">Knowledge Centre</a>
+        <a href="https://ipchat.in/" class="nav-link nav-link-external" target="_blank" rel="noopener noreferrer"><i class="fa-solid fa-comments" aria-hidden="true"></i> <span>IP Chat</span> <i class="fa-solid fa-arrow-up-right-from-square nav-ext-icon" aria-hidden="true"></i></a>
+        <a href="about.html" class="nav-link">About</a>
+        <div class="lang-selector-wrapper">
+          <i class="fa-solid fa-globe lang-icon"></i>
+          <select class="janaseva-lang-select" aria-label="Select Language">
+            <option value="en">English</option>
+            <option value="kn">ಕನ್ನಡ (Kannada)</option>
+            <option value="hi">हिन्दी (Hindi)</option>
+          </select>
+        </div>
+        <div id="nav-auth-container" style="display: inline-flex; align-items: center; gap: 8px;">
+          <!-- Dynamically populated by auth.js -->
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Hero Banner -->
+  <section class="hero-banner">
+    <div class="hero-bg-overlay"></div>
+    <div class="hero-content-wrap">
+      <div class="hero-text-side">
+        <div class="hero-title-with-icon">
+          <div class="hero-page-icon">
+            <i class="fa-solid fa-id-card-clip"></i>
+          </div>
+          <h1 class="hero-main-heading" id="cit-welcome-title">MY COMPLAINTS &amp; HISTORY</h1>
+        </div>
+        <p class="hero-subheading" id="cit-welcome-sub">Personal complaint history, verified work progress tracking, chronological activity timeline, and delete management.</p>
+      </div>
+      <div class="hero-cta-actions" style="margin-top: 14px;">
+        <a href="complaint.html" class="btn-cta-primary" style="padding: 10px 20px; font-size: 14px; text-decoration: none;">
+          <i class="fa-solid fa-plus"></i> Submit New Grievance
+        </a>
+      </div>
+    </div>
+
+    <div class="tricolour-wave-separator">
+      <svg viewBox="0 0 1440 24" fill="none" preserveAspectRatio="none">
+        <path d="M0,0 C360,18 1080,6 1440,16 L1440,24 L0,24 Z" fill="#ffffff" />
+        <path d="M0,4 C400,20 1100,10 1440,18" stroke="#ff9933" stroke-width="2.5" fill="none" />
+        <path d="M0,8 C420,22 1120,12 1440,20" stroke="#138808" stroke-width="2.5" fill="none" />
+      </svg>
+    </div>
+  </section>
+
+  <!-- Main Content -->
+  <main class="page-main-content">
+
+    <!-- Section 1: Citizen 6 Summary Status Filter Cards -->
+    <div class="stats-grid-10 citizen-stats-grid" aria-label="Complaint Status Summary">
+      <div class="stat-panel-card citizen-stat-card cit-card--total active-filter" data-filter="all" onclick="filterCitizenGrievances('all', this)">
+        <div class="stat-panel-icon"><i class="fa-solid fa-folder-open"></i></div>
+        <div class="stat-panel-info">
+          <div class="stat-panel-num" id="cit-stat-total">0</div>
+          <div class="stat-panel-label">Total Complaints</div>
+        </div>
+      </div>
+
+      <div class="stat-panel-card citizen-stat-card cit-card--pending" data-filter="Pending" onclick="filterCitizenGrievances('Pending', this)">
+        <div class="stat-panel-icon"><i class="fa-solid fa-clock"></i></div>
+        <div class="stat-panel-info">
+          <div class="stat-panel-num" id="cit-stat-pending">0</div>
+          <div class="stat-panel-label">Pending Complaints</div>
+        </div>
+      </div>
+
+      <div class="stat-panel-card citizen-stat-card cit-card--progress" data-filter="In Progress" onclick="filterCitizenGrievances('In Progress', this)">
+        <div class="stat-panel-icon"><i class="fa-solid fa-gear"></i></div>
+        <div class="stat-panel-info">
+          <div class="stat-panel-num" id="cit-stat-inprogress">0</div>
+          <div class="stat-panel-label">In Progress</div>
+        </div>
+      </div>
+
+      <div class="stat-panel-card citizen-stat-card cit-card--resolved" data-filter="Resolved" onclick="filterCitizenGrievances('Resolved', this)">
+        <div class="stat-panel-icon"><i class="fa-solid fa-circle-check"></i></div>
+        <div class="stat-panel-info">
+          <div class="stat-panel-num" id="cit-stat-resolved">0</div>
+          <div class="stat-panel-label">Resolved Complaints</div>
+        </div>
+      </div>
+
+      <div class="stat-panel-card citizen-stat-card cit-card--rejected" data-filter="Rejected" onclick="filterCitizenGrievances('Rejected', this)">
+        <div class="stat-panel-icon"><i class="fa-solid fa-circle-xmark"></i></div>
+        <div class="stat-panel-info">
+          <div class="stat-panel-num" id="cit-stat-rejected">0</div>
+          <div class="stat-panel-label">Rejected Complaints</div>
+        </div>
+      </div>
+
+      <div class="stat-panel-card citizen-stat-card cit-card--reopened" data-filter="Reopened" onclick="filterCitizenGrievances('Reopened', this)">
+        <div class="stat-panel-icon"><i class="fa-solid fa-rotate-left"></i></div>
+        <div class="stat-panel-info">
+          <div class="stat-panel-num" id="cit-stat-reopened">0</div>
+          <div class="stat-panel-label">Reopened Complaints</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 2: Work Progress Summary Card -->
+    <section class="citizen-progress-card" aria-label="Work Progress Summary">
+      <div class="citizen-progress-header">
+        <div class="citizen-progress-title-wrap">
+          <div class="citizen-progress-icon">
+            <i class="fa-solid fa-chart-line"></i>
+          </div>
+          <div>
+            <h2 class="citizen-progress-heading">Work Progress Summary</h2>
+            <p class="citizen-progress-subtitle">Official resolution velocity and work completion metrics across your filed grievances.</p>
+          </div>
+        </div>
+        <div class="citizen-rate-badge">
+          <span class="citizen-rate-label">Overall Resolution Rate</span>
+          <span id="wp-overall-resolution-rate" class="citizen-rate-value">0%</span>
+        </div>
+      </div>
+
+      <!-- Animated Progress Gauge -->
+      <div class="citizen-progress-gauge">
+        <div class="citizen-progress-track">
+          <div id="wp-overall-progress-bar" class="citizen-progress-fill"></div>
+        </div>
+        <div class="citizen-progress-scale">
+          <span>0% Initiation</span>
+          <span id="wp-progress-status-desc">Calculating resolution rate...</span>
+          <span>100% Full Resolution</span>
+        </div>
+      </div>
+
+      <!-- 4 Core Performance Tiles -->
+      <div class="citizen-progress-tiles">
+        <div class="citizen-metric-tile">
+          <div class="citizen-metric-label">Total Submitted</div>
+          <div id="wp-metric-submitted" class="citizen-metric-num">0</div>
+          <div class="citizen-metric-sub">Excludes deleted records</div>
+        </div>
+        <div class="citizen-metric-tile citizen-metric-tile--completed">
+          <div class="citizen-metric-label">Completed &amp; Verified</div>
+          <div id="wp-metric-completed" class="citizen-metric-num">0</div>
+          <div class="citizen-metric-sub">Resolved &amp; signed off</div>
+        </div>
+        <div class="citizen-metric-tile citizen-metric-tile--processing">
+          <div class="citizen-metric-label">Currently Processing</div>
+          <div id="wp-metric-processing" class="citizen-metric-num">0</div>
+          <div class="citizen-metric-sub">Active remediation underway</div>
+        </div>
+        <div class="citizen-metric-tile citizen-metric-tile--awaiting">
+          <div class="citizen-metric-label">Awaiting Action</div>
+          <div id="wp-metric-awaiting" class="citizen-metric-num">0</div>
+          <div class="citizen-metric-sub">Pending assignment / review</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Dashboard Navigation Tabs -->
+    <div class="admin-tab-nav citizen-tab-nav" role="tablist">
+      <button type="button" class="admin-tab-btn active" id="tab-btn-active" role="tab" aria-selected="true" onclick="switchCitizenTab('active')">
+        <i class="fa-solid fa-list-check"></i>
+        <span>My Complaints &amp; History</span>
+        <span class="admin-tab-badge" id="cit-active-tab-count">0</span>
+      </button>
+      <button type="button" class="admin-tab-btn" id="tab-btn-deleted" role="tab" aria-selected="false" onclick="switchCitizenTab('deleted')">
+        <i class="fa-solid fa-trash-can"></i>
+        <span>Deleted Complaints</span>
+        <span class="admin-tab-badge" id="cit-deleted-tab-count">0</span>
+      </button>
+      <button type="button" class="admin-tab-btn" id="tab-btn-report" role="tab" aria-selected="false" onclick="switchCitizenTab('report')">
+        <i class="fa-solid fa-chart-pie"></i>
+        <span>My Complaint Report &amp; Analytics</span>
+      </button>
+      <button type="button" class="admin-tab-btn" id="tab-btn-preferences" role="tab" aria-selected="false" onclick="switchCitizenTab('preferences')">
+        <i class="fa-solid fa-sliders"></i>
+        <span>Profile &amp; Preferences</span>
+      </button>
+    </div>
+
+    <!-- Offline Queued Submissions Notice -->
+    <div id="cit-offline-sync-notice" style="display: none; margin-bottom: 16px;"></div>
+
+    <!-- ===================================================================== -->
+    <!-- TAB 1: ACTIVE COMPLAINTS & HISTORY VIEW -->
+    <!-- ===================================================================== -->
+    <div id="citizen-active-view">
+      <!-- Section 3: Search & Filter Toolbar -->
+      <div class="citizen-control-bar citizen-filter-toolbar">
+        <div class="citizen-filter-row-primary">
+          <div class="filter-field-group">
+            <label class="filter-field-label" for="cit-search-input">
+              <i class="fa-solid fa-magnifying-glass"></i> Search Complaint
+            </label>
+            <div class="filter-search-input-wrap">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <input type="text" id="cit-search-input" class="form-input" placeholder="Search by Complaint ID, subject, category, location, or remarks...">
+            </div>
+          </div>
+
+          <div class="filter-field-group">
+            <label class="filter-field-label" for="cit-category-filter">
+              <i class="fa-solid fa-layer-group"></i> Category Filter
+            </label>
+            <select id="cit-category-filter" class="form-select">
+              <option value="">All Categories</option>
+              <option value="Road Damage">Road Damage</option>
+              <option value="Water Supply">Water Supply</option>
+              <option value="Garbage and Cleanliness">Garbage and Cleanliness</option>
+              <option value="Streetlight Problems">Streetlight Problems</option>
+              <option value="Drainage and Sanitation">Drainage and Sanitation</option>
+              <option value="Public Facilities">Public Facilities</option>
+              <option value="Other Civic Issues">Other Civic Issues</option>
+            </select>
+          </div>
+
+          <div class="filter-field-group">
+            <label class="filter-field-label" for="cit-status-filter">
+              <i class="fa-solid fa-filter"></i> Status Filter
+            </label>
+            <select id="cit-status-filter" class="form-select">
+              <option value="">All Statuses</option>
+              <option value="Submitted">Submitted</option>
+              <option value="Assigned">Assigned</option>
+              <option value="Under Review">Under Review</option>
+              <option value="In Progress">In Progress</option>
+              <option value="Action Taken">Action Taken</option>
+              <option value="Resolved">Resolved</option>
+              <option value="Rejected">Rejected</option>
+              <option value="Reopened">Reopened</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="citizen-filter-row-secondary">
+          <div class="filter-field-group">
+            <label class="filter-field-label" for="cit-date-from">
+              <i class="fa-regular fa-calendar"></i> From Date
+            </label>
+            <input type="date" id="cit-date-from" class="form-input" title="From filing date">
+          </div>
+
+          <div class="filter-field-group">
+            <label class="filter-field-label" for="cit-date-to">
+              <i class="fa-regular fa-calendar-check"></i> To Date
+            </label>
+            <input type="date" id="cit-date-to" class="form-input" title="To filing date">
+          </div>
+
+          <div class="filter-field-group filter-field-sort">
+            <label class="filter-field-label" for="cit-sort-select">
+              <i class="fa-solid fa-arrow-down-wide-short"></i> Sort By
+            </label>
+            <select id="cit-sort-select" class="form-select">
+              <option value="newest">Newest First</option>
+              <option value="oldest">Oldest First</option>
+              <option value="progress_high">Highest Progress First</option>
+              <option value="progress_low">Lowest Progress First</option>
+            </select>
+          </div>
+
+          <div class="cit-filter-actions">
+            <button type="button" class="cit-clear-btn" id="cit-clear-filters" onclick="clearCitizenFilters()">
+              <i class="fa-solid fa-rotate-left"></i> Clear Filters
+            </button>
+            <a href="complaint.html" class="cit-new-grievance-btn">
+              <i class="fa-solid fa-plus"></i> Submit New Grievance
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 4: Complete Complaint History List Card -->
+      <section class="portal-card">
+        <div class="portal-card-header" style="flex-wrap: wrap;">
+          <div class="card-title-group">
+            <i class="fa-solid fa-list-check card-header-icon"></i>
+            <div>
+              <h2 class="card-heading">Complete Complaint History List</h2>
+              <p class="card-subheading">Chronological register of your grievances with live work progress tracking and official responses.</p>
+            </div>
+          </div>
+          <div style="font-size: 13px; font-weight: 700; color: #0f56b3; background: #eff6ff; padding: 5px 12px; border-radius: 999px; border: 1px solid #bfdbfe;" id="cit-record-count">0 Grievances Found</div>
+        </div>
+
+        <!-- Desktop Table Presentation -->
+        <div class="citizen-table-desktop-wrap">
+          <div class="directory-table-responsive">
+            <table class="directory-table citizen-history-table">
+              <thead>
+                <tr>
+                  <th class="cit-col-id">Complaint ID</th>
+                  <th class="cit-col-subject">Subject</th>
+                  <th class="cit-col-category">Category</th>
+                  <th class="cit-col-location">Location</th>
+                  <th class="cit-col-date">Submitted Date</th>
+                  <th class="cit-col-receiver">Assigned Receiver</th>
+                  <th class="cit-col-status">Current Status</th>
+                  <th class="cit-col-progress">Work Progress</th>
+                  <th class="cit-col-date">Last Updated</th>
+                  <th class="cit-col-actions">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="citizen-table-body">
+                <!-- Dynamically populated via citizen-dashboard.js -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Mobile / Tablet Responsive Card Presentation -->
+        <div id="citizen-mobile-cards" class="citizen-mobile-cards-list">
+          <!-- Dynamically populated via citizen-dashboard.js -->
+        </div>
+
+        <!-- Pagination / Load Controls -->
+        <div id="cit-pagination-wrap" style="display: flex; justify-content: space-between; align-items: center; padding: 14px 18px; border-top: 1px solid #e2e8f0; flex-wrap: wrap; gap: 10px; background: #ffffff;">
+          <div style="font-size: 12.5px; font-weight: 600; color: #64748b;" id="cit-pagination-info">Showing 0 of 0 grievances</div>
+          <div id="cit-pagination-buttons" style="display: flex; gap: 6px; flex-wrap: wrap;"></div>
+        </div>
+      </section>
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- TAB 2: DELETED COMPLAINTS VIEW (SOFT DELETION MANAGEMENT) -->
+    <!-- ===================================================================== -->
+    <div id="citizen-deleted-view" style="display: none;">
+      <div class="cit-soft-delete-banner">
+        <i class="fa-solid fa-shield-halved" style="font-size: 24px; color: #d97706; flex-shrink: 0;"></i>
+        <div>
+          <strong style="color: #92400e; font-size: 13.5px;">Soft-Deletion Protected Storage:</strong>
+          <p style="color: #b45309; font-size: 12.5px; margin: 2px 0 0; line-height: 1.45;">
+            Complaints moved to Deleted History are safely archived. Official audit trails and receiver records remain permanently intact. You can restore eligible complaints back to active tracking at any time.
+          </p>
+        </div>
+      </div>
+
+      <section class="portal-card">
+        <div class="portal-card-header" style="flex-wrap: wrap;">
+          <div class="card-title-group">
+            <i class="fa-solid fa-trash-can card-header-icon" style="color: #dc2626;"></i>
+            <div>
+              <h2 class="card-heading">Deleted Complaints Archive</h2>
+              <p class="card-subheading">Archived grievances removed from your active dashboard.</p>
+            </div>
+          </div>
+          <div style="font-size: 13px; font-weight: 700; color: #991b1b; background: #fef2f2; padding: 5px 12px; border-radius: 999px; border: 1px solid #fecaca;" id="cit-deleted-count">0 Deleted Grievances</div>
+        </div>
+
+        <div class="citizen-deleted-desktop-wrap">
+          <div class="directory-table-responsive">
+            <table class="directory-table citizen-history-table">
+              <thead>
+                <tr>
+                  <th class="cit-col-id">Complaint ID</th>
+                  <th>Complaint Title</th>
+                  <th>Original Submission Date</th>
+                  <th>Deletion Date</th>
+                  <th>Deletion Reason</th>
+                  <th>Deleted By</th>
+                  <th style="text-align: center; width: 120px;">Action</th>
+                </tr>
+              </thead>
+              <tbody id="citizen-deleted-table-body">
+                <!-- Dynamically populated via citizen-dashboard.js -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div id="citizen-deleted-mobile-cards" class="citizen-mobile-cards-list">
+          <!-- Dynamically populated via citizen-dashboard.js -->
+        </div>
+      </section>
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- TAB 3: MY COMPLAINT REPORT & ANALYTICS -->
+    <!-- ===================================================================== -->
+    <div id="citizen-report-view" style="display: none;">
+      <section class="portal-card" id="citizen-printable-report">
+        <div class="portal-card-header" style="border-bottom: 1.5px solid #e2e8f0; flex-wrap: wrap;">
+          <div class="card-title-group">
+            <i class="fa-solid fa-chart-pie card-header-icon" style="color: #0f56b3;"></i>
+            <div>
+              <h2 class="card-heading">My Complaint Report &amp; Analytics</h2>
+              <p class="card-subheading">Comprehensive personal analytics and grievance resolution performance metrics.</p>
+            </div>
+          </div>
+          <button type="button" class="cit-clear-btn" onclick="printCitizenReport()" style="height: 36px; min-height: 36px;">
+            <i class="fa-solid fa-print"></i> Print / Export Report
+          </button>
+        </div>
+
+        <div class="portal-card-body">
+          <!-- Report KPI Metrics -->
+          <div class="citizen-report-kpi-grid">
+            <div class="cit-rep-kpi-card">
+              <div class="cit-rep-kpi-lbl">Total Submitted</div>
+              <div id="rep-total-submitted" class="cit-rep-kpi-val">0</div>
+            </div>
+            <div class="cit-rep-kpi-card cit-rep-kpi-card--resolved">
+              <div class="cit-rep-kpi-lbl" style="color: #166534;">Resolved</div>
+              <div id="rep-total-resolved" class="cit-rep-kpi-val" style="color: #16a34a;">0</div>
+            </div>
+            <div class="cit-rep-kpi-card cit-rep-kpi-card--pending">
+              <div class="cit-rep-kpi-lbl" style="color: #92400e;">Pending</div>
+              <div id="rep-total-pending" class="cit-rep-kpi-val" style="color: #d97706;">0</div>
+            </div>
+            <div class="cit-rep-kpi-card cit-rep-kpi-card--active">
+              <div class="cit-rep-kpi-lbl" style="color: #1e40af;">Active Processing</div>
+              <div id="rep-total-active" class="cit-rep-kpi-val" style="color: #0f56b3;">0</div>
+            </div>
+            <div class="cit-rep-kpi-card">
+              <div class="cit-rep-kpi-lbl">Avg Resolution Time</div>
+              <div id="rep-avg-time" class="cit-rep-kpi-val" style="color: #0f56b3; font-size: 20px;">--</div>
+            </div>
+            <div class="cit-rep-kpi-card cit-rep-kpi-card--rate">
+              <div class="cit-rep-kpi-lbl" style="color: #166534;">Resolution Rate</div>
+              <div id="rep-resolution-rate" class="cit-rep-kpi-val" style="color: #15803d;">0%</div>
+            </div>
+          </div>
+
+          <div class="citizen-report-charts-grid">
+            <!-- Category-wise Complaint Distribution -->
+            <div class="citizen-report-panel">
+              <h3 style="font-size: 14.5px; font-weight: 800; color: #0b2545; margin: 0 0 12px; display: flex; align-items: center; gap: 8px;">
+                <i class="fa-solid fa-layer-group" style="color: #0f56b3;"></i> Category-wise Complaint Distribution
+              </h3>
+              <div id="rep-category-bars" style="display: flex; flex-direction: column; gap: 10px;">
+                <!-- Populated dynamically via JS -->
+              </div>
+            </div>
+
+            <!-- Monthly Complaint Filing & Resolution History -->
+            <div class="citizen-report-panel">
+              <h3 style="font-size: 14.5px; font-weight: 800; color: #0b2545; margin: 0 0 12px; display: flex; align-items: center; gap: 8px;">
+                <i class="fa-regular fa-calendar-days" style="color: #0f56b3;"></i> Monthly Filing &amp; Resolution History
+              </h3>
+              <div class="directory-table-responsive">
+                <table class="directory-table citizen-history-table">
+                  <thead>
+                    <tr>
+                      <th>Month</th>
+                      <th>Submitted</th>
+                      <th>Resolved</th>
+                      <th>Open</th>
+                      <th>Rate</th>
+                    </tr>
+                  </thead>
+                  <tbody id="rep-monthly-table-body">
+                    <!-- Populated dynamically -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- TAB 4: CITIZEN PROFILE & PORTAL PREFERENCES -->
+    <!-- ===================================================================== -->
+    <div id="citizen-preferences-view" style="display: none;">
+      <div class="two-col-layout">
+        <section class="portal-card" id="citizen-profile-pref-card" style="margin-bottom: 16px;">
+          <div class="portal-card-header">
+            <div class="card-title-group">
+              <i class="fa-solid fa-user-gear card-header-icon"></i>
+              <div>
+                <h2 class="card-heading">My Profile Settings</h2>
+                <p class="card-subheading">Manage your verified citizen name, contact phone, and home Gram Panchayat.</p>
+              </div>
+            </div>
+          </div>
+          <div class="portal-card-body">
+            <div id="citizen-profile-usm-status"></div>
+            <form id="citizen-profile-pref-form">
+              <div class="form-group" style="margin-bottom: 12px;">
+                <label class="form-label" for="cit-pref-name">Full Name<span class="req-star">*</span></label>
+                <input type="text" id="cit-pref-name" class="form-input" maxlength="100" required>
+              </div>
+              <div class="usm-form-grid-2" style="margin-bottom: 12px;">
+                <div class="form-group" style="margin-bottom: 0;">
+                  <label class="form-label" for="cit-pref-phone">Contact Phone Number</label>
+                  <input type="tel" id="cit-pref-phone" class="form-input" maxlength="20" placeholder="e.g. ">
+                </div>
+                <div class="form-group" style="margin-bottom: 0;">
+                  <label class="form-label" for="cit-pref-gp">Home Gram Panchayat</label>
+                  <input type="text" id="cit-pref-gp" class="form-input" maxlength="100" placeholder="Enter your Gram Panchayat">
+                </div>
+              </div>
+              <div class="form-group" style="margin-bottom: 8px;">
+                <label class="form-label" for="cit-pref-email">Login Email (Read-Only)</label>
+                <input type="email" id="cit-pref-email" class="form-input" readonly disabled style="background: #f8fafc; color: #64748b;">
+              </div>
+              <div class="usm-actions-bar">
+                <button type="submit" id="cit-profile-save-btn" class="btn-cta-primary" style="width: auto; padding: 9px 18px;">
+                  <i class="fa-solid fa-floppy-disk"></i> <span>Save Profile</span>
+                </button>
+                <button type="button" id="cit-profile-reset-btn" class="btn-secondary-action usm-btn-reset" style="padding: 9px 15px;">
+                  <i class="fa-solid fa-rotate-left"></i> <span>Reset Defaults</span>
+                </button>
+                <button type="button" id="cit-profile-refresh-btn" class="btn-secondary-action usm-btn-refresh" style="padding: 9px 15px;">
+                  <i class="fa-solid fa-arrows-rotate"></i> <span>Refresh</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </section>
+
+        <section class="portal-card" id="citizen-ui-pref-card" style="margin-bottom: 16px;">
+          <div class="portal-card-header">
+            <div class="card-title-group">
+              <i class="fa-solid fa-language card-header-icon"></i>
+              <div>
+                <h2 class="card-heading">Portal Language &amp; Display Preferences</h2>
+                <p class="card-subheading">Customize preferred portal language and dashboard view preferences.</p>
+              </div>
+            </div>
+          </div>
+          <div class="portal-card-body">
+            <div id="citizen-prefs-usm-status"></div>
+            <form id="citizen-ui-pref-form">
+              <div class="form-group" style="margin-bottom: 14px;">
+                <label class="form-label" for="cit-pref-lang">Preferred Portal Language</label>
+                <select id="cit-pref-lang" class="form-select">
+                  <option value="en">English</option>
+                  <option value="kn">ಕನ್ನಡ (Kannada)</option>
+                  <option value="hi">हिन्दी (Hindi)</option>
+                </select>
+              </div>
+              <div class="pref-toggle-list">
+                <div class="pref-toggle-row">
+                  <div class="pref-info-block">
+                    <div class="pref-title">Auto-Expand Timeline Updates</div>
+                    <div class="pref-desc">Show the newest grievance timeline milestones expanded inside detail popups.</div>
+                  </div>
+                  <label class="switch" for="cit-pref-expand">
+                    <input type="checkbox" id="cit-pref-expand" checked>
+                    <span class="slider"></span>
+                  </label>
+                </div>
+                <div class="pref-toggle-row">
+                  <div class="pref-info-block">
+                    <div class="pref-title">Email Status Alerts Opt-In</div>
+                    <div class="pref-desc">Receive email acknowledgments and official resolution summaries for your complaints.</div>
+                  </div>
+                  <label class="switch" for="cit-pref-alerts">
+                    <input type="checkbox" id="cit-pref-alerts" checked>
+                    <span class="slider"></span>
+                  </label>
+                </div>
+                <div class="pref-toggle-row">
+                  <div class="pref-info-block">
+                    <div class="pref-title">Compact List Density</div>
+                    <div class="pref-desc">Use denser spacing in complaint summary tables.</div>
+                  </div>
+                  <label class="switch" for="cit-pref-compact">
+                    <input type="checkbox" id="cit-pref-compact">
+                    <span class="slider"></span>
+                  </label>
+                </div>
+              </div>
+              <div class="usm-actions-bar">
+                <button type="submit" id="cit-prefs-save-btn" class="btn-cta-primary" style="width: auto; padding: 9px 18px;">
+                  <i class="fa-solid fa-floppy-disk"></i> <span>Save Preferences</span>
+                </button>
+                <button type="button" id="cit-prefs-reset-btn" class="btn-secondary-action usm-btn-reset" style="padding: 9px 15px;">
+                  <i class="fa-solid fa-rotate-left"></i> <span>Reset Defaults</span>
+                </button>
+                <button type="button" id="cit-prefs-refresh-btn" class="btn-secondary-action usm-btn-refresh" style="padding: 9px 15px;">
+                  <i class="fa-solid fa-arrows-rotate"></i> <span>Refresh</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </section>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Citizen Grievance Details & Public Response Modal -->
+  <div class="modal-overlay" id="citizen-detail-modal">
+    <div class="modal-window" style="max-width: 780px;">
+      <div class="modal-header">
+        <div class="modal-title" style="display: flex; align-items: center; gap: 8px;">
+          <i class="fa-solid fa-file-shield" style="color: #0f56b3;"></i>
+          <span>Grievance Details & Official Responses</span>
+        </div>
+        <button type="button" class="modal-close-btn" onclick="closeCitizenModal()">&times;</button>
+      </div>
+
+      <div class="modal-body" style="max-height: 75vh; overflow-y: auto; padding: 20px;">
+        <table class="detail-table" style="margin-bottom: 16px;">
+          <tr>
+            <td class="detail-label-cell" style="width: 140px;">Complaint ID</td>
+            <td class="detail-value-cell">: <strong id="cmodal-id" style="color: #0b2545;">JAN-2026-0000</strong></td>
+          </tr>
+          <tr>
+            <td class="detail-label-cell">Subject</td>
+            <td class="detail-value-cell">: <strong id="cmodal-subject">Subject</strong></td>
+          </tr>
+          <tr>
+            <td class="detail-label-cell">Category</td>
+            <td class="detail-value-cell">: <span id="cmodal-category">Category</span></td>
+          </tr>
+          <tr>
+            <td class="detail-label-cell">Gram Panchayat</td>
+            <td class="detail-value-cell">: <span id="cmodal-gp">Panchayat Name</span></td>
+          </tr>
+          <tr>
+            <td class="detail-label-cell">Assigned Receiver</td>
+            <td class="detail-value-cell">: <span id="cmodal-receiver" style="font-weight: 600; color: #334155;">Gram Panchayat Desk</span></td>
+          </tr>
+          <tr>
+            <td class="detail-label-cell">Filed Date</td>
+            <td class="detail-value-cell">: <span id="cmodal-date">Date</span></td>
+          </tr>
+          <tr>
+            <td class="detail-label-cell">Current Status</td>
+            <td class="detail-value-cell">: <span class="status-badge-pill" id="cmodal-status-badge">Submitted</span></td>
+          </tr>
+          <tr>
+            <td class="detail-label-cell">Description</td>
+            <td class="detail-value-cell">: <span id="cmodal-desc" style="line-height: 1.5;">Description...</span></td>
+          </tr>
+        </table>
+
+        <!-- Verified Work Progress Details Card -->
+        <div id="cmodal-work-progress-card" style="background: #f0fdf4; border: 1.5px solid #bbf7d0; border-radius: 8px; padding: 14px 16px; margin-bottom: 16px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 10px;">
+            <div style="font-weight: 800; font-size: 13.5px; color: #166534; display: flex; align-items: center; gap: 7px;">
+              <i class="fa-solid fa-bars-progress" style="color: #16a34a;"></i> Verified Work Progress
+            </div>
+            <span id="cmodal-wp-stage-badge" style="font-size: 12px; font-weight: 800; background: #ffffff; color: #15803d; border: 1px solid #86efac; padding: 2px 10px; border-radius: 16px;">
+              0% – Not Started
+            </span>
+          </div>
+
+          <div style="background: #e2e8f0; height: 10px; border-radius: 5px; overflow: hidden; margin-bottom: 12px;">
+            <div id="cmodal-wp-bar" style="background: linear-gradient(90deg, #2563eb 0%, #16a34a 100%); height: 100%; width: 0%; border-radius: 5px; transition: width 0.5s ease;"></div>
+          </div>
+
+          <div id="cmodal-wp-details-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 210px), 1fr)); gap: 10px; font-size: 12.5px;">
+            <div style="background: #ffffff; border: 1px solid #dcfce7; border-radius: 6px; padding: 8px 10px;">
+              <div style="font-weight: 700; color: #475569; font-size: 11px; text-transform: uppercase;">Work Description</div>
+              <div id="cmodal-wp-desc" style="color: #0b2545; margin-top: 2px;">Awaiting initial assessment by receiver.</div>
+            </div>
+            <div style="background: #ffffff; border: 1px solid #dcfce7; border-radius: 6px; padding: 8px 10px;">
+              <div style="font-weight: 700; color: #15803d; font-size: 11px; text-transform: uppercase;">Completed Work</div>
+              <div id="cmodal-wp-completed" style="color: #0b2545; margin-top: 2px;">None recorded yet.</div>
+            </div>
+            <div style="background: #ffffff; border: 1px solid #dcfce7; border-radius: 6px; padding: 8px 10px;">
+              <div style="font-weight: 700; color: #c2410c; font-size: 11px; text-transform: uppercase;">Remaining Work</div>
+              <div id="cmodal-wp-remaining" style="color: #0b2545; margin-top: 2px;">Pending field team deployment.</div>
+            </div>
+            <div style="background: #ffffff; border: 1px solid #dcfce7; border-radius: 6px; padding: 8px 10px;">
+              <div style="font-weight: 700; color: #0f56b3; font-size: 11px; text-transform: uppercase;">Next Expected Action</div>
+              <div id="cmodal-wp-next" style="color: #0b2545; margin-top: 2px;">Initial inspection / verification.</div>
+            </div>
+          </div>
+
+          <div id="cmodal-wp-delay-wrap" style="display: none; background: #fffbeb; border: 1px solid #fcd34d; border-radius: 6px; padding: 8px 12px; margin-top: 10px; font-size: 12.5px; color: #92400e;">
+            <i class="fa-solid fa-triangle-exclamation" style="color: #d97706;"></i> <strong>Reason for Delay:</strong> <span id="cmodal-wp-delay"></span>
+          </div>
+
+          <div id="cmodal-wp-photo-wrap" style="display: none; margin-top: 10px;">
+            <label style="font-size: 12px; font-weight: 700; color: #166534; display: block; margin-bottom: 4px;">
+              <i class="fa-solid fa-camera"></i> Official Site Work Progress Photo:
+            </label>
+            <img id="cmodal-wp-photo" src="" alt="Work Progress Photo" style="width: 100%; max-height: 160px; object-fit: cover; border-radius: 6px; border: 1px solid #86efac; cursor: pointer;">
+          </div>
+        </div>
+
+        <!-- Complete Chronological Activity Timeline -->
+        <div id="cmodal-timeline-card" style="background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 8px; padding: 14px 16px; margin-bottom: 16px;">
+          <div style="font-weight: 800; font-size: 13.5px; color: #0b2545; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between;">
+            <span><i class="fa-solid fa-clock-rotate-left" style="color: #0f56b3;"></i> Complete Activity Timeline</span>
+            <span style="font-size: 11px; font-weight: 600; color: #64748b;" id="cmodal-timeline-count">0 Events</span>
+          </div>
+          <div id="cmodal-timeline-trail" class="citizen-timeline-trail">
+            <!-- Dynamically populated chronological audit trail -->
+          </div>
+        </div>
+
+        <!-- Evidence Photo -->
+        <div style="margin-bottom: 16px;" id="cmodal-photo-wrap">
+          <label style="font-size: 13px; font-weight: 700; color: #0b2545; display: block; margin-bottom: 6px;">
+            <i class="fa-regular fa-image" style="color: #0f56b3;"></i> Attached Evidence Photograph:
+          </label>
+          <img id="cmodal-photo" src="" alt="Evidence Photo" style="width: 100%; max-height: 200px; object-fit: cover; border-radius: 8px; border: 1.5px solid #cbd5e1;">
+        </div>
+
+        <!-- AI Verified Supporting Document Details -->
+        <div id="cmodal-doc-analysis-wrap" style="display: none; margin-bottom: 16px;"></div>
+
+        <!-- Official Response Communication Thread (Strictly Public) -->
+        <div class="comm-thread-card" style="margin-bottom: 16px;">
+          <div class="comm-thread-header">
+            <div class="comm-thread-header-title">
+              <i class="fa-solid fa-comments" style="color: #0f56b3;"></i>
+              <span>Official Responses & Message History</span>
+            </div>
+            <span style="font-size: 11px; font-weight: 700; color: #166534; background: #dcfce7; padding: 2px 7px; border-radius: 4px;">
+              Verified Channel
+            </span>
+          </div>
+          <div class="comm-thread-box" id="cmodal-thread" style="max-height: 220px;">
+            <!-- Populated dynamically -->
+          </div>
+          <!-- Citizen Follow-up Reply -->
+          <div class="comm-composer-box" id="cmodal-reply-box">
+            <div style="font-size: 12.5px; font-weight: 700; color: #0b2545; margin-bottom: 6px;">
+              <i class="fa-solid fa-reply" style="color: #0f56b3;"></i> Send a Reply to Panchayat Officials:
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <textarea id="cmodal-reply-text" class="form-textarea" placeholder="Type your inquiry or update..." rows="2" style="flex: 1; min-height: 48px; font-size: 13px;"></textarea>
+              <button type="button" class="btn-cta-primary" onclick="sendCitizenDashboardReply()" style="padding: 8px 16px; font-size: 13px; white-space: nowrap;">
+                <i class="fa-solid fa-paper-plane"></i> Send
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+        <button type="button" class="btn-table-action" id="cmodal-delete-btn" style="background: #fee2e2; border: 1px solid #fca5a5; color: #991b1b; font-weight: 700; padding: 7px 14px; border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;" onclick="deleteCurrentCitizenComplaintFromModal()" title="Delete Grievance">
+          <i class="fa-solid fa-trash-can"></i> Delete Grievance
+        </button>
+        <div style="display: flex; gap: 8px; align-items: center;">
+          <button type="button" class="btn-cta-secondary" id="cmodal-receipt-btn" onclick="printModalReceipt()">
+            <i class="fa-solid fa-file-arrow-down"></i> Acknowledgement Slip
+          </button>
+          <button type="button" class="btn-cta-secondary" onclick="closeCitizenModal()">
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Citizen Feedback Modal (After Resolution) -->
+  <div class="modal-overlay" id="citizen-feedback-modal">
+    <div class="modal-window" style="max-width: 500px;">
+      <div class="modal-header">
+        <div class="modal-title" style="color: #166534; display: flex; align-items: center; gap: 8px;">
+          <i class="fa-solid fa-star" style="color: #eab308;"></i>
+          <span>Grievance Resolution Feedback</span>
+        </div>
+        <button type="button" class="modal-close-btn" onclick="closeFeedbackModal()">&times;</button>
+      </div>
+      <div class="modal-body" style="padding: 20px;">
+        <p style="font-size: 13.5px; color: #475569; margin-bottom: 14px;">
+          Your feedback helps improve Gram Panchayat public services. How satisfied are you with the resolution of <strong id="fb-complaint-id">JAN-2026-0000</strong>?
+        </p>
+        <div style="display: flex; gap: 10px; justify-content: center; font-size: 28px; color: #cbd5e1; margin-bottom: 18px; cursor: pointer;" id="star-rating-wrap">
+          <i class="fa-solid fa-star star-rate" data-val="1" onclick="selectStar(1)"></i>
+          <i class="fa-solid fa-star star-rate" data-val="2" onclick="selectStar(2)"></i>
+          <i class="fa-solid fa-star star-rate" data-val="3" onclick="selectStar(3)"></i>
+          <i class="fa-solid fa-star star-rate" data-val="4" onclick="selectStar(4)"></i>
+          <i class="fa-solid fa-star star-rate" data-val="5" onclick="selectStar(5)"></i>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="fb-comments">Comments / Feedback</label>
+          <textarea id="fb-comments" class="form-textarea" placeholder="Share your experience with the resolution quality or timeliness..." rows="3"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-cta-primary" onclick="submitCitizenFeedback()">
+          <i class="fa-solid fa-check"></i> Submit Feedback
+        </button>
+        <button type="button" class="btn-cta-secondary" onclick="closeFeedbackModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Citizen Reopen Request Modal -->
+  <div class="modal-overlay" id="citizen-reopen-modal">
+    <div class="modal-window" style="max-width: 520px;">
+      <div class="modal-header">
+        <div class="modal-title" style="color: #c2410c; display: flex; align-items: center; gap: 8px;">
+          <i class="fa-solid fa-rotate-left"></i>
+          <span>Request Grievance Reopening</span>
+        </div>
+        <button type="button" class="modal-close-btn" onclick="closeReopenModal()">&times;</button>
+      </div>
+      <div class="modal-body" style="padding: 20px;">
+        <p style="font-size: 13.5px; color: #475569; margin-bottom: 14px;">
+          If the reported issue has not been satisfactorily resolved or has recurred, please explain the reason for requesting a reopening for grievance <strong id="reopen-modal-id">JAN-2026-0000</strong>:
+        </p>
+        <div class="form-group">
+          <label class="form-label" for="reopen-reason-input" style="color: #c2410c;">
+            Reason for Reopening<span class="req-star">*</span>
+          </label>
+          <textarea id="reopen-reason-input" class="form-textarea" placeholder="Detail why the issue remains unresolved or what additional action is required on site..." rows="4" required></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-cta-primary" style="background: #ea580c; border-color: #c2410c;" onclick="submitReopenRequest()">
+          <i class="fa-solid fa-rotate-left"></i> Submit Reopening Request
+        </button>
+        <button type="button" class="btn-cta-secondary" onclick="closeReopenModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Citizen Soft-Delete Confirmation Modal -->
+  <div class="modal-overlay" id="citizen-delete-confirm-modal">
+    <div class="modal-window" style="max-width: 500px;">
+      <div class="modal-header" style="background: #fef2f2; border-bottom: 1.5px solid #fecaca;">
+        <div class="modal-title" style="color: #991b1b; display: flex; align-items: center; gap: 8px;">
+          <i class="fa-solid fa-trash-can"></i>
+          <span>Confirm Move to Deleted History</span>
+        </div>
+        <button type="button" class="modal-close-btn" onclick="closeDeleteConfirmModal()">&times;</button>
+      </div>
+      <div class="modal-body" style="padding: 20px;">
+        <div style="background: #fffbeb; border: 1px solid #fde68a; border-radius: 6px; padding: 10px 14px; margin-bottom: 14px; font-size: 13px; color: #92400e;">
+          <i class="fa-solid fa-circle-info"></i> <strong>Soft Delete Protected:</strong>
+          This grievance will be moved to your <strong>Deleted Complaints</strong> folder. Official audit trails and receiver work records remain intact, and you can restore it anytime.
+        </div>
+
+        <table class="detail-table" style="margin-bottom: 14px; font-size: 13px;">
+          <tr>
+            <td class="detail-label-cell" style="width: 110px;">Complaint ID</td>
+            <td class="detail-value-cell">: <strong id="cdel-complaint-id" style="color: #0b2545;">JAN-2026-0000</strong></td>
+          </tr>
+          <tr>
+            <td class="detail-label-cell">Subject</td>
+            <td class="detail-value-cell">: <span id="cdel-complaint-subject" style="font-weight: 600;">Subject</span></td>
+          </tr>
+        </table>
+
+        <div class="form-group" style="margin-bottom: 0;">
+          <label class="form-label" for="cdel-reason-input">Reason for Deletion (Optional)</label>
+          <textarea id="cdel-reason-input" class="form-textarea" placeholder="e.g. Filed by mistake, issue resolved locally, duplicate entry..." rows="3"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-cta-primary" id="cdel-confirm-btn" style="background: #dc2626; border-color: #b91c1c;" onclick="confirmCitizenSoftDelete()">
+          <i class="fa-solid fa-trash-can"></i> Move to Deleted History
+        </button>
+        <button type="button" class="btn-cta-secondary" onclick="closeDeleteConfirmModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="portal-footer">
+    <div class="footer-wave-line"></div>
+    <div class="footer-content">
+      <div class="footer-disclaimer">
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px;">
+          <img src="assets/branding/janaseva-icon.png" alt="JANASEVA Logo" class="footer-emblem-img" width="26" height="26" style="width: 26px; height: 26px; object-fit: contain;">
+          <strong>JANASEVA – Gram Panchayat Grievance Portal</strong>
+        </div>
+        This portal is an academic student project created for civic grievance demonstration. Not an official Government of India website.
+      </div>
+      <div class="footer-links-group">
+        <a href="index.html">Home</a>
+        <a href="citizen-dashboard.html">My Dashboard</a>
+        <a href="complaint.html">Submit Complaint</a>
+        <a href="track.html">Track Status</a>
+        <a href="directory.html">Directory</a>
+        <a href="knowledge-centre.html">Knowledge Centre</a>
+        <a href="about.html">About</a>
+        <a href="https://ipchat.in/" target="_blank" rel="noopener noreferrer">IP Chat – External Messaging Service</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- JANASEVA MongoDB Backend & Scripts -->
+  <script src="js/firebase-config.js"></script>
+  <script src="js/mongodb-adapter.js"></script>
+  <script src="js/translations.js"></script>
+  <script src="js/universal-settings.js"></script>
+  <script src="js/status-config.js"></script>
+  <script src="js/auth.js"></script>
+<script src="js/universal-notifications.js"></script>
+  <script src="js/email.js"></script>
+  <script src="js/complaint-storage-manager.js"></script>
+  <script src="js/complaints.js"></script>
+  <script src="js/citizen-dashboard.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      if (window.authService) {
+        window.authService.protectPage('any');
+      }
+    });
+  </script>
+  <script src="js/offline-db.js"></script>
+  <script src="js/ai-prioritization.js"></script>
+  <script src="assets/ocr/tesseract.min.js"></script>
+  <script src="assets/ocr/pdf.min.js"></script>
+  <script src="js/ocr-document-store.js"></script>
+  <script src="js/hybrid-ocr-engine.js"></script>
+  <script src="js/document-verifier.js"></script>
+  <script src="js/knowledge-parsers.js"></script>
+  <script src="js/knowledge-security.js"></script>
+  <script src="js/knowledge-rag.js"></script>
+  <script src="js/knowledge-storage.js"></script>
+  <script src="js/ai-chat-services.js"></script>
+  <script src="js/ai-voice-assistant.js"></script>
+</body>
+</html>

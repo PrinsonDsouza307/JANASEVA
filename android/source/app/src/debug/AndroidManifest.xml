@@ -1,0 +1,4 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Local development only: permits cleartext HTTP to 10.0.2.2 emulator loopback -->
+    <application android:usesCleartextTraffic="true"/>
+</manifest>

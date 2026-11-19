@@ -1,0 +1,16 @@
+{
+  "name": "janaseva-portal",
+  "version": "1.0.0",
+  "description": "JANASEVA - Gram Panchayat Civic Grievance Redressal Portal",
+  "main": "tools/local_server.cjs",
+  "scripts": {
+    "start": "node tools/local_server.cjs",
+    "test": "node -e \"console.log('OK')\""
+  },
+  "dependencies": {
+    "mongodb": "^6.10.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

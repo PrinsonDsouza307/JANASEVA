@@ -1,0 +1,26 @@
+{
+  "name": "JANASEVA – Gram Panchayat Grievance Portal",
+  "short_name": "JANASEVA",
+  "description": "Digital Grievance Redressal and AI-Powered Gram Panchayat Public Services Platform",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#0b2545",
+  "orientation": "portrait-primary",
+  "scope": "./",
+  "icons": [
+    {
+      "src": "assets/branding/android-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "assets/branding/android-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["government", "productivity", "utilities"]
+}

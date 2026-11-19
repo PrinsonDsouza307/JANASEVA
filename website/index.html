@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <!-- Favicon & Brand Identity -->
+  <link rel="icon" type="image/x-icon" href="assets/branding/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/branding/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/branding/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/branding/apple-touch-icon.png">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0b2545">
+  <title>JANASEVA – Gram Panchayat Grievance Portal</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/responsive.css">
+  <link rel="stylesheet" href="css/android-download.css">
+</head>
+<body>
+  <!-- Auth Guard Overlay (Prevents flash of protected content during session verification) -->
+  <div id="auth-guard-overlay" class="auth-guard-overlay">
+    <div class="auth-guard-box">
+      <img src="assets/branding/janaseva-icon.png" alt="JANASEVA" class="auth-guard-logo">
+      <div class="auth-guard-spinner"></div>
+      <div class="auth-guard-title">JANASEVA</div>
+      <div class="auth-guard-sub" id="auth-guard-sub">Verifying security session...</div>
+    </div>
+  </div>
+
+
+  <!-- ========================================================================
+       PORTAL HEADER & NAVIGATION
+       ======================================================================== -->
+  <header class="portal-header">
+    <div class="header-container">
+      <a href="index.html" class="brand-section">
+        <img src="assets/branding/janaseva-icon.png" alt="JANASEVA Official Logo" class="emblem-img brand-logo-img">
+        <div class="brand-text-block">
+          <span class="brand-main-title">JANASEVA</span>
+          <div class="brand-divider"></div>
+          <div class="brand-sub-titles">
+            <span class="brand-subtitle">Gram Panchayat Grievance Portal</span>
+            <span class="brand-tagline">Report • Submit • Track • Resolve</span>
+          </div>
+        </div>
+      </a>
+
+      <!-- Header Action Controls: Notification Bell (Always visible in Android toolbar & Desktop header) + Mobile Menu Toggle -->
+      <div class="header-action-controls" id="header-action-controls">
+        <button class="nav-notif-bell-btn" id="nav-notif-bell-btn" type="button" aria-label="View Notifications">
+          <i class="fa-regular fa-bell"></i>
+          <span class="nav-notif-badge" id="nav-notif-badge" style="display: none;">0</span>
+        </button>
+        <button class="nav-toggle-btn" id="mobile-nav-toggle" aria-label="Toggle Navigation">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+      </div>
+
+      <!-- Main Navigation -->
+      <nav class="main-nav" id="main-navigation">
+        <a href="index.html" class="nav-link active">Home</a>
+        <a href="complaint.html" class="nav-link">Submit Complaint</a>
+        <a href="track.html" class="nav-link">Track Status</a>
+        <a href="directory.html" class="nav-link">Panchayat Directory</a>
+        <a href="knowledge-centre.html" class="nav-link">Knowledge Centre</a>
+        <a href="https://ipchat.in/" class="nav-link nav-link-external" target="_blank" rel="noopener noreferrer"><i class="fa-solid fa-comments" aria-hidden="true"></i> <span>IP Chat</span> <i class="fa-solid fa-arrow-up-right-from-square nav-ext-icon" aria-hidden="true"></i></a>
+        <a href="about.html" class="nav-link">About</a>
+        <div class="lang-selector-wrapper">
+          <i class="fa-solid fa-globe lang-icon"></i>
+          <select class="janaseva-lang-select" aria-label="Select Language">
+            <option value="en">English</option>
+            <option value="kn">ಕನ್ನಡ (Kannada)</option>
+            <option value="hi">हिन्दी (Hindi)</option>
+          </select>
+        </div>
+        <div id="nav-auth-container" style="display: inline-flex; align-items: center; gap: 8px;">
+          <a href="login.html" class="nav-btn-primary">
+            <i class="fa-solid fa-arrow-right-to-bracket"></i>
+            <span>Sign In</span>
+          </a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ========================================================================
+       HERO BANNER SECTION
+       ======================================================================== -->
+  <section class="hero-banner">
+    <div class="hero-bg-overlay"></div>
+    <div class="hero-content-wrap">
+      <div class="hero-text-side">
+        <h1 class="hero-main-heading">A Direct Link to Your<br>Gram Panchayat</h1>
+        <p class="hero-subheading">Report local issues in your village and get them resolved by your Gram Panchayat.</p>
+        <div class="hero-cta-buttons">
+          <button type="button" id="btn-open-android-modal" class="btn-cta-primary hero-android-btn" aria-haspopup="dialog" aria-expanded="false" aria-controls="android-app-modal">
+            <i class="fa-brands fa-android" aria-hidden="true"></i>
+            <span>Download Android App</span>
+          </button>
+          <a href="complaint.html" class="btn-cta-primary">
+            <i class="fa-solid fa-circle-plus"></i>
+            <span>Submit a Complaint</span>
+          </a>
+          <a href="track.html" class="btn-cta-secondary">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <span>Track Complaint</span>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tricolour Wave Separator -->
+    <div class="tricolour-wave-separator">
+      <svg viewBox="0 0 1440 24" fill="none" preserveAspectRatio="none">
+        <path d="M0,0 C360,18 1080,6 1440,16 L1440,24 L0,24 Z" fill="#ffffff" />
+        <path d="M0,4 C400,20 1100,10 1440,18" stroke="#ff9933" stroke-width="2.5" fill="none" />
+        <path d="M0,8 C420,22 1120,12 1440,20" stroke="#138808" stroke-width="2.5" fill="none" />
+      </svg>
+    </div>
+  </section>
+
+  <!-- ========================================================================
+       MAIN PAGE CONTENT
+       ======================================================================== -->
+  <main class="page-main-content">
+    <!-- Categories Strip Card -->
+    <section class="category-strip-card">
+      <div class="category-items-grid">
+        <a href="complaint.html?category=water" class="category-pill-card cat-water">
+          <div class="cat-icon-container">
+            <i class="fa-solid fa-droplet"></i>
+          </div>
+          <span class="cat-label">Water Supply<br>Issues</span>
+        </a>
+
+        <a href="complaint.html?category=road" class="category-pill-card cat-road">
+          <div class="cat-icon-container">
+            <i class="fa-solid fa-road"></i>
+          </div>
+          <span class="cat-label">Road &<br>Infrastructure</span>
+        </a>
+
+        <a href="complaint.html?category=garbage" class="category-pill-card cat-garbage">
+          <div class="cat-icon-container">
+            <i class="fa-solid fa-trash-can"></i>
+          </div>
+          <span class="cat-label">Garbage &<br>Cleanliness</span>
+        </a>
+
+        <a href="complaint.html?category=streetlight" class="category-pill-card cat-light">
+          <div class="cat-icon-container">
+            <i class="fa-regular fa-lightbulb"></i>
+          </div>
+          <span class="cat-label">Streetlight<br>Problems</span>
+        </a>
+
+        <a href="complaint.html?category=drainage" class="category-pill-card cat-drainage">
+          <div class="cat-icon-container">
+            <i class="fa-solid fa-seedling"></i>
+          </div>
+          <span class="cat-label">Drainage &<br>Sanitation</span>
+        </a>
+
+        <a href="complaint.html?category=public" class="category-pill-card cat-public">
+          <div class="cat-icon-container">
+            <i class="fa-solid fa-landmark"></i>
+          </div>
+          <span class="cat-label">Public<br>Facilities</span>
+        </a>
+
+        <a href="complaint.html?category=other" class="category-pill-card cat-other">
+          <div class="cat-icon-container">
+            <i class="fa-solid fa-border-all"></i>
+          </div>
+          <span class="cat-label">Other<br>Civic Issues</span>
+        </a>
+      </div>
+    </section>
+
+    <!-- Two-Column Layout: Recent Complaints + How it Works -->
+    <div class="two-col-layout">
+      
+      <!-- Left Column: Recent Complaints (Public View) -->
+      <section class="recent-complaints-card">
+        <div class="recent-complaints-heading">
+          <span>Recent Complaints (Public View)</span>
+          <a href="complaint.html" style="font-size: 13.5px; font-weight: 600; color: #0f56b3;">
+            Lodge Complaint <i class="fa-solid fa-arrow-right"></i>
+          </a>
+        </div>
+
+        <div class="complaints-grid-three" id="public-recent-complaints-container">
+          <!-- Dynamically populated strictly from authentic citizen complaints -->
+        </div>
+      </section>
+
+      <!-- Right Column: How It Works & Village Mission -->
+      <aside>
+        
+        <!-- How It Works Card -->
+        <div class="how-it-works-card">
+          <h2 class="how-it-works-title">How It Works?</h2>
+          
+          <div class="work-step-item">
+            <div class="step-num-bubble">1</div>
+            <div class="step-icon"><i class="fa-regular fa-user"></i></div>
+            <div class="step-content">
+              <div class="step-title">Register / Login</div>
+              <div class="step-desc">Create your account with mobile or email</div>
+            </div>
+          </div>
+
+          <div class="work-step-item">
+            <div class="step-num-bubble">2</div>
+            <div class="step-icon"><i class="fa-regular fa-file-lines"></i></div>
+            <div class="step-content">
+              <div class="step-title">Submit Complaint</div>
+              <div class="step-desc">Describe the issue and upload a photo</div>
+            </div>
+          </div>
+
+          <div class="work-step-item">
+            <div class="step-num-bubble">3</div>
+            <div class="step-icon"><i class="fa-regular fa-envelope"></i></div>
+            <div class="step-content">
+              <div class="step-title">Sent to Gram Panchayat</div>
+              <div class="step-desc">Your complaint is automatically emailed to the configured Panchayat office</div>
+            </div>
+          </div>
+
+          <div class="work-step-item">
+            <div class="step-num-bubble">4</div>
+            <div class="step-icon"><i class="fa-solid fa-check"></i></div>
+            <div class="step-content">
+              <div class="step-title">Track & Get Updates</div>
+              <div class="step-desc">Check the real-time status until it is resolved</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mission Card -->
+        <div class="mission-side-card">
+          <div class="mission-icon-wrap">
+            <i class="fa-solid fa-hand-holding-heart"></i>
+          </div>
+          <div class="mission-text-wrap">
+            <h3 class="mission-heading">Make Your Village Better</h3>
+            <p class="mission-body">Report issues, stay informed, and help build a cleaner, safer, and better village.</p>
+          </div>
+        </div>
+
+      </aside>
+
+    </div>
+
+  </main>
+
+  <!-- ========================================================================
+       FOOTER SECTION
+       ======================================================================== -->
+  <footer class="portal-footer">
+    <div class="footer-wave-line"></div>
+    <div class="footer-content">
+      <div class="footer-disclaimer">
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px;">
+          <img src="assets/branding/janaseva-icon.png" alt="JANASEVA Logo" class="footer-emblem-img" width="26" height="26" style="width: 26px; height: 26px; object-fit: contain;">
+          <strong>JANASEVA – Gram Panchayat Grievance Portal</strong>
+        </div>
+        This portal is an academic student project created for civic grievance demonstration. Not an official Government of India website.
+      </div>
+      <div class="footer-links-group">
+        <a href="index.html">Home</a>
+        <a href="complaint.html">Submit Complaint</a>
+        <a href="track.html">Track Status</a>
+        <a href="directory.html">Directory</a>
+        <a href="knowledge-centre.html">Knowledge Centre</a>
+        <a href="about.html">About</a>
+        <a href="https://ipchat.in/" target="_blank" rel="noopener noreferrer">IP Chat – External Messaging Service</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ========================================================================
+       ANDROID APP DOWNLOAD MODAL DIALOG
+       ======================================================================== -->
+  <div id="android-app-modal" class="android-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="android-modal-title" aria-describedby="android-modal-desc" aria-hidden="true">
+    <div class="android-modal-backdrop" id="android-modal-backdrop" tabindex="-1"></div>
+    <div class="android-modal-dialog">
+      <!-- Tricolour Accent Stripe -->
+      <div class="android-modal-stripe" aria-hidden="true"></div>
+
+      <!-- Header -->
+      <div class="android-modal-header">
+        <div class="android-download-intro">
+          <span class="android-download-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="6" y="2" width="12" height="20" rx="3"/><path d="M10 5h4M11 19h2"/></svg>
+          </span>
+          <div>
+            <p class="android-download-eyebrow" data-i18n="janaseva_mobile">JANASEVA MOBILE</p>
+            <h2 id="android-modal-title" class="android-modal-title">JANASEVA for Android</h2>
+            <p id="android-modal-desc" class="android-download-description">Keep JANASEVA close at hand. Download the Android app directly to your phone.</p>
+          </div>
+        </div>
+        <button type="button" class="android-modal-close-btn" id="btn-close-android-modal" aria-label="Close Android App Details Dialog">
+          <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+        </button>
+      </div>
+
+      <!-- Body -->
+      <div class="android-modal-body">
+        <dl class="android-release-meta">
+          <div><dt>App version</dt><dd>1.0 <small>Build 1</small></dd></div>
+          <div><dt>Download size</dt><dd>12.80 MB <small>12,799,064 bytes</small></dd></div>
+          <div><dt>Compatibility</dt><dd>Android 8.0+ <small>Android phones &amp; tablets</small></dd></div>
+        </dl>
+        <p class="android-download-status"><strong>Current release:</strong> this app stores records locally. Website and app accounts and records are not yet synchronized.</p>
+        <details>
+          <summary>How to install</summary>
+          <ol>
+            <li>On Android, download the APK and open it from Downloads.</li>
+            <li>If Android asks, allow this browser to install unknown apps, then choose Install. Keep Play Protect enabled.</li>
+            <li>Open JANASEVA. Turn off the browser’s install permission afterward.</li>
+            <li>On a desktop computer, download the file and transfer it to your Android phone. APK files do not run on Windows or iPhone.</li>
+          </ol>
+          <p>If an existing installation reports a signature conflict, contact the app provider. Do not uninstall to force an update: local records could be lost.</p>
+        </details>
+        <details>
+          <summary>File integrity</summary>
+          <p>SHA-256: <code>0a22fee96165c6f7ca65d23ad38bc56cbab9683dab1c2d21b9d7e0c758549f40</code></p>
+          <p><a href="android/release.json">Release details</a> · <a href="android/SHA256SUMS">Checksum file</a></p>
+        </details>
+      </div>
+
+      <!-- Footer -->
+      <div class="android-modal-footer">
+        <div class="android-download-action">
+          <a class="android-download-button" href="android/JANASEVA-latest.apk" download="JANASEVA.apk" id="modal-download-apk-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3v12m-5-5 5 5 5-5M4 16v5h16v-5"/></svg>
+            <span>Download APK</span>
+          </a>
+        </div>
+        <p class="android-download-caption"><i class="fa-solid fa-shield-halved" style="color: #16a34a; margin-right: 4px;" aria-hidden="true"></i> Direct APK download · No sign-in required</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- JANASEVA MongoDB Backend & Scripts -->
+  <script src="js/firebase-config.js"></script>
+  <script src="js/mongodb-adapter.js"></script>
+  <script src="js/translations.js"></script>
+  <script src="js/universal-settings.js"></script>
+  <script src="js/status-config.js"></script>
+  <script src="js/auth.js"></script>
+<script src="js/universal-notifications.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      if (window.authService) {
+        window.authService.handleRootEntry();
+      }
+      initAndroidDownloadModal();
+      loadPublicRecentComplaints();
+    });
+
+    function initAndroidDownloadModal() {
+      const openBtn = document.getElementById('btn-open-android-modal');
+      const modal = document.getElementById('android-app-modal');
+      const closeBtn = document.getElementById('btn-close-android-modal');
+      const backdrop = document.getElementById('android-modal-backdrop');
+      if (!openBtn || !modal) return;
+
+      let lastFocusedElement = null;
+
+      const getFocusableElements = () => {
+        return Array.from(modal.querySelectorAll(
+          'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"]), details summary'
+        )).filter(el => {
+          return !!(el.offsetWidth || el.offsetHeight || el.getClientRects().length);
+        });
+      };
+
+      const openModal = () => {
+        lastFocusedElement = document.activeElement;
+        modal.classList.add('active');
+        modal.setAttribute('aria-hidden', 'false');
+        openBtn.setAttribute('aria-expanded', 'true');
+        document.body.classList.add('android-modal-open');
+
+        // Focus close button initially for accessibility
+        if (closeBtn) {
+          closeBtn.focus();
+        } else {
+          const focusables = getFocusableElements();
+          if (focusables.length) focusables[0].focus();
+        }
+
+        document.addEventListener('keydown', onKeyDown);
+      };
+
+      const closeModal = () => {
+        modal.classList.remove('active');
+        modal.setAttribute('aria-hidden', 'true');
+        openBtn.setAttribute('aria-expanded', 'false');
+        document.body.classList.remove('android-modal-open');
+        document.removeEventListener('keydown', onKeyDown);
+
+        if (lastFocusedElement && typeof lastFocusedElement.focus === 'function') {
+          lastFocusedElement.focus();
+        }
+      };
+
+      const onKeyDown = (e) => {
+        if (e.key === 'Escape' || e.key === 'Esc') {
+          e.preventDefault();
+          closeModal();
+          return;
+        }
+
+        if (e.key === 'Tab') {
+          const focusables = getFocusableElements();
+          if (!focusables.length) return;
+          const first = focusables[0];
+          const last = focusables[focusables.length - 1];
+
+          if (e.shiftKey) {
+            if (document.activeElement === first || document.activeElement === modal) {
+              e.preventDefault();
+              last.focus();
+            }
+          } else {
+            if (document.activeElement === last) {
+              e.preventDefault();
+              first.focus();
+            }
+          }
+        }
+      };
+
+      openBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        openModal();
+      });
+
+      if (closeBtn) {
+        closeBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          closeModal();
+        });
+      }
+
+      if (backdrop) {
+        backdrop.addEventListener('click', () => {
+          closeModal();
+        });
+      }
+
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+          closeModal();
+        }
+      });
+    }
+
+    async function loadPublicRecentComplaints() {
+      const container = document.getElementById('public-recent-complaints-container');
+      if (!container) return;
+
+      let list = [];
+      if (window.isFirebaseAvailable && window.fbDb) {
+        try {
+          const snap = await window.fbDb.collection('complaints')
+            .orderBy('createdAt', 'desc')
+            .limit(10)
+            .get();
+          if (!snap.empty) {
+            snap.forEach(d => {
+              const data = d.data();
+              if (data && typeof JanasevaDB !== 'undefined' && !JanasevaDB.isFakeOrDummyComplaint(data)) {
+                list.push(data);
+              }
+            });
+          }
+        } catch (e) {
+          console.warn("[index.html] Firestore complaints fetch warning:", e.message);
+        }
+      }
+
+      if (list.length === 0 && typeof JanasevaDB !== 'undefined') {
+        const local = JanasevaDB.get('complaints', []);
+        list = local.filter(c => !JanasevaDB.isFakeOrDummyComplaint(c));
+      }
+
+      // Filter out rejected or soft-deleted records for public homepage view
+      const publicList = list.filter(c => {
+        const s = String(c.status || '').toLowerCase();
+        return s !== 'rejected' && !c.deletedByCitizen;
+      }).slice(0, 3);
+
+      if (publicList.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state-notice" style="grid-column: 1 / -1; text-align: center; padding: 40px 16px; background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 12px; color: #64748b;">
+            <div style="width: 54px; height: 54px; margin: 0 auto 12px; border-radius: 50%; background: #eff6ff; color: #0f56b3; display: flex; align-items: center; justify-content: center; font-size: 24px;">
+              <i class="fa-solid fa-folder-open"></i>
+            </div>
+            <strong style="color: #0b2545; font-size: 16px; display: block; margin-bottom: 4px;">No public grievances submitted yet</strong>
+            <span style="font-size: 13.5px; display: block; max-width: 420px; margin: 0 auto 16px; line-height: 1.5;">
+              All authentic civic grievances registered by citizens will appear here in real time.
+            </span>
+            <a href="complaint.html" class="btn-cta-primary" style="display: inline-flex; align-items: center; gap: 8px; padding: 9px 18px; font-size: 13.5px; text-decoration: none; border-radius: 6px;">
+              <i class="fa-solid fa-circle-plus"></i> Lodge First Grievance
+            </a>
+          </div>
+        `;
+        return;
+      }
+
+      const getCatIcon = (cat) => {
+        const c = String(cat || '').toLowerCase();
+        if (c.includes('road')) return 'fa-solid fa-road';
+        if (c.includes('water')) return 'fa-solid fa-droplet';
+        if (c.includes('garbage') || c.includes('sanitation')) return 'fa-solid fa-trash-can';
+        if (c.includes('electric') || c.includes('light')) return 'fa-solid fa-bolt';
+        return 'fa-solid fa-bullhorn';
+      };
+
+      const getBadgeClass = (status) => {
+        const s = String(status || '').toLowerCase();
+        if (s === 'resolved') return 'badge-resolved';
+        if (s === 'in progress' || s === 'action taken') return 'badge-inprogress';
+        return 'badge-underreview';
+      };
+
+      const getBadgeIcon = (status) => {
+        const s = String(status || '').toLowerCase();
+        if (s === 'resolved') return 'fa-solid fa-check';
+        if (s === 'in progress' || s === 'action taken') return 'fa-solid fa-gear';
+        return 'fa-solid fa-magnifying-glass';
+      };
+
+      container.innerHTML = publicList.map(c => {
+        const cid = c.complaintId || 'JAN-2026-XXXX';
+        const title = c.subject || c.category || 'Civic Grievance';
+        const gp = c.panchayatName || 'Gram Panchayat';
+        const photo = c.photoURL || 'assets/complaint-road.png';
+        const catIcon = getCatIcon(c.category);
+        const badgeClass = getBadgeClass(c.status);
+        const badgeIcon = getBadgeIcon(c.status);
+        const statusLabel = c.status || 'Submitted';
+
+        return `
+          <div class="complaint-item-card" onclick="window.location.href='track.html?id=' + encodeURIComponent('${cid}')" style="cursor: pointer;">
+            <div class="complaint-thumb-wrap">
+              <img src="${photo}" alt="${title}" class="complaint-thumb-img" onerror="this.src='assets/branding/janaseva-icon.png'; this.style.objectFit='contain';">
+            </div>
+            <div class="complaint-content-bottom">
+              <div class="complaint-info-row">
+                <i class="${catIcon} complaint-cat-icon"></i>
+                <div>
+                  <div class="complaint-title-text">${title}</div>
+                  <div class="complaint-gp-text">${gp}</div>
+                </div>
+              </div>
+              <div class="status-badge-pill ${badgeClass}">
+                <i class="${badgeIcon}"></i> ${statusLabel}
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+  </script>
+  <script src="js/offline-db.js"></script>
+  <script src="js/ai-prioritization.js"></script>
+  <script src="js/document-verifier.js"></script>
+  <script src="js/knowledge-parsers.js"></script>
+  <script src="js/knowledge-security.js"></script>
+  <script src="js/knowledge-rag.js"></script>
+  <script src="js/knowledge-storage.js"></script>
+  <script src="js/ai-chat-services.js"></script>
+  <script src="js/ai-voice-assistant.js"></script>
+</body>
+</html>

@@ -1,0 +1,20 @@
+# ==============================================================================
+# JANASEVA Cloud Functions – Version Control Exclusions
+# ==============================================================================
+
+# Private Environment & Secret Files
+.env
+.env.*
+! .env.example
+
+# Dependencies
+node_modules/
+
+# Logs
+firebase-debug.log
+firebase-debug.*.log
+*.log
+
+# OS Cache
+.DS_Store
+Thumbs.db
